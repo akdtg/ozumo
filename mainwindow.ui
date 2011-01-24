@@ -27,7 +27,7 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>330</x>
       <y>20</y>
       <width>75</width>
       <height>23</height>
@@ -42,7 +42,7 @@
      <rect>
       <x>30</x>
       <y>20</y>
-      <width>431</width>
+      <width>291</width>
       <height>20</height>
      </rect>
     </property>
@@ -131,6 +131,19 @@
       <string>o1e</string>
      </property>
     </item>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Go">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Go</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

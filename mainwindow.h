@@ -15,6 +15,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    bool convert_torikumi();
+
 private:
     Ui::MainWindow *ui;
 };
