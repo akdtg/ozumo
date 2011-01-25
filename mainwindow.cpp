@@ -181,7 +181,13 @@ bool MainWindow::convert_torikumi()
 
     readShikonas();
 
-    QFile file0(ui->lineEdit->text());
+    QFile file0(ui->lineEdit->text()
+                + "/tori_"
+                + QString::number((ui->comboBox_year->currentIndex() * 6) + ui->comboBox_basho->currentIndex() + 491)
+                + "_1_"
+                + QString::number(ui->comboBox_day->currentIndex() + 1)
+                + ".html");
+
     QFile file1("torikumi.html");
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
