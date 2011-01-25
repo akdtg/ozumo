@@ -27,8 +27,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>20</y>
+      <x>360</x>
+      <y>120</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -40,8 +40,8 @@
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>20</y>
+      <x>40</x>
+      <y>120</y>
       <width>291</width>
       <height>20</height>
      </rect>
@@ -135,8 +135,8 @@
    <widget class="QPushButton" name="pushButton_Go">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>20</y>
+      <x>370</x>
+      <y>50</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -145,14 +145,17 @@
      <string>Go</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="comboBox_year">
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>80</y>
+      <y>50</y>
       <width>72</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="maxVisibleItems">
+     <number>15</number>
     </property>
     <item>
      <property name="text">
@@ -205,11 +208,11 @@
      </property>
     </item>
    </widget>
-   <widget class="QComboBox" name="comboBox_2">
+   <widget class="QComboBox" name="comboBox_basho">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>80</y>
+      <x>140</x>
+      <y>50</y>
       <width>72</width>
       <height>22</height>
      </rect>
@@ -245,14 +248,17 @@
      </property>
     </item>
    </widget>
-   <widget class="QComboBox" name="comboBox_3">
+   <widget class="QComboBox" name="comboBox_day">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>80</y>
+      <x>250</x>
+      <y>50</y>
       <width>72</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="maxVisibleItems">
+     <number>15</number>
     </property>
     <item>
      <property name="text">
