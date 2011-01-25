@@ -46,6 +46,88 @@ void readShikonas()
     //qDebug() << Shikonas;
 }
 
+int collectShikonas()
+{
+    int listCount = 0;
+    QStringList listShikonas;
+
+    for (int b = 491; b <= 545; b++)
+    {
+        for (int d = 1; d <= 15; d++)
+        {
+            QString fName = "/mnt/memory/x/tori_" + QString::number(b) + "_1_" + QString::number(d) + ".html";
+            QFile file0(fName);
+            QFile file1("/mnt/memory/x/a.txt");
+
+            if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                return -1;
+            }
+
+            if (!file1.open(QIODevice::Append | QIODevice::Text))
+            {
+                return -1;
+            }
+
+            QTextStream in(&file0);
+            QTextStream out(&file1);
+
+            in.setCodec("EUC-JP");
+
+            QString content = in.readAll();
+            content.replace(">", "<");
+            content.replace("\n", " ");
+            QStringList list = content.split("<");
+
+            int i = 0;
+            while (i < list.count())
+            {
+                if (list.value(i).contains("torikumi_riki2"))
+                {
+                    out << (list.value(i +  9)) << "\n";   // shikona 1
+
+                    int hack;
+                    if (list.value(i + 27).contains(QString::fromUtf8("不戦")))
+                        hack = -4;
+                    else
+                        hack = 0;
+                    out << (list.value(i + 43 + hack)) << "\n";   // shikona 2
+
+                    listShikonas << list.value(i +  9);
+                    listCount++;
+                    listShikonas << list.value(i + 43 + hack);
+                    listCount++;
+                    i += 57;
+                }
+                i++;
+            }
+
+            file0.close();
+            file1.close();
+        }
+    }
+
+    //qDebug() << listCount;
+
+    listShikonas.removeDuplicates();
+    qDebug() << listShikonas.count();
+
+    QFile file1("/mnt/memory/x/aa.txt");
+    QTextStream out(&file1);
+    if (!file1.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < listShikonas.count(); i++)
+    {
+        out << listShikonas.at(i) << "\n";
+    }
+    file1.close();
+
+    return listCount;
+}
+
 QString translateShikona(QString shikona)
 {
     for (int i = 0; i < Shikonas.count(); i++, i++)
@@ -58,6 +140,9 @@ QString translateShikona(QString shikona)
 
 bool MainWindow::convert_torikumi()
 {
+//    collectShikonas();
+//    return true;
+
     readShikonas();
 
     QFile file0(ui->lineEdit->text());
@@ -90,30 +175,38 @@ bool MainWindow::convert_torikumi()
 
     out << "<table>\n";
     out << "<tr>\n";
-    out << QString::fromUtf8("<th>Ранг</th>\n");
-    out << QString::fromUtf8("<th>Сикона</th>\n");
-    out << QString::fromUtf8("<th>Счет</th>\n");
-    out << QString::fromUtf8("<th>Результат</th>\n");
+    //out << QString::fromUtf8("<th>Ранг</th>\n");
+    out << QString::fromUtf8("<th>Восток</th>\n");
+    //out << QString::fromUtf8("<th>Счет</th>\n");
+    out << QString::fromUtf8("<th></th>\n");    // Результат
     out << QString::fromUtf8("<th>Кимаритэ</th>\n");
-    out << QString::fromUtf8("<th>Результат</th>\n");
-    out << QString::fromUtf8("<th>Сикона</th>\n");
-    out << QString::fromUtf8("<th>Счет</th>\n");
-    out << QString::fromUtf8("<th>Ранг</th>\n");
+    out << QString::fromUtf8("<th></th>\n");    // Результат
+    out << QString::fromUtf8("<th>Запад</th>\n");
+    //out << QString::fromUtf8("<th>Счет</th>\n");
+    //out << QString::fromUtf8("<th>Ранг</th>\n");
     out << "</tr>\n\n";
     while (i < list.count())
     {
         if (list.value(i).contains("torikumi_riki2"))
         {
             out << "<tr class=" + className[trClass] + ">\n";
-            out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
-            out << "<td>" << translateShikona(list.value(i +  9)) << "</td>\n";   // shikona 1
-            out << "<td>" << list.value(i + 17) << "</td>\n";   // +- 1
+            //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
+            out << "<td><strong>" << translateShikona(list.value(i +  9)) << "</strong><br />";   // shikona 1
+            out << list.value(i + 17) << "</td>\n";   // +- 1
             out << "<td>" << list.value(i + 23) << "</td>\n";   // bout 1
-            out << "<td>" << list.value(i + 29) << "</td>\n";   // kimarite
-            out << "<td>" << list.value(i + 35) << "</td>\n";   // bout 2
-            out << "<td>" << list.value(i + 51) << "</td>\n";   // shikona 2
-            out << "<td>" << translateShikona(list.value(i + 43)) << "</td>\n";   // +- 2
-            out << "<td>" << list.value(i + 57) << "</td>\n";   // rank 2
+
+            int hack;
+            if (list.value(i + 27).contains(QString::fromUtf8("不戦")))
+                hack = -4;
+            else
+                hack = 0;
+
+            out << "<td>" << list.value(i + 29 + hack) << "</td>\n";   // kimarite
+
+            out << "<td>" << list.value(i + 35 + hack) << "</td>\n";   // bout 2
+            out << "<td><strong>" << translateShikona(list.value(i + 43 + hack)) << "</strong><br />";   // shikona 2
+            out << list.value(i + 51 + hack) << "</td>\n";   // +- 2
+            //out << "<td>" << list.value(i + 57 + hack) << "</td>\n";   // rank 2
             out << "</tr>\n\n";
 
             i += 57;
