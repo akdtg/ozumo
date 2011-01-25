@@ -18,7 +18,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-QStringList Shikonas;
+QStringList Shikonas, Kimarite;
 
 void readShikonas()
 {
@@ -44,6 +44,32 @@ void readShikonas()
 
     file0.close();
     //qDebug() << Shikonas;
+}
+
+void readKimarite()
+{
+    QFile file0("kimarite.txt");
+
+    if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return;
+    }
+
+   QTextStream in(&file0);
+
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        if (!line.isEmpty() && !line.isNull())
+        {
+            QString szPair = line.trimmed();
+            QStringList list = szPair.split(" - ");
+            Kimarite << list;
+        }
+    }
+
+    file0.close();
+    //qDebug() << Kimarite;
 }
 
 int collectShikonas()
@@ -138,10 +164,20 @@ QString translateShikona(QString shikona)
     return shikona;
 }
 
+QString translateKimarite(QString kimarite)
+{
+    for (int i = 0; i < Kimarite.count(); i++, i++, i++)
+    {
+        if (kimarite == Kimarite.at(i + 1 + 1))
+            return (Kimarite.at(i));
+    }
+    return kimarite;
+}
+
 bool MainWindow::convert_torikumi()
 {
-//    collectShikonas();
-//    return true;
+    readKimarite();
+    //return true;
 
     readShikonas();
 
@@ -192,7 +228,11 @@ bool MainWindow::convert_torikumi()
             out << "<tr class=" + className[trClass] + ">\n";
             //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
             out << "<td><strong>" << translateShikona(list.value(i +  9)) << "</strong><br />";   // shikona 1
-            out << list.value(i + 17) << "</td>\n";   // +- 1
+
+            QString sum = list.value(i + 17);
+            sum.replace(QString::fromUtf8("勝"), QString("-"));
+            sum.replace(QString::fromUtf8("敗"), QString(""));
+            out << sum << "</td>\n";   // +- 1
             out << "<td>" << list.value(i + 23) << "</td>\n";   // bout 1
 
             int hack;
@@ -201,11 +241,15 @@ bool MainWindow::convert_torikumi()
             else
                 hack = 0;
 
-            out << "<td>" << list.value(i + 29 + hack) << "</td>\n";   // kimarite
+            out << "<td>" << translateKimarite(list.value(i + 29 + hack)) << "</td>\n";   // kimarite
 
             out << "<td>" << list.value(i + 35 + hack) << "</td>\n";   // bout 2
             out << "<td><strong>" << translateShikona(list.value(i + 43 + hack)) << "</strong><br />";   // shikona 2
-            out << list.value(i + 51 + hack) << "</td>\n";   // +- 2
+
+            sum = list.value(i + 51 + hack);
+            sum.replace(QString::fromUtf8("勝"), QString("-"));
+            sum.replace(QString::fromUtf8("敗"), QString(""));
+            out << sum << "</td>\n";   // +- 2
             //out << "<td>" << list.value(i + 57 + hack) << "</td>\n";   // rank 2
             out << "</tr>\n\n";
 
