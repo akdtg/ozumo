@@ -18,10 +18,50 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QStringList Shikonas;
+
+void readShikonas()
+{
+    QFile file0("shikonas.txt");
+
+    if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return;
+    }
+
+   QTextStream in(&file0);
+
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        if (!line.isEmpty() && !line.isNull())
+        {
+            QString szPair = line.trimmed();
+            QStringList list = szPair.split(" ");
+            Shikonas << list;
+        }
+    }
+
+    file0.close();
+    //qDebug() << Shikonas;
+}
+
+QString translateShikona(QString shikona)
+{
+    for (int i = 0; i < Shikonas.count(); i++, i++)
+    {
+        if (shikona == Shikonas.at(i))
+            return (Shikonas.at(i + 1));
+    }
+    return shikona;
+}
+
 bool MainWindow::convert_torikumi()
 {
-    QFile file0("/mnt/memory/tori_545_1_15.html");
-    QFile file1("/mnt/memory/t.html");
+    readShikonas();
+
+    QFile file0(ui->lineEdit->text());
+    QFile file1("torikumi.html");
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -66,13 +106,13 @@ bool MainWindow::convert_torikumi()
         {
             out << "<tr class=" + className[trClass] + ">\n";
             out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
-            out << "<td>" << list.value(i +  9) << "</td>\n";   // shikona 1
+            out << "<td>" << translateShikona(list.value(i +  9)) << "</td>\n";   // shikona 1
             out << "<td>" << list.value(i + 17) << "</td>\n";   // +- 1
             out << "<td>" << list.value(i + 23) << "</td>\n";   // bout 1
             out << "<td>" << list.value(i + 29) << "</td>\n";   // kimarite
             out << "<td>" << list.value(i + 35) << "</td>\n";   // bout 2
             out << "<td>" << list.value(i + 51) << "</td>\n";   // shikona 2
-            out << "<td>" << list.value(i + 43) << "</td>\n";   // +- 2
+            out << "<td>" << translateShikona(list.value(i + 43)) << "</td>\n";   // +- 2
             out << "<td>" << list.value(i + 57) << "</td>\n";   // rank 2
             out << "</tr>\n\n";
 
