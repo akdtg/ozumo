@@ -275,9 +275,18 @@ bool MainWindow::convert_torikumi()
             out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
 
             QString sum = list.value(i + 4);
-            sum.replace(QString::fromUtf8("勝"), QString("-"));
-            sum.replace(QString::fromUtf8("敗"), QString(""));
+            if (sum.contains(QRegExp("\\d+")))
+            {
+                sum.replace(QString::fromUtf8("勝"), QString("-"));
+                sum.replace(QString::fromUtf8("敗"), QString(""));
+            }
+            else
+            {
+                sum = "";
+                i--;
+            }
             out << sum << "</td>\n";   // +- 1
+
             out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
 
             out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
@@ -287,8 +296,16 @@ bool MainWindow::convert_torikumi()
             out << "<td><strong>" << translateShikona(list.value(i + 12)) << "</strong><br />";   // shikona 2
 
             sum = list.value(i + 13);
-            sum.replace(QString::fromUtf8("勝"), QString("-"));
-            sum.replace(QString::fromUtf8("敗"), QString(""));
+            if (sum.contains(QRegExp("\\d+")))
+            {
+                sum.replace(QString::fromUtf8("勝"), QString("-"));
+                sum.replace(QString::fromUtf8("敗"), QString(""));
+            }
+            else
+            {
+                sum = "";
+                i--;
+            }
             out << sum << "</td>\n";   // +- 2
 
             //out << "<td>" << list.value(i + 15) << "</td>\n";   // rank 2
