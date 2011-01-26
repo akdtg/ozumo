@@ -124,9 +124,9 @@ int collectShikonas()
     {
         for (int d = 1; d <= 15; d++)
         {
-            QString fName = "/mnt/memory/x/tori_" + QString::number(b) + "_1_" + QString::number(d) + ".html";
+            QString fName = "/mnt/memory/torikumi-makuuchi/tori_" + QString::number(b) + "_1_" + QString::number(d) + ".html";
             QFile file0(fName);
-            QFile file1("/mnt/memory/x/a.txt");
+            QFile file1("/mnt/memory/s-all.txt");
 
             if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
             {
@@ -144,29 +144,45 @@ int collectShikonas()
             in.setCodec("EUC-JP");
 
             QString content = in.readAll();
-            content.replace(">", "<");
-            content.replace("\n", " ");
-            QStringList list = content.split("<");
+
+            QStringList list = readAndSimplifyBashoContent(content);
 
             int i = 0;
             while (i < list.count())
             {
-                if (list.value(i).contains("torikumi_riki2"))
+                if (list.value(i).contains("rank"))
                 {
-                    out << (list.value(i +  9)) << "\n";   // shikona 1
+                    out << (list.value(i +  3)) << "\n";   // shikona 1
 
-                    int hack;
-                    if (list.value(i + 27).contains(QString::fromUtf8("不戦")))
-                        hack = -4;
+                    listShikonas << list.value(i +  3);
+                    listCount++;
+
+                    QString sum = list.value(i + 4);
+                    if (sum.contains(QRegExp("\\d+")))
+                    {
+                    }
                     else
-                        hack = 0;
-                    out << (list.value(i + 43 + hack)) << "\n";   // shikona 2
+                    {
+                        sum = "";
+                        i--;
+                    }
 
-                    listShikonas << list.value(i +  9);
+                    out << (list.value(i + 12)) << "\n";   // shikona 2
+
+                    listShikonas << list.value(i + 12);
                     listCount++;
-                    listShikonas << list.value(i + 43 + hack);
-                    listCount++;
-                    i += 57;
+
+                    sum = list.value(i + 13);
+                    if (sum.contains(QRegExp("\\d+")))
+                    {
+                    }
+                    else
+                    {
+                        sum = "";
+                        i--;
+                    }
+
+                    i += 15;
                 }
                 i++;
             }
@@ -181,7 +197,7 @@ int collectShikonas()
     listShikonas.removeDuplicates();
     qDebug() << listShikonas.count();
 
-    QFile file1("/mnt/memory/x/aa.txt");
+    QFile file1("/mnt/memory/s-nodup.txt");
     QTextStream out(&file1);
     if (!file1.open(QIODevice::WriteOnly | QIODevice::Text))
     {
@@ -219,9 +235,10 @@ QString translateKimarite(QString kimarite)
 
 bool MainWindow::convert_torikumi()
 {
-    readKimarite();
-    //return true;
+    collectShikonas();
+    return true;
 
+    readKimarite();
     readShikonas();
 
     QFile file0(ui->lineEdit->text()
