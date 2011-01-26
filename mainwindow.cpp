@@ -206,9 +206,42 @@ bool MainWindow::convert_torikumi()
     in.setCodec("EUC-JP");
 
     QString content = in.readAll();
+    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+    content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->")));
+
+    content.replace(QRegExp("<table([^<]*)>"), "");
+    content.replace(QRegExp("</table>"), "");
+
+    content.replace(QRegExp("<a([^<]*)>"), "");
+    content.replace(QRegExp("</a>"), "");
+
+    content.replace(QRegExp("<br>"), "<>");
+
+    content.replace(QRegExp("</td>"), "");
+
+    content.replace(QRegExp("<tr>"), "");
+    content.replace(QRegExp("</tr>"), "");
+
+    content.replace(QRegExp("<span([^<]*)>"), "");
+    content.replace(QRegExp("</span>"), "");
+
+    content.replace(QRegExp("<div([^<]*)>"), "");
+    content.replace(QRegExp("</div>"), "");
+
+    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki1\">"), "<shikona>");
+    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki2\">"), "<rank>");
+    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki3\">"), "<result>");
+
     content.replace(">", "<");
-    content.replace("\n", " ");
-    QStringList list = content.split("<");
+    content = content.simplified();
+    content.replace("< <", "<");
+    content = content.simplified();
+    QStringList list = content.split("<", QString::SkipEmptyParts);
+
+    for (int i = 0; i < list.count(); i++)
+    {
+        list.replace(i, list.value(i).simplified());
+    }
     //qDebug() << list;
 
     int i = 0;
@@ -216,6 +249,7 @@ bool MainWindow::convert_torikumi()
     QString className[] = {"\"odd\"", "\"even\""};
 
     out << "<table>\n";
+    out << "<thead>\n";
     out << "<tr>\n";
     //out << QString::fromUtf8("<th>Ранг</th>\n");
     out << QString::fromUtf8("<th>Восток</th>\n");
@@ -226,44 +260,47 @@ bool MainWindow::convert_torikumi()
     out << QString::fromUtf8("<th>Запад</th>\n");
     //out << QString::fromUtf8("<th>Счет</th>\n");
     //out << QString::fromUtf8("<th>Ранг</th>\n");
-    out << "</tr>\n\n";
+    out << "</tr>\n";
+    out << "</thead>\n\n";
+
+    out << "<tbody>\n";
     while (i < list.count())
     {
-        if (list.value(i).contains("torikumi_riki2"))
+        if (list.value(i).contains("rank"))
         {
             out << "<tr class=" + className[trClass] + ">\n";
-            //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
-            out << "<td><strong>" << translateShikona(list.value(i +  9)) << "</strong><br />";   // shikona 1
 
-            QString sum = list.value(i + 17);
+            //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
+
+            out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
+
+            QString sum = list.value(i + 4);
             sum.replace(QString::fromUtf8("勝"), QString("-"));
             sum.replace(QString::fromUtf8("敗"), QString(""));
             out << sum << "</td>\n";   // +- 1
-            out << "<td>" << list.value(i + 23) << "</td>\n";   // bout 1
+            out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
 
-            int hack;
-            if (list.value(i + 27).contains(QString::fromUtf8("不戦")))
-                hack = -4;
-            else
-                hack = 0;
+            out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
 
-            out << "<td>" << translateKimarite(list.value(i + 29 + hack)) << "</td>\n";   // kimarite
+            out << "<td>" << list.value(i + 10) << "</td>\n";   // bout 2
 
-            out << "<td>" << list.value(i + 35 + hack) << "</td>\n";   // bout 2
-            out << "<td><strong>" << translateShikona(list.value(i + 43 + hack)) << "</strong><br />";   // shikona 2
+            out << "<td><strong>" << translateShikona(list.value(i + 12)) << "</strong><br />";   // shikona 2
 
-            sum = list.value(i + 51 + hack);
+            sum = list.value(i + 13);
             sum.replace(QString::fromUtf8("勝"), QString("-"));
             sum.replace(QString::fromUtf8("敗"), QString(""));
             out << sum << "</td>\n";   // +- 2
-            //out << "<td>" << list.value(i + 57 + hack) << "</td>\n";   // rank 2
+
+            //out << "<td>" << list.value(i + 15) << "</td>\n";   // rank 2
+
             out << "</tr>\n\n";
 
-            i += 57;
+            i += 15;
             trClass ^= 1;
         }
         i++;
     }
+    out << "</tbody>\n";
     out << "</table>\n";
 
     file0.close();
