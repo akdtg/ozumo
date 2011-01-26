@@ -72,6 +72,49 @@ void readKimarite()
     //qDebug() << Kimarite;
 }
 
+QStringList readAndSimplifyBashoContent(QString content)
+{
+    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+    content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->")));
+
+    content.replace(QRegExp("<table([^<]*)>"), "");
+    content.replace(QRegExp("</table>"), "");
+
+    content.replace(QRegExp("<a([^<]*)>"), "");
+    content.replace(QRegExp("</a>"), "");
+
+    content.replace(QRegExp("<br>"), "<>");
+
+    content.replace(QRegExp("</td>"), "");
+
+    content.replace(QRegExp("<tr>"), "");
+    content.replace(QRegExp("</tr>"), "");
+
+    content.replace(QRegExp("<span([^<]*)>"), "");
+    content.replace(QRegExp("</span>"), "");
+
+    content.replace(QRegExp("<div([^<]*)>"), "");
+    content.replace(QRegExp("</div>"), "");
+
+    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki1\">"), "<shikona>");
+    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki2\">"), "<rank>");
+    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki3\">"), "<result>");
+
+    content.replace(">", "<");
+    content = content.simplified();
+    content.replace("< <", "<");
+    content = content.simplified();
+
+    QStringList list = content.split("<", QString::SkipEmptyParts);
+
+    for (int i = 0; i < list.count(); i++)
+    {
+        list.replace(i, list.value(i).simplified());
+    }
+
+    return list;
+}
+
 int collectShikonas()
 {
     int listCount = 0;
@@ -206,43 +249,8 @@ bool MainWindow::convert_torikumi()
     in.setCodec("EUC-JP");
 
     QString content = in.readAll();
-    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
-    content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->")));
 
-    content.replace(QRegExp("<table([^<]*)>"), "");
-    content.replace(QRegExp("</table>"), "");
-
-    content.replace(QRegExp("<a([^<]*)>"), "");
-    content.replace(QRegExp("</a>"), "");
-
-    content.replace(QRegExp("<br>"), "<>");
-
-    content.replace(QRegExp("</td>"), "");
-
-    content.replace(QRegExp("<tr>"), "");
-    content.replace(QRegExp("</tr>"), "");
-
-    content.replace(QRegExp("<span([^<]*)>"), "");
-    content.replace(QRegExp("</span>"), "");
-
-    content.replace(QRegExp("<div([^<]*)>"), "");
-    content.replace(QRegExp("</div>"), "");
-
-    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki1\">"), "<shikona>");
-    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki2\">"), "<rank>");
-    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki3\">"), "<result>");
-
-    content.replace(">", "<");
-    content = content.simplified();
-    content.replace("< <", "<");
-    content = content.simplified();
-    QStringList list = content.split("<", QString::SkipEmptyParts);
-
-    for (int i = 0; i < list.count(); i++)
-    {
-        list.replace(i, list.value(i).simplified());
-    }
-    //qDebug() << list;
+    QStringList list = readAndSimplifyBashoContent(content);
 
     int i = 0;
     int trClass = 0;
