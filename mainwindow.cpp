@@ -246,8 +246,8 @@ QString translateKimarite(QString kimarite)
 
 bool MainWindow::convert_torikumi()
 {
-    collectShikonas();
-    return true;
+    //collectShikonas();
+    //return true;
 
     readKimarite();
     readShikonas();
@@ -255,7 +255,9 @@ bool MainWindow::convert_torikumi()
     QFile file0(ui->lineEdit->text()
                 + "/tori_"
                 + QString::number((ui->comboBox_year->currentIndex() * 6) + ui->comboBox_basho->currentIndex() + 491)
-                + "_1_"
+                + "_"
+                + QString::number(ui->comboBox_division->currentIndex() + 1)
+                + "_"
                 + QString::number(ui->comboBox_day->currentIndex() + 1)
                 + ".html");
 

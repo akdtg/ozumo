@@ -135,7 +135,7 @@
    <widget class="QPushButton" name="pushButton_Go">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>480</x>
       <y>50</y>
       <width>75</width>
       <height>23</height>
@@ -213,7 +213,7 @@
      <rect>
       <x>140</x>
       <y>50</y>
-      <width>72</width>
+      <width>81</width>
       <height>22</height>
      </rect>
     </property>
@@ -333,6 +333,26 @@
     <item>
      <property name="text">
       <string>15</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QComboBox" name="comboBox_division">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>50</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>makuuchi</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>juryo</string>
      </property>
     </item>
    </widget>
