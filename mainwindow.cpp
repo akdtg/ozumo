@@ -325,18 +325,6 @@ bool MainWindow::convert_torikumi()
         {
             out << "<tr class=" + className[trClass] + ">\n";
 
-            QString id = list.value(i +  1) + " "
-                         + list.value(i +  3) + " "
-                         + QString(list.value(i +  4).contains(QRegExp("\\d+")) ? list.value(i +  4) : "-") + " "
-                         + list.value(i +  6) + " "
-                         + list.value(i +  8) + " "
-                         + list.value(i + 10) + " "
-                         + list.value(i + 12) + " "
-                         + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
-                         + list.value(i + 15);
-
-            out << "<!--" << id << "-->\n";
-
             //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
 
             out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
@@ -376,6 +364,18 @@ bool MainWindow::convert_torikumi()
             out << sum << "</td>\n";   // +- 2
 
             //out << "<td>" << list.value(i + 15) << "</td>\n";   // rank 2
+
+            QString id = list.value(i +  1) + " "
+                         + list.value(i +  3) + " "
+                         + QString(list.value(i +  4).contains(QRegExp("\\d+")) ? list.value(i +  4) : "-") + " "
+                         + list.value(i +  6) + " "
+                         + list.value(i +  8) + " "
+                         + list.value(i + 10) + " "
+                         + list.value(i + 12) + " "
+                         + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
+                         + list.value(i + 15);
+
+            out << "<!-- Original data: " << id << " -->\n";
 
             out << "</tr>\n\n";
 
