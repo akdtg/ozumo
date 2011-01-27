@@ -39,7 +39,7 @@ void readShikonas()
         QString line = in.readLine();
         if (!line.isEmpty() && !line.isNull())
         {
-            QString szPair = line.trimmed();
+            QString szPair = line.simplified();
             QStringList list = szPair.split(" ");
             Shikonas << list;
         }
@@ -66,7 +66,7 @@ void readKimarite()
         QString line = in.readLine();
         if (!line.isEmpty() && !line.isNull())
         {
-            QString szPair = line.trimmed();
+            QString szPair = line.simplified();
             QStringList list = szPair.split(" - ");
             Kimarite << list;
         }
@@ -230,7 +230,7 @@ int collectShikonas()
 
 QString translateShikona(QString shikona)
 {
-    for (int i = 0; i < Shikonas.count(); i++, i++)
+    for (int i = 0; i < Shikonas.count(); i++)
     {
         if (shikona == Shikonas.at(i))
             return (Shikonas.at(i + 1));
