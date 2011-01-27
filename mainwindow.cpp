@@ -39,9 +39,7 @@ void readShikonas()
         QString line = in.readLine();
         if (!line.isEmpty() && !line.isNull())
         {
-            QString szPair = line.simplified();
-            QStringList list = szPair.split(" ");
-            Shikonas << list;
+            Shikonas << line.simplified().split(" ");
         }
     }
 
@@ -66,9 +64,7 @@ void readKimarite()
         QString line = in.readLine();
         if (!line.isEmpty() && !line.isNull())
         {
-            QString szPair = line.simplified();
-            QStringList list = szPair.split(" - ");
-            Kimarite << list;
+            Kimarite << line.simplified().split(" - ");
         }
     }
 
@@ -209,7 +205,7 @@ int collectShikonas()
     //qDebug() << listCount;
 
     listShikonas.removeDuplicates();
-    qDebug() << listShikonas.count();
+    //qDebug() << listShikonas.count();
 
     QFile file1("/mnt/memory/s-nodup.txt");
     QTextStream out(&file1);
@@ -240,7 +236,7 @@ QString translateShikona(QString shikona)
 
 QString translateKimarite(QString kimarite)
 {
-    for (int i = 0; i < Kimarite.count(); i++, i++, i++)
+    for (int i = 0 + 1 + 1; i < Kimarite.count(); i++, i++, i++)
     {
         if (kimarite == Kimarite.at(i + 1 + 1))
             return (Kimarite.at(i));
