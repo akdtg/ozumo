@@ -4,6 +4,8 @@
 #include <QtCore>
 #include <QtGui>
 
+#define START_INDEX 491
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -122,7 +124,7 @@ int collectShikonas()
     int listCount = 0;
     QStringList listShikonas;
 
-    for (int basho = 491; basho <= 545; basho++)
+    for (int basho = START_INDEX; basho <= 545; basho++)
     {
         for (int day = 1; day <= 15; day++)
         {
@@ -254,7 +256,7 @@ bool MainWindow::convert_torikumi()
 
     QFile file0(ui->lineEdit->text()
                 + "/tori_"
-                + QString::number((ui->comboBox_year->currentIndex() * 6) + ui->comboBox_basho->currentIndex() + 491)
+                + QString::number((ui->comboBox_year->currentIndex() * 6) + ui->comboBox_basho->currentIndex() + START_INDEX)
                 + "_"
                 + QString::number(ui->comboBox_division->currentIndex() + 1)
                 + "_"
