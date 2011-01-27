@@ -26,6 +26,7 @@ void readShikonas()
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
+        qDebug() << "error: file.open(shikonas.txt)";
         return;
     }
 
@@ -52,6 +53,7 @@ void readKimarite()
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
+        qDebug() << "error: file.open(kimarite.txt)";
         return;
     }
 
@@ -135,11 +137,13 @@ int collectShikonas()
 
                 if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
                 {
+                    qDebug() << "error: file.open(/mnt/memory/torikumi/tori_...)";
                     return -1;
                 }
 
                 if (!file1.open(QIODevice::Append | QIODevice::Text))
                 {
+                    qDebug() << "error: file.open(/mnt/memory/s-all.txt)";
                     return -1;
                 }
 
@@ -207,6 +211,7 @@ int collectShikonas()
     QTextStream out(&file1);
     if (!file1.open(QIODevice::WriteOnly | QIODevice::Text))
     {
+        qDebug() << "error: file.open(/mnt/memory/s-nodup.txt)";
         return -1;
     }
 
@@ -258,11 +263,13 @@ bool MainWindow::convert_torikumi()
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
+        qDebug() << "error: file.open(/mnt/memory/torikumi/tori_...)";
         return false;
     }
 
     if (!file1.open(QIODevice::WriteOnly | QIODevice::Text))
     {
+        qDebug() << "error: file.open(torikumi.html)";
         return false;
     }
 
