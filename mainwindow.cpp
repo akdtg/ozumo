@@ -265,7 +265,18 @@ bool MainWindow::convert_torikumi()
                 + QString::number(ui->comboBox_day->currentIndex() + 1)
                 + ".html");
 
-    QFile file1("torikumi.html");
+    //"tori-2011-1-15-m.html";
+    QString toriFname= "tori-"
+                       + QString::number(ui->comboBox_year->currentIndex() + 2002)
+                       + "-"
+                       + QString::number(ui->comboBox_basho->currentIndex() + 1)
+                       + "-"
+                       + QString::number(ui->comboBox_day->currentIndex() + 1)
+                       + "-"
+                       + QString::number(ui->comboBox_division->currentIndex() + 1)
+                       + ".html";
+
+    QFile file1(toriFname);
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
