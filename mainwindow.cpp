@@ -120,75 +120,81 @@ int collectShikonas()
     int listCount = 0;
     QStringList listShikonas;
 
-    for (int b = 491; b <= 545; b++)
+    for (int basho = 491; basho <= 545; basho++)
     {
-        for (int d = 1; d <= 15; d++)
+        for (int day = 1; day <= 15; day++)
         {
-            QString fName = "/mnt/memory/torikumi-makuuchi/tori_" + QString::number(b) + "_1_" + QString::number(d) + ".html";
-            QFile file0(fName);
-            QFile file1("/mnt/memory/s-all.txt");
-
-            if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+            for (int division = 1; division <= 2; division++)
             {
-                return -1;
-            }
+                QString fName = "/mnt/memory/torikumi/tori_"
+                                + QString::number(basho) + "_"
+                                + QString::number(division) + "_"
+                                + QString::number(day) + ".html";
+                QFile file0(fName);
+                QFile file1("/mnt/memory/s-all.txt");
 
-            if (!file1.open(QIODevice::Append | QIODevice::Text))
-            {
-                return -1;
-            }
-
-            QTextStream in(&file0);
-            QTextStream out(&file1);
-
-            in.setCodec("EUC-JP");
-
-            QString content = in.readAll();
-
-            QStringList list = readAndSimplifyBashoContent(content);
-
-            int i = 0;
-            while (i < list.count())
-            {
-                if (list.value(i).contains("rank"))
+                if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
                 {
-                    out << (list.value(i +  3)) << "\n";   // shikona 1
-
-                    listShikonas << list.value(i +  3);
-                    listCount++;
-
-                    QString sum = list.value(i + 4);
-                    if (sum.contains(QRegExp("\\d+")))
-                    {
-                    }
-                    else
-                    {
-                        sum = "";
-                        i--;
-                    }
-
-                    out << (list.value(i + 12)) << "\n";   // shikona 2
-
-                    listShikonas << list.value(i + 12);
-                    listCount++;
-
-                    sum = list.value(i + 13);
-                    if (sum.contains(QRegExp("\\d+")))
-                    {
-                    }
-                    else
-                    {
-                        sum = "";
-                        i--;
-                    }
-
-                    i += 15;
+                    return -1;
                 }
-                i++;
-            }
 
-            file0.close();
-            file1.close();
+                if (!file1.open(QIODevice::Append | QIODevice::Text))
+                {
+                    return -1;
+                }
+
+                QTextStream in(&file0);
+                QTextStream out(&file1);
+
+                in.setCodec("EUC-JP");
+
+                QString content = in.readAll();
+
+                QStringList list = readAndSimplifyBashoContent(content);
+
+                int i = 0;
+                while (i < list.count())
+                {
+                    if (list.value(i).contains("rank"))
+                    {
+                        out << (list.value(i +  3)) << "\n";   // shikona 1
+
+                        listShikonas << list.value(i +  3);
+                        listCount++;
+
+                        QString sum = list.value(i + 4);
+                        if (sum.contains(QRegExp("\\d+")))
+                        {
+                        }
+                        else
+                        {
+                            sum = "";
+                            i--;
+                        }
+
+                        out << (list.value(i + 12)) << "\n";   // shikona 2
+
+                        listShikonas << list.value(i + 12);
+                        listCount++;
+
+                        sum = list.value(i + 13);
+                        if (sum.contains(QRegExp("\\d+")))
+                        {
+                        }
+                        else
+                        {
+                            sum = "";
+                            i--;
+                        }
+
+                        i += 15;
+                    }
+                    i++;
+                }
+
+                file0.close();
+                file1.close();
+            }
         }
     }
 
