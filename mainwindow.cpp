@@ -97,6 +97,7 @@ QStringList readAndSimplifyBashoContent(QString content)
     content.replace(QRegExp("<span([^<]*)>"), "");
     content.replace(QRegExp("</span>"), "");
 
+    content.replace(QRegExp("<div class=\"torikumi_gyoji\">([^<]*)</div>"), "");
     content.replace(QRegExp("<div([^<]*)>"), "");
     content.replace(QRegExp("</div>"), "");
 
@@ -116,6 +117,7 @@ QStringList readAndSimplifyBashoContent(QString content)
         list.replace(i, list.value(i).simplified());
     }
 
+    //qDebug() << list;
     return list;
 }
 
@@ -311,6 +313,18 @@ bool MainWindow::convert_torikumi()
         if (list.value(i).contains("rank"))
         {
             out << "<tr class=" + className[trClass] + ">\n";
+
+            QString id = list.value(i +  1) + " "
+                         + list.value(i +  3) + " "
+                         + QString(list.value(i +  4).contains(QRegExp("\\d+")) ? list.value(i +  4) : "-") + " "
+                         + list.value(i +  6) + " "
+                         + list.value(i +  8) + " "
+                         + list.value(i + 10) + " "
+                         + list.value(i + 12) + " "
+                         + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
+                         + list.value(i + 15);
+
+            out << "<!--" << id << "-->\n";
 
             //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
 
