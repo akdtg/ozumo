@@ -132,7 +132,7 @@
      </property>
     </item>
    </widget>
-   <widget class="QPushButton" name="pushButton_Go">
+   <widget class="QPushButton" name="pushButton_Torikumi">
     <property name="geometry">
      <rect>
       <x>480</x>
@@ -142,7 +142,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Go</string>
+     <string>Torikumi</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_year">
@@ -219,32 +219,32 @@
     </property>
     <item>
      <property name="text">
-      <string>1 - Хацу</string>
+      <string>1 - Hatsu</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>2 - Хару</string>
+      <string>2 - Haru</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>3 - Нацу</string>
+      <string>3 - Natsu</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>4 - Нагоя</string>
+      <string>4 - Nagoya</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>5 - Аки</string>
+      <string>5 - Aki</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>6 - Кюсю</string>
+      <string>6 - Kushu</string>
      </property>
     </item>
    </widget>
@@ -355,6 +355,19 @@
       <string>juryo</string>
      </property>
     </item>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Hoshitori">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>90</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Hoshitori</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
