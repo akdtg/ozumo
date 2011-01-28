@@ -12,7 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->pushButton_Go, SIGNAL(clicked()), this, SLOT(convert_torikumi()));
+    connect(ui->pushButton_Torikumi, SIGNAL(clicked()), this, SLOT(convertTorikumi()));
+    connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 }
 
 MainWindow::~MainWindow()
@@ -244,7 +245,137 @@ QString translateKimarite(QString kimarite)
     return kimarite;
 }
 
-bool MainWindow::convert_torikumi()
+bool MainWindow::convertHoshitori()
+{
+    readKimarite();
+    readShikonas();
+
+    // Makuuchi
+    for (int i = 1; i <= 3; i++)
+    {
+        // hoshi_545_1_1.html
+        QFile file0("hoshi_"
+                    + QString::number((ui->comboBox_year->currentIndex() * 6) + ui->comboBox_basho->currentIndex() + START_INDEX)
+                    + "_1_"
+                    + QString::number(i)
+                    + ".html");
+
+        QFile file1("hoshi_"
+                    + QString::number(ui->comboBox_year->currentIndex() + 2002)
+                    + "-"
+                    + QString::number(ui->comboBox_basho->currentIndex() + 1)
+                    + "-"
+                    + QString::number(ui->comboBox_division->currentIndex() + 1)
+                    + ".html");
+
+        if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            qDebug() << "error: file.open(hoshi_...)";
+            return false;
+        }
+
+        if (!file1.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            qDebug() << "error: file.open(hoshitori.html)";
+            return false;
+        }
+
+        QTextStream in(&file0);
+        QTextStream out(&file1);
+
+        in.setCodec("EUC-JP");
+
+        QString content = in.readAll();
+
+        //QStringList list = readAndSimplifyBashoContent(content);
+        content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+        content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->")));
+
+        int i = 0;
+        int trClass = 0;
+        QString className[] = {"\"odd\"", "\"even\""};
+
+        out << "<table>\n";
+        out << "<thead>\n";
+        out << "<tr>\n";
+        //out << QString::fromUtf8("<th>Ранг</th>\n");
+        out << QString::fromUtf8("<th>Восток</th>\n");
+        //out << QString::fromUtf8("<th>Счет</th>\n");
+        out << QString::fromUtf8("<th></th>\n");    // Результат
+        //out << QString::fromUtf8("<th>Кимаритэ</th>\n");
+        out << QString::fromUtf8("<th></th>\n");    // Результат
+        out << QString::fromUtf8("<th>Запад</th>\n");
+        //out << QString::fromUtf8("<th>Счет</th>\n");
+        //out << QString::fromUtf8("<th>Ранг</th>\n");
+        out << "</tr>\n";
+        out << "</thead>\n\n";
+
+        out << "<tbody>\n";
+
+        while (content.indexOf("hoshitori_riki1") != -1)
+        {
+            content = content.mid(content.indexOf("hoshitori_riki1"));
+            content = content.mid(content.indexOf("strong"));
+            content = content.mid(content.indexOf(">") + 1);
+            QString shikona = content.left(content.indexOf("<"));
+            int x = content.indexOf("class=\"hoshitori_riki3-1\">");
+            int z = content.indexOf("hoshitori_riki1");
+            QString xxboshi = "";
+            do
+            {
+            if (x > 0)
+            {
+                content = content.mid(x);
+                content = content.mid(content.indexOf(">") + 1);
+                xxboshi += content.left(content.indexOf("<"));
+
+                x = content.indexOf("class=\"hoshitori_riki3-1\">");
+                z = content.indexOf("hoshitori_riki1");
+                if (z < 0) z = 1000000;
+            }
+            }
+            while ((x > 0) && (x < z));
+
+            qDebug() << shikona << xxboshi;
+            if ((content.indexOf("&nbsp;") != -1) && (content.indexOf("&nbsp;") < (content.indexOf("hoshitori_riki1"))))
+                qDebug() << "-----";
+        }
+
+        /*while (i < list.count())
+        {
+            if (list.value(i) == ("strong"))
+            {
+                out << "<tr class=" + className[trClass] + ">\n";
+
+                //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
+
+                out << "<td><strong>" << translateShikona(list.value(i +  1)) << "</strong>";   // shikona 1
+
+                QString sum = list.value(i + 4);
+                sum.replace(QString::fromUtf8("勝"), QString("-"));
+                sum.replace(QString::fromUtf8("敗"), QString(""));
+                out << sum << "<br />";
+
+                out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
+
+                //out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
+
+                out << "</tr>\n\n";
+
+                i += 15;
+                trClass ^= 1;
+            }
+            i++;
+        }*/
+
+        file0.close();
+        file1.close();
+    }
+
+    return true;
+}
+
+bool MainWindow::convertTorikumi()
 {
     //collectShikonas();
     //return true;

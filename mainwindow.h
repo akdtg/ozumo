@@ -16,7 +16,8 @@ public:
     ~MainWindow();
 
 public slots:
-    bool convert_torikumi();
+    bool convertTorikumi();
+    bool convertHoshitori();
 
 private:
     Ui::MainWindow *ui;
