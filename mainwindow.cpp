@@ -337,7 +337,9 @@ bool MainWindow::convertHoshitori()
             while ((x > 0) && (x < z));
 
             qDebug() << shikona << xxboshi;
-            if ((content.indexOf("&nbsp;") != -1) && (content.indexOf("&nbsp;") < (content.indexOf("hoshitori_riki1"))))
+            if ((content.indexOf("&nbsp;") != -1)
+                && ((content.indexOf("&nbsp;") < (content.indexOf("hoshitori_riki1")))
+                 || (content.indexOf("hoshitori_riki1") == -1)))
                 qDebug() << "-----";
         }
 
