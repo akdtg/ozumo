@@ -398,87 +398,91 @@ bool MainWindow::convertTorikumi()
     {
         for (int day = 1; day <= 15; day++)
         {
-            QFile file0("/mnt/memory/torikumi-makuuchi/"
-                        + QString("tori_")
-                        + QString::number(basho)
-                        + "_1_"
-                        + QString::number(day)
-                        + ".html");
-
-            if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+            for (int division = 1; division <= 2; division++)
             {
-                qDebug() << "error: file.open(/mnt/memory/torikumi/tori_...)";
-                return false;
-            }
+                QFile file0("/mnt/memory/torikumi-makuuchi/"
+                            + QString("tori_")
+                            + QString::number(basho)
+                            + "_"
+                            + QString::number(division)
+                            + "_"
+                            + QString::number(day)
+                            + ".html");
 
-            QTextStream in(&file0);
-
-            in.setCodec("EUC-JP");
-
-            QString content = in.readAll();
-
-            QStringList list = readAndSimplifyBashoContent(content);
-
-            int i = 0;
-            int dayx = day, id_local = 0;
-            while (i < list.count())
-            {
-                if (list.value(i).contains("rank"))
+                if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
                 {
-                    //東前14 栃栄 3勝0敗 ○ 押し出し ● 寺尾 0勝3敗 西十2
+                    qDebug() << "error: file.open(/mnt/memory/torikumi/tori_...)";
+                    return false;
+                }
 
-                    QString rank1 = list.value(i +  1);
-                    //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
+                QTextStream in(&file0);
 
-                    QString shikona1 = list.value(i +  3);
-                    //out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
+                in.setCodec("EUC-JP");
 
-                    QString sum = list.value(i + 4);
-                    if (sum.contains(QRegExp("\\d+")))
+                QString content = in.readAll();
+
+                QStringList list = readAndSimplifyBashoContent(content);
+
+                int i = 0;
+                int dayx = day, id_local = 0;
+                while (i < list.count())
+                {
+                    if (list.value(i).contains("rank"))
                     {
-                        sum.replace(QString::fromUtf8("勝"), QString("-"));
-                        sum.replace(QString::fromUtf8("敗"), QString(""));
-                    }
-                    else
-                    {
-                        sum = "";
-                        dayx = 16;
-                        i--;
-                    }
-                    //out << sum << "</td>\n";   // +- 1
+                        //東前14 栃栄 3勝0敗 ○ 押し出し ● 寺尾 0勝3敗 西十2
 
-                    QString result1 = list.value(i +  6);
-                    //out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
+                        QString rank1 = list.value(i +  1);
+                        //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
 
-                    QString kimarite = list.value(i +  8);
-                    //out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
+                        QString shikona1 = list.value(i +  3);
+                        //out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
 
-                    QString result2 = list.value(i + 10);
-                    //out << "<td>" << list.value(i + 10) << "</td>\n";   // bout 2
+                        QString sum = list.value(i + 4);
+                        if (sum.contains(QRegExp("\\d+")))
+                        {
+                            sum.replace(QString::fromUtf8("勝"), QString("-"));
+                            sum.replace(QString::fromUtf8("敗"), QString(""));
+                        }
+                        else
+                        {
+                            sum = "";
+                            dayx = 16;
+                            i--;
+                        }
+                        //out << sum << "</td>\n";   // +- 1
 
-                    QString shikona2 = list.value(i + 12);
-                    //out << "<td><strong>" << translateShikona(list.value(i + 12)) << "</strong><br />";   // shikona 2
+                        QString result1 = list.value(i +  6);
+                        //out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
 
-                    sum = list.value(i + 13);
-                    if (sum.contains(QRegExp("\\d+")))
-                    {
-                        sum.replace(QString::fromUtf8("勝"), QString("-"));
-                        sum.replace(QString::fromUtf8("敗"), QString(""));
-                    }
-                    else
-                    {
-                        sum = "";
-                        dayx = 16;
-                        i--;
-                    }
-                    //out << sum << "</td>\n";   // +- 2
+                        QString kimarite = list.value(i +  8);
+                        //out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
 
-                    QString rank2 = list.value(i + 15);
-                    //out << "<td>" << list.value(i + 15) << "</td>\n";   // rank 2
+                        QString result2 = list.value(i + 10);
+                        //out << "<td>" << list.value(i + 10) << "</td>\n";   // bout 2
 
-                    QString id = QString::number(basho) + QString::number(day).rightJustified(2, '0');
+                        QString shikona2 = list.value(i + 12);
+                        //out << "<td><strong>" << translateShikona(list.value(i + 12)) << "</strong><br />";   // shikona 2
 
-                    /*QString id = list.value(i +  1) + " "
+                        sum = list.value(i + 13);
+                        if (sum.contains(QRegExp("\\d+")))
+                        {
+                            sum.replace(QString::fromUtf8("勝"), QString("-"));
+                            sum.replace(QString::fromUtf8("敗"), QString(""));
+                        }
+                        else
+                        {
+                            sum = "";
+                            dayx = 16;
+                            i--;
+                        }
+                        //out << sum << "</td>\n";   // +- 2
+
+                        QString rank2 = list.value(i + 15);
+                        //out << "<td>" << list.value(i + 15) << "</td>\n";   // rank 2
+
+                        QString id = QString::number(basho) + QString::number(day).rightJustified(2, '0');
+
+                        /*QString id = list.value(i +  1) + " "
                                  + list.value(i +  3) + " "
                                  + QString(list.value(i +  4).contains(QRegExp("\\d+")) ? list.value(i +  4) : "-") + " "
                                  + list.value(i +  6) + " "
@@ -488,41 +492,42 @@ bool MainWindow::convertTorikumi()
                                  + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
                                  + list.value(i + 15);*/
 
-                    query.prepare("INSERT INTO torikumi (id, basho, day, rikishi1, shikona1, rank1, result1, "
-                                                         "rikishi2, shikona2, rank2, result2, kimarite, id_local) "
-                                       "VALUES (:id, :basho, :day, :rikishi1, :shikona1, :rank1, :result1, "
-                                                ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
+                        query.prepare("INSERT INTO torikumi (id, basho, day, rikishi1, shikona1, rank1, result1, "
+                                      "rikishi2, shikona2, rank2, result2, kimarite, id_local) "
+                                      "VALUES (:id, :basho, :day, :rikishi1, :shikona1, :rank1, :result1, "
+                                      ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
 
-                    ++id_local;
-                    query.bindValue(":id", (basho * 100 + day) * 1000 + id_local);
-                    query.bindValue(":basho", basho);
-                    query.bindValue(":day", dayx);
-                    query.bindValue(":rikishi1", 0);
-                    query.bindValue(":shikona1", shikona1);
-                    query.bindValue(":rank1", rank1);
-                    query.bindValue(":result1", result1 == QString::fromUtf8("○") ? 1:0);
-                    query.bindValue(":rikishi2", 0);
-                    query.bindValue(":shikona2", shikona2);
-                    query.bindValue(":rank2", rank2);
-                    query.bindValue(":result2", result2 == QString::fromUtf8("○") ? 1:0);
-                    query.bindValue(":kimarite", kimarite);
-                    query.bindValue(":id_local", id_local);
-                    if (!query.exec())
-                    {
-                        qDebug() << "-";
-                    };
-                    //qDebug() << query.lastQuery();
+                        ++id_local;
+                        query.bindValue(":id", ((basho * 100 + day) * 10 + division) * 100 + id_local);
+                        query.bindValue(":basho", basho);
+                        query.bindValue(":day", dayx);
+                        query.bindValue(":rikishi1", 0);
+                        query.bindValue(":shikona1", shikona1);
+                        query.bindValue(":rank1", rank1);
+                        query.bindValue(":result1", result1 == QString::fromUtf8("○") ? 1:0);
+                        query.bindValue(":rikishi2", 0);
+                        query.bindValue(":shikona2", shikona2);
+                        query.bindValue(":rank2", rank2);
+                        query.bindValue(":result2", result2 == QString::fromUtf8("○") ? 1:0);
+                        query.bindValue(":kimarite", kimarite);
+                        query.bindValue(":id_local", id_local);
+                        if (!query.exec())
+                        {
+                            qDebug() << "-";
+                        };
+                        //qDebug() << query.lastQuery();
 
-                    //out << "<!-- Original data: " << id << " -->\n";
+                        //out << "<!-- Original data: " << id << " -->\n";
 
-                    //out << "</tr>\n\n";
+                        //out << "</tr>\n\n";
 
-                    i += 15;
+                        i += 15;
+                    }
+                    i++;
                 }
-                i++;
-            }
 
-            file0.close();
+                file0.close();
+            }
         }
     }
 
