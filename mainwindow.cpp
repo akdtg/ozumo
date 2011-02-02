@@ -29,7 +29,7 @@ void readShikonas()
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "error: file.open(shikonas.txt)";
+        qDebug() << "error: file.open(shikonas.tsv)";
         return;
     }
 
