@@ -498,7 +498,8 @@ bool MainWindow::convertTorikumi()
                                       ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
 
                         ++id_local;
-                        query.bindValue(":id", ((basho * 100 + day) * 10 + division) * 100 + id_local);
+                        int index = (((((2002 + (basho - START_INDEX) / 6) * 10 + (basho - START_INDEX) % 6 + 1) * 100)+ day) * 10 + division) * 100 + id_local;
+                        query.bindValue(":id", index);
                         query.bindValue(":basho", basho);
                         query.bindValue(":day", dayx);
                         query.bindValue(":rikishi1", 0);
