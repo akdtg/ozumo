@@ -25,7 +25,7 @@ QStringList Shikonas, Kimarite;
 
 void readShikonas()
 {
-    QFile file0("shikonas.txt");
+    QFile file0("shikonas.tsv");
 
     if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
     {
