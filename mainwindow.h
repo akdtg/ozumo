@@ -18,6 +18,7 @@ public:
 public slots:
     bool convertTorikumi();
     bool convertHoshitori();
+    bool convertTorikumi3456();
 
 private:
     Ui::MainWindow *ui;
