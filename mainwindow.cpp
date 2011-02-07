@@ -378,8 +378,125 @@ bool MainWindow::convertHoshitori()
     return true;
 }
 
+void splitRank (QString kanjiRank, int *side, int *rank, int *pos)
+{
+    if (kanjiRank == QString::fromUtf8("幕付出"))
+    {
+        side  = 0;
+        *rank = 7;
+        *pos  = 15;
+        return;
+    }
+
+    *side = kanjiRank.startsWith(QString::fromUtf8("東")) ? 0:1;
+    kanjiRank = kanjiRank.mid(1);
+
+    if (kanjiRank.startsWith(QString::fromUtf8("序")))
+    {
+        *rank = 10;
+        *pos = kanjiRank.mid(1).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("二")))
+    {
+        *rank = 9;
+        *pos = kanjiRank.mid(1).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("三")))
+    {
+        *rank = 8;
+        *pos = kanjiRank.mid(1).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("幕")))
+    {
+        *rank = 7;
+        *pos = kanjiRank.mid(1).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("十")))
+    {
+        *rank = 6;
+        *pos = kanjiRank.mid(1).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("前")))
+    {
+        *rank = 5;
+        *pos = kanjiRank.mid(1).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("小結")))
+    {
+        *rank = 4;
+        *pos = kanjiRank.mid(2).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("関脇")))
+    {
+        *rank = 3;
+        *pos = kanjiRank.mid(2).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("大関")))
+    {
+        *rank = 2;
+        *pos = kanjiRank.mid(2).toInt();
+    }
+
+    if (kanjiRank.startsWith(QString::fromUtf8("横綱")))
+    {
+        *rank = 1;
+        *pos = kanjiRank.mid(2).toInt();
+    }
+}
+
+void torikumi2Banzuke (void)
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
+    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    if (!db.open())
+        QMessageBox::warning(0, ("Unable to open database"),
+                             ("An error occurred while opening the connection: ") + db.lastError().text());
+
+    QSqlQuery query(db), queryOut(db);
+
+    query.prepare("SELECT year, month, rank1, rikishi1, shikona1 FROM torikumi "
+                  "UNION "
+                  "SELECT year, month, rank2, rikishi2, shikona2 FROM torikumi");
+    query.exec();
+    while (query.next())
+    {
+        int year        = query.value(0).toInt();
+        int month       = query.value(1).toInt();
+        QString rank    = query.value(2).toString();
+        int rikishi     = query.value(3).toInt();
+        QString shikona = query.value(4).toString();
+
+        int side, rankN, pos;
+        splitRank(rank, &side, &rankN, &pos);
+
+        queryOut.prepare("INSERT INTO banzuke (year, month, rank, position, side, rikishi, shikona)"
+                         "VALUES (:year, :month, :rank, :position, :side, :rikishi, :shikona)");
+        queryOut.bindValue(":year", year);
+        queryOut.bindValue(":month", month);
+        queryOut.bindValue(":rank", rankN);
+        queryOut.bindValue(":position", pos);
+        queryOut.bindValue(":side", side);
+        queryOut.bindValue(":rikishi", rikishi);
+        queryOut.bindValue(":shikona", shikona);
+        queryOut.exec();
+    }
+}
+
+
 bool MainWindow::convertTorikumi3456()
 {
+    torikumi2Banzuke();
+    return true;
+
+
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName("/mnt/memory/ozumo.sqlite");
     if (!db.open())
@@ -789,3 +906,4 @@ bool MainWindow::convertTorikumi()
 */
     return true;
 }
+
