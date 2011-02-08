@@ -275,7 +275,7 @@ void splitRank (QString kanjiRank, int *side, int *rank, int *pos)
 {
     if (kanjiRank == QString::fromUtf8("幕付出"))
     {
-        side  = 0;
+        *side = 0;
         *rank = 7;
         *pos  = 15;
         return;
