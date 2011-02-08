@@ -19,6 +19,7 @@ public slots:
     bool convertTorikumi();
     bool convertHoshitori();
     bool convertTorikumi3456();
+    bool torikumi2Banzuke();
 
 private:
     Ui::MainWindow *ui;

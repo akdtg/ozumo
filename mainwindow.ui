@@ -137,7 +137,7 @@
      <rect>
       <x>480</x>
       <y>50</y>
-      <width>75</width>
+      <width>91</width>
       <height>23</height>
      </rect>
     </property>
@@ -360,13 +360,39 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>90</y>
-      <width>75</width>
+      <y>120</y>
+      <width>91</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
      <string>Hoshitori</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_Torikumi3456">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>80</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Torikumi3456</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_torikumi2Banzuke">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>160</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>torikumi2Banzuke</string>
     </property>
    </widget>
   </widget>

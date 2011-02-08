@@ -13,7 +13,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->pushButton_Torikumi, SIGNAL(clicked()), this, SLOT(convertTorikumi3456()));
+    connect(ui->pushButton_Torikumi, SIGNAL(clicked()), this, SLOT(convertTorikumi()));
+    connect(ui->pushButton_Torikumi3456, SIGNAL(clicked()), this, SLOT(convertTorikumi3456()));
+    connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 }
 
@@ -82,9 +84,6 @@ QStringList readAndSimplifyBashoContent(QString content)
     content.replace(QRegExp("<table([^<]*)>"), "");
     content.replace(QRegExp("</table>"), "");
 
-    content.replace(QRegExp("<a([^<]*)>"), "");
-    content.replace(QRegExp("</a>"), "");
-
     content.replace(QRegExp("<br>"), "<>");
 
     content.replace(QRegExp("</td>"), "");
@@ -102,6 +101,12 @@ QStringList readAndSimplifyBashoContent(QString content)
     content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki1\">"), "<shikona>");
     content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki2\">"), "<rank>");
     content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki3\">"), "<result>");
+
+    content.replace(QRegExp("<a([^<]*)rikishi_(\\d+).html\">"), "<rikishi_id><\\2>");
+    content.replace(QRegExp("<a([^<]*)kimarite/(\\d+).html\">"), "<kimarite_id><\\2>");
+
+    content.replace(QRegExp("<a([^<]*)>"), "");
+    content.replace(QRegExp("</a>"), "");
 
     content.replace(">", "<");
     content = content.simplified();
@@ -345,7 +350,7 @@ void splitRank (QString kanjiRank, int *side, int *rank, int *pos)
     }
 }
 
-void torikumi2Banzuke (void)
+bool MainWindow::torikumi2Banzuke()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName("/mnt/memory/ozumo.sqlite");
@@ -392,13 +397,14 @@ void torikumi2Banzuke (void)
         queryOut.bindValue(":shikona", shikona);
         queryOut.exec();
     }
+
+    return true;
 }
 
 bool MainWindow::convertTorikumi3456()
 {
-    torikumi2Banzuke();
-    return true;
-
+//    torikumi2Banzuke();
+//    return true;
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName("/mnt/memory/ozumo.sqlite");
@@ -480,16 +486,19 @@ bool MainWindow::convertTorikumi3456()
                     content = content.mid(content.indexOf(">") + 1);
                     QString rank2 = content.left(content.indexOf("<")).simplified();
 
-                    query.prepare("INSERT INTO torikumi (id, basho, day, rikishi1, shikona1, rank1, result1, "
+                    query.prepare("INSERT INTO torikumi (id, basho, year, month, day, division, rikishi1, shikona1, rank1, result1, "
                                   "rikishi2, shikona2, rank2, result2, kimarite, id_local) "
-                                  "VALUES (:id, :basho, :day, :rikishi1, :shikona1, :rank1, :result1, "
+                                  "VALUES (:id, :basho, :year, :month, :day, :division, :rikishi1, :shikona1, :rank1, :result1, "
                                   ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
 
                     ++id_local;
                     int index = (((((2002 + (basho - START_INDEX) / 6) * 10 + (basho - START_INDEX) % 6 + 1) * 100)+ day) * 10 + division) * 100 + id_local;
                     query.bindValue(":id", index);
                     query.bindValue(":basho", basho);
+                    query.bindValue(":year", 2002 + (basho - START_INDEX) / 6);
+                    query.bindValue(":month", (basho - START_INDEX) % 6 + 1);
                     query.bindValue(":day", dayx);
+                    query.bindValue(":division", division);
                     query.bindValue(":rikishi1", 0);
                     query.bindValue(":shikona1", shikona1);
                     query.bindValue(":rank1", rank1);
@@ -517,11 +526,8 @@ bool MainWindow::convertTorikumi3456()
 
 bool MainWindow::convertTorikumi()
 {
-    //collectShikonas();
-    //return true;
-
-    readKimarite();
-    readShikonas();
+//    readKimarite();
+//    readShikonas();
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName("/mnt/memory/ozumo.sqlite");
@@ -562,6 +568,8 @@ bool MainWindow::convertTorikumi()
 
                 int i = 0;
                 int dayx = day, id_local = 0;
+                QString rikishi1, rikishi2;
+
                 while (i < list.count())
                 {
                     if (list.value(i).contains("rank"))
@@ -572,6 +580,17 @@ bool MainWindow::convertTorikumi()
                         //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
 
                         QString shikona1 = list.value(i +  3);
+                        if (shikona1 == "rikishi_id")
+                        {
+                            i++;
+                            rikishi1 = list.value(i +  3);
+                            i++;
+                            shikona1 = list.value(i +  3);
+                        }
+                        else
+                        {
+                            rikishi1 = "0";
+                        }
                         //out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
 
                         QString sum = list.value(i + 4);
@@ -592,12 +611,30 @@ bool MainWindow::convertTorikumi()
                         //out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
 
                         QString kimarite = list.value(i +  8);
+                        if (kimarite == "kimarite_id")
+                        {
+                            i++;
+                            kimarite = list.value(i +  8);  // kimarite id, just skipped at this moment
+                            i++;
+                            kimarite = list.value(i +  8);
+                        }
                         //out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
 
                         QString result2 = list.value(i + 10);
                         //out << "<td>" << list.value(i + 10) << "</td>\n";   // bout 2
 
                         QString shikona2 = list.value(i + 12);
+                        if (shikona2 == "rikishi_id")
+                        {
+                            i++;
+                            rikishi2 = list.value(i +  12);
+                            i++;
+                            shikona2 = list.value(i +  12);
+                        }
+                        else
+                        {
+                            rikishi2 = "0";
+                        }
                         //out << "<td><strong>" << translateShikona(list.value(i + 12)) << "</strong><br />";   // shikona 2
 
                         sum = list.value(i + 13);
@@ -629,21 +666,24 @@ bool MainWindow::convertTorikumi()
                                  + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
                                  + list.value(i + 15);*/
 
-                        query.prepare("INSERT INTO torikumi (id, basho, day, rikishi1, shikona1, rank1, result1, "
+                        query.prepare("INSERT INTO torikumi (id, basho, year, month, day, division, rikishi1, shikona1, rank1, result1, "
                                       "rikishi2, shikona2, rank2, result2, kimarite, id_local) "
-                                      "VALUES (:id, :basho, :day, :rikishi1, :shikona1, :rank1, :result1, "
+                                      "VALUES (:id, :basho, :year, :month, :day, :division, :rikishi1, :shikona1, :rank1, :result1, "
                                       ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
 
                         ++id_local;
                         int index = (((((2002 + (basho - START_INDEX) / 6) * 10 + (basho - START_INDEX) % 6 + 1) * 100)+ day) * 10 + division) * 100 + id_local;
                         query.bindValue(":id", index);
                         query.bindValue(":basho", basho);
+                        query.bindValue(":year", 2002 + (basho - START_INDEX) / 6);
+                        query.bindValue(":month", (basho - START_INDEX) % 6 + 1);
                         query.bindValue(":day", dayx);
-                        query.bindValue(":rikishi1", 0);
+                        query.bindValue(":division", division);
+                        query.bindValue(":rikishi1", rikishi1.toInt());
                         query.bindValue(":shikona1", shikona1);
                         query.bindValue(":rank1", rank1);
                         query.bindValue(":result1", result1 == QString::fromUtf8("○") ? 1:0);
-                        query.bindValue(":rikishi2", 0);
+                        query.bindValue(":rikishi2", rikishi2.toInt());
                         query.bindValue(":shikona2", shikona2);
                         query.bindValue(":rank2", rank2);
                         query.bindValue(":result2", result2 == QString::fromUtf8("○") ? 1:0);
