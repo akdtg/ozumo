@@ -355,10 +355,21 @@ void torikumi2Banzuke (void)
 
     QSqlQuery query(db), queryOut(db);
 
-    query.prepare("SELECT year, month, rank1, rikishi1, shikona1 FROM torikumi "
-                  "UNION "
-                  "SELECT year, month, rank2, rikishi2, shikona2 FROM torikumi");
-    query.exec();
+    query.exec("DROP TABLE IF EXISTS banzuke");
+
+    query.exec("CREATE TABLE \"banzuke\" ("
+               "\"year\" INTEGER, "
+               "\"month\" INTEGER, "
+               "\"rank\" INTEGER, "
+               "\"position\" INTEGER, "
+               "\"side\" INTEGER, "
+               "\"rikishi\" INTEGER, "
+               "\"shikona\" VARCHAR)");
+
+    query.exec("SELECT year, month, rank1, rikishi1, shikona1 FROM torikumi "
+               "UNION "
+               "SELECT year, month, rank2, rikishi2, shikona2 FROM torikumi");
+
     while (query.next())
     {
         int year        = query.value(0).toInt();
@@ -382,7 +393,6 @@ void torikumi2Banzuke (void)
         queryOut.exec();
     }
 }
-
 
 bool MainWindow::convertTorikumi3456()
 {
