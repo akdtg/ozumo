@@ -79,7 +79,7 @@ void readKimarite()
 QStringList readAndSimplifyBashoContent(QString content)
 {
     content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
-    content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->")));
+    content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->")));
 
     content.replace(QRegExp("<table([^<]*)>"), "");
     content.replace(QRegExp("</table>"), "");
@@ -97,6 +97,11 @@ QStringList readAndSimplifyBashoContent(QString content)
     content.replace(QRegExp("<div class=\"torikumi_gyoji\">([^<]*)</div>"), "");
     content.replace(QRegExp("<div([^<]*)>"), "");
     content.replace(QRegExp("</div>"), "");
+
+    content.replace(QRegExp("<td([^<]*)class=\"basho78-150\">"), "<date>");
+
+    content.replace(QRegExp("<strong>"), "");
+    content.replace(QRegExp("</strong>"), "");
 
     content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki1\">"), "<shikona>");
     content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki2\">"), "<rank>");
@@ -569,9 +574,21 @@ bool MainWindow::convertTorikumi()
                 int i = 0;
                 int dayx = day, id_local = 0;
                 QString rikishi1, rikishi2;
+                int year, month;
 
                 while (i < list.count())
                 {
+                    year = 0;
+                    month = 0;
+                    if (list.value(i).contains("date"))
+                    {
+                        QStringList tempList = list.value(i + 1).split(" ");
+                        QString date = tempList.at(3);
+                        tempList = date.split(QRegExp("(\\D+)"), QString::SkipEmptyParts);
+                        year = tempList.at(0).toInt();
+                        month = tempList.at(1).toInt();
+                    }
+
                     if (list.value(i).contains("rank"))
                     {
                         //東前14 栃栄 3勝0敗 ○ 押し出し ● 寺尾 0勝3敗 西十2
@@ -675,8 +692,8 @@ bool MainWindow::convertTorikumi()
                         int index = (((((2002 + (basho - START_INDEX) / 6) * 10 + (basho - START_INDEX) % 6 + 1) * 100)+ day) * 10 + division) * 100 + id_local;
                         query.bindValue(":id", index);
                         query.bindValue(":basho", basho);
-                        query.bindValue(":year", 2002 + (basho - START_INDEX) / 6);
-                        query.bindValue(":month", (basho - START_INDEX) % 6 + 1);
+                        query.bindValue(":year", year == 0 ? (2002 + (basho - START_INDEX) / 6) : year);
+                        query.bindValue(":month", month == 0 ? ((basho - START_INDEX) % 6 + 1) : month);
                         query.bindValue(":day", dayx);
                         query.bindValue(":division", division);
                         query.bindValue(":rikishi1", rikishi1.toInt());
