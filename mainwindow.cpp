@@ -355,13 +355,46 @@ void splitRank (QString kanjiRank, int *side, int *rank, int *pos)
     }
 }
 
-bool insertTorikumi(int id, int basho, int year, int month, int day,
-                    int division,
-                    int rikishi1, QString shikona1, int rank1, int result1,
-                    int rikishi2, QString shikona2, int rank2, int result2,
-                    QString kimarite,
-                    int id_local)
+bool MainWindow::findDate(QString content, int *year, int *month)
 {
+    QStringList list = readAndSimplifyBashoContent(content);
+
+    *year = 0;
+    *month = 0;
+
+    int i = 0;
+    while (!list.value(i).contains("date"))
+    {
+        i++;
+    }
+
+    if (list.value(i).contains("date"))
+    {
+        QStringList tempList = list.value(i + 1).split(" ");
+        QString date = tempList.at(3);
+        tempList = date.split(QRegExp("(\\D+)"), QString::SkipEmptyParts);
+        *year = tempList.at(0).toInt();
+        *month = tempList.at(1).toInt();
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
+
+bool MainWindow::insertTorikumi(QSqlDatabase db,
+                                int id, int basho, int year, int month, int day,
+                                int division,
+                                int rikishi1, QString shikona1, QString rank1, int result1,
+                                int rikishi2, QString shikona2, QString rank2, int result2,
+                                QString kimarite,
+                                int id_local)
+{
+    QSqlQuery query(db);
+
     query.prepare("INSERT INTO torikumi ("
                   "id, basho, year, month, day, division, "
                   "rikishi1, shikona1, rank1, result1, "
@@ -377,8 +410,8 @@ bool insertTorikumi(int id, int basho, int year, int month, int day,
 
     query.bindValue(":id",       id);
     query.bindValue(":basho",    basho);
-    query.bindValue(":year",     year == 0 ? (2002 + (basho - START_INDEX) / 6) : year);
-    query.bindValue(":month",    month == 0 ? ((basho - START_INDEX) % 6 + 1) : month);
+    query.bindValue(":year",     year);
+    query.bindValue(":month",    month);
     query.bindValue(":day",      day);
     query.bindValue(":division", division);
     query.bindValue(":rikishi1", rikishi1);
@@ -448,16 +481,11 @@ bool MainWindow::torikumi2Banzuke()
 
 bool MainWindow::convertTorikumi3456()
 {
-//    torikumi2Banzuke();
-//    return true;
-
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName("/mnt/memory/ozumo.sqlite");
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
-
-    QSqlQuery query(db);
 
     for (int basho = START_INDEX; basho <= 545; basho++)
     {
@@ -465,7 +493,7 @@ bool MainWindow::convertTorikumi3456()
         {
             for (int division = 3; division <= 6; division++)
             {
-                QFile file0("/mnt/memory/torikumi/"
+                QFile file0("/mnt/memory/torikumi-3456/"
                             + QString("tori_")
                             + QString::number(basho)
                             + "_"
@@ -486,10 +514,20 @@ bool MainWindow::convertTorikumi3456()
 
                 QString content = in.readAll();
 
-                content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
-                content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->"))).simplified();
+                int year, month;
 
+                if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
+                {
+                    year = 2002 + (basho - START_INDEX) / 6;
+                    month = (basho - START_INDEX) % 6 * 2 + 1;
+                }
+
+                int rikishi1 = 0, rikishi2 = 0;
                 int dayx = day, id_local = 0;
+
+                content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+                content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->"))).simplified();
+                //content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->"))).simplified();
 
                 while (content.indexOf("torikumi_riki2") != -1)
                 {
@@ -531,33 +569,18 @@ bool MainWindow::convertTorikumi3456()
                     content = content.mid(content.indexOf(">") + 1);
                     QString rank2 = content.left(content.indexOf("<")).simplified();
 
-                    query.prepare("INSERT INTO torikumi (id, basho, year, month, day, division, rikishi1, shikona1, rank1, result1, "
-                                  "rikishi2, shikona2, rank2, result2, kimarite, id_local) "
-                                  "VALUES (:id, :basho, :year, :month, :day, :division, :rikishi1, :shikona1, :rank1, :result1, "
-                                  ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
-
                     ++id_local;
-                    int index = (((((2002 + (basho - START_INDEX) / 6) * 10 + (basho - START_INDEX) % 6 + 1) * 100)+ day) * 10 + division) * 100 + id_local;
-                    query.bindValue(":id", index);
-                    query.bindValue(":basho", basho);
-                    query.bindValue(":year", 2002 + (basho - START_INDEX) / 6);
-                    query.bindValue(":month", (basho - START_INDEX) % 6 + 1);
-                    query.bindValue(":day", dayx);
-                    query.bindValue(":division", division);
-                    query.bindValue(":rikishi1", 0);
-                    query.bindValue(":shikona1", shikona1);
-                    query.bindValue(":rank1", rank1);
-                    query.bindValue(":result1", result1 == QString::fromUtf8("○") ? 1:0);
-                    query.bindValue(":rikishi2", 0);
-                    query.bindValue(":shikona2", shikona2);
-                    query.bindValue(":rank2", rank2);
-                    query.bindValue(":result2", result2 == QString::fromUtf8("○") ? 1:0);
-                    query.bindValue(":kimarite", kimarite);
-                    query.bindValue(":id_local", id_local);
-                    if (!query.exec())
-                    {
+
+                    int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
+
+                    if (!insertTorikumi(db, index, basho, year, month, dayx,
+                                        division,
+                                        rikishi1, shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
+                                        rikishi2, shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
+                                        kimarite,
+                                        id_local)
+                        )
                         qDebug() << "-";
-                    };
                 }
             }
         }
@@ -580,15 +603,13 @@ bool MainWindow::convertTorikumi()
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
 
-    QSqlQuery query(db);
-
     for (int basho = START_INDEX; basho <= 545; basho++)
     {
         for (int day = 1; day <= 15; day++)
         {
             for (int division = 1; division <= 2; division++)
             {
-                QFile file0("/mnt/memory/torikumi-makuuchi/"
+                QFile file0("/mnt/memory/torikumi-12/"
                             + QString("tori_")
                             + QString::number(basho)
                             + "_"
@@ -609,26 +630,22 @@ bool MainWindow::convertTorikumi()
 
                 QString content = in.readAll();
 
+                int year, month;
+
+                if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
+                {
+                    year = 2002 + (basho - START_INDEX) / 6;
+                    month = (basho - START_INDEX) % 6 * 2 + 1;
+                }
+
                 QStringList list = readAndSimplifyBashoContent(content);
 
                 int i = 0;
                 int dayx = day, id_local = 0;
                 QString rikishi1, rikishi2;
-                int year, month;
 
                 while (i < list.count())
                 {
-                    year = 0;
-                    month = 0;
-                    if (list.value(i).contains("date"))
-                    {
-                        QStringList tempList = list.value(i + 1).split(" ");
-                        QString date = tempList.at(3);
-                        tempList = date.split(QRegExp("(\\D+)"), QString::SkipEmptyParts);
-                        year = tempList.at(0).toInt();
-                        month = tempList.at(1).toInt();
-                    }
-
                     if (list.value(i).contains("rank"))
                     {
                         //東前14 栃栄 3勝0敗 ○ 押し出し ● 寺尾 0勝3敗 西十2
@@ -723,33 +740,19 @@ bool MainWindow::convertTorikumi()
                                  + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
                                  + list.value(i + 15);*/
 
-                        query.prepare("INSERT INTO torikumi (id, basho, year, month, day, division, rikishi1, shikona1, rank1, result1, "
-                                      "rikishi2, shikona2, rank2, result2, kimarite, id_local) "
-                                      "VALUES (:id, :basho, :year, :month, :day, :division, :rikishi1, :shikona1, :rank1, :result1, "
-                                      ":rikishi2, :shikona2, :rank2, :result2, :kimarite, :id_local)");
-
                         ++id_local;
-                        int index = (((((2002 + (basho - START_INDEX) / 6) * 10 + (basho - START_INDEX) % 6 + 1) * 100)+ day) * 10 + division) * 100 + id_local;
-                        query.bindValue(":id", index);
-                        query.bindValue(":basho", basho);
-                        query.bindValue(":year", year == 0 ? (2002 + (basho - START_INDEX) / 6) : year);
-                        query.bindValue(":month", month == 0 ? ((basho - START_INDEX) % 6 + 1) : month);
-                        query.bindValue(":day", dayx);
-                        query.bindValue(":division", division);
-                        query.bindValue(":rikishi1", rikishi1.toInt());
-                        query.bindValue(":shikona1", shikona1);
-                        query.bindValue(":rank1", rank1);
-                        query.bindValue(":result1", result1 == QString::fromUtf8("○") ? 1:0);
-                        query.bindValue(":rikishi2", rikishi2.toInt());
-                        query.bindValue(":shikona2", shikona2);
-                        query.bindValue(":rank2", rank2);
-                        query.bindValue(":result2", result2 == QString::fromUtf8("○") ? 1:0);
-                        query.bindValue(":kimarite", kimarite);
-                        query.bindValue(":id_local", id_local);
-                        if (!query.exec())
-                        {
+
+                        int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
+
+                        if (!insertTorikumi(db, index, basho, year, month, dayx,
+                                            division,
+                                            rikishi1.toInt(), shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
+                                            rikishi2.toInt(), shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
+                                            kimarite,
+                                            id_local)
+                            )
                             qDebug() << "-";
-                        };
+
                         //qDebug() << query.lastQuery();
 
                         //out << "<!-- Original data: " << id << " -->\n";
