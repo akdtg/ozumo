@@ -493,7 +493,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
     QSqlQuery query(db);
 
-    query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2 "
+    query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
                "FROM torikumi "
                "WHERE year = :year AND month = :month AND day = :day AND division = :division "
                "ORDER BY id_local");
@@ -520,6 +520,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         QString rank1    = query.value(2).toString();
         QString shikona2 = query.value(3).toString();
         QString rank2    = query.value(4).toString();
+        int basho = query.value(5).toInt();
 
         QString shikona1Ru = shikona1, shikona2Ru = shikona2;
 
@@ -538,7 +539,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
             shikona2Ru = queryShikona.value(0).toString();
 
         QString res = "";
-        for (int i = 0; i < 6; i++)
+        for (int i = 1; i <= 6; i++)
         {
             //SELECT result1, result2 FROM torikumi WHERE (shikona1 = "白鵬" AND shikona2 = "魁皇") AND basho = 545
             //UNION ALL
@@ -551,8 +552,8 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
             queryShikona.bindValue(":shikona2a", shikona2);
             queryShikona.bindValue(":shikona1b", shikona1);
             queryShikona.bindValue(":shikona2b", shikona2);
-            queryShikona.bindValue(":bashoa", 544 - i);
-            queryShikona.bindValue(":bashob", 544 - i);
+            queryShikona.bindValue(":bashoa", basho - i);
+            queryShikona.bindValue(":bashob", basho - i);
             queryShikona.exec();
             if (queryShikona.next())
             {
