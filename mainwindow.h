@@ -30,6 +30,7 @@ public slots:
                         int rikishi2, QString shikona2, QString rank2, int result2,
                         QString kimarite,
                         int id_local);
+    QString torikumi2Html(int year, int month, int day, int division);
 
 private:
     Ui::MainWindow *ui;

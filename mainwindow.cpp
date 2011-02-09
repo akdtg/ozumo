@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_Torikumi3456, SIGNAL(clicked()), this, SLOT(convertTorikumi3456()));
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
+
+    torikumi2Html(2011, 1, 15, 1);
 }
 
 MainWindow::~MainWindow()
@@ -479,6 +481,99 @@ bool MainWindow::torikumi2Banzuke()
     db.close();
 
     return true;
+}
+
+QString MainWindow::torikumi2Html(int year, int month, int day, int division)
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
+    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    if (!db.open())
+        QMessageBox::warning(this, tr("Unable to open database"),
+                             tr("An error occurred while opening the connection: ") + db.lastError().text());
+
+    QSqlQuery query(db);
+
+    query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2 "
+               "FROM torikumi "
+               "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+               "ORDER BY id_local");
+    query.bindValue(":year", year);
+    query.bindValue(":month", month);
+    query.bindValue(":day", day);
+    query.bindValue(":division", division);
+
+    query.exec();
+
+    int trClass = 0;
+    QString className[] = {"\"odd\"", "\"even\""};
+
+    while (query.next())
+    {
+        /*qDebug()<< query.value(0).toInt()
+                << query.value(1).toString()
+                << query.value(2).toString()
+                << query.value(3).toString()
+                << query.value(4).toString();*/
+
+        int id = query.value(0).toInt();
+        QString shikona1 = query.value(1).toString();
+        QString rank1    = query.value(2).toString();
+        QString shikona2 = query.value(3).toString();
+        QString rank2    = query.value(4).toString();
+
+        QString shikona1Ru = shikona1, shikona2Ru = shikona2;
+
+        QSqlQuery queryShikona(db);
+
+        queryShikona.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+        queryShikona.bindValue(":kanji", shikona1);
+        queryShikona.exec();
+        if (queryShikona.next())
+            shikona1Ru = queryShikona.value(0).toString();
+
+        queryShikona.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+        queryShikona.bindValue(":kanji", shikona2);
+        queryShikona.exec();
+        if (queryShikona.next())
+            shikona2Ru = queryShikona.value(0).toString();
+
+        QString res = "";
+        for (int i = 0; i < 6; i++)
+        {
+            //SELECT result1, result2 FROM torikumi WHERE (shikona1 = "白鵬" AND shikona2 = "魁皇") AND basho = 545
+            //UNION ALL
+            //SELECT result2, result1 FROM torikumi WHERE (shikona2 = "白鵬" AND shikona1 = "魁皇") AND basho = 545
+            queryShikona.prepare("SELECT result1, result2 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
+                                 "UNION "
+                                 "SELECT result2, result1 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
+
+            queryShikona.bindValue(":shikona1a", shikona1);
+            queryShikona.bindValue(":shikona2a", shikona2);
+            queryShikona.bindValue(":shikona1b", shikona1);
+            queryShikona.bindValue(":shikona2b", shikona2);
+            queryShikona.bindValue(":bashoa", 544 - i);
+            queryShikona.bindValue(":bashob", 544 - i);
+            queryShikona.exec();
+            if (queryShikona.next())
+            {
+                QString r = queryShikona.value(0).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+                res.prepend(r);
+            }
+            else
+                res.prepend(QString::fromUtf8("－"));
+            res.prepend(" ");
+        }
+
+        //qDebug() << shikona1Ru << shikona2Ru;
+        QString Html;
+        Html = "<tr class=" + className[trClass] + "><td>" + shikona1Ru + "</td> <td>" + res + "</td> <td>" + shikona2Ru + "</td></tr>";
+        trClass ^= 1;
+        qDebug() << Html;
+    }
+
+    db.close();
+
+    return "Well done :)";
 }
 
 bool MainWindow::convertTorikumi3456()
