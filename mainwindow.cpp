@@ -584,6 +584,8 @@ bool MainWindow::convertTorikumi3456()
                         )
                         qDebug() << "-";
                 }
+
+                file0.close();
             }
         }
     }
