@@ -476,6 +476,8 @@ bool MainWindow::torikumi2Banzuke()
         queryOut.exec();
     }
 
+    db.close();
+
     return true;
 }
 
@@ -586,8 +588,7 @@ bool MainWindow::convertTorikumi3456()
         }
     }
 
-    QSqlDatabase::database("ozumo", false).close();
-    QSqlDatabase::removeDatabase("ozumo");
+    db.close();
 
     return true;
 }
@@ -769,8 +770,7 @@ bool MainWindow::convertTorikumi()
         }
     }
 
-    QSqlDatabase::database("ozumo", false).close();
-    QSqlDatabase::removeDatabase("ozumo");
+    db.close();
 
 /*
     QFile file0(ui->lineEdit->text()
