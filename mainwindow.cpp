@@ -355,6 +355,46 @@ void splitRank (QString kanjiRank, int *side, int *rank, int *pos)
     }
 }
 
+bool insertTorikumi(int id, int basho, int year, int month, int day,
+                    int division,
+                    int rikishi1, QString shikona1, int rank1, int result1,
+                    int rikishi2, QString shikona2, int rank2, int result2,
+                    QString kimarite,
+                    int id_local)
+{
+    query.prepare("INSERT INTO torikumi ("
+                  "id, basho, year, month, day, division, "
+                  "rikishi1, shikona1, rank1, result1, "
+                  "rikishi2, shikona2, rank2, result2, "
+                  "kimarite, "
+                  "id_local) "
+                  "VALUES ("
+                  ":id, :basho, :year, :month, :day, :division, "
+                  ":rikishi1, :shikona1, :rank1, :result1, "
+                  ":rikishi2, :shikona2, :rank2, :result2, "
+                  ":kimarite, "
+                  ":id_local)");
+
+    query.bindValue(":id",       id);
+    query.bindValue(":basho",    basho);
+    query.bindValue(":year",     year == 0 ? (2002 + (basho - START_INDEX) / 6) : year);
+    query.bindValue(":month",    month == 0 ? ((basho - START_INDEX) % 6 + 1) : month);
+    query.bindValue(":day",      day);
+    query.bindValue(":division", division);
+    query.bindValue(":rikishi1", rikishi1);
+    query.bindValue(":shikona1", shikona1);
+    query.bindValue(":rank1",    rank1);
+    query.bindValue(":result1",  result1);
+    query.bindValue(":rikishi2", rikishi2);
+    query.bindValue(":shikona2", shikona2);
+    query.bindValue(":rank2",    rank2);
+    query.bindValue(":result2",  result2);
+    query.bindValue(":kimarite", kimarite);
+    query.bindValue(":id_local", id_local);
+
+    return query.exec();
+}
+
 bool MainWindow::torikumi2Banzuke()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
