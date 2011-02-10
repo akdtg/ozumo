@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 
     connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
+    connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
 }
 
 MainWindow::~MainWindow()
@@ -513,7 +514,8 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
                    + " -->\n";
 
     Html += "<table>\n"
-            "<thead><tr><th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
+            "<thead><tr>"
+            "<th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
             "<th width=\"33%\">" + QString::fromUtf8("История последних встреч") + "</th>"
             "<th width=\"33%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
             "<tbody>\n";
@@ -526,7 +528,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
                 << query.value(3).toString()
                 << query.value(4).toString();*/
 
-        int id = query.value(0).toInt();
+        //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
         QString rank1    = query.value(2).toString();
         QString shikona2 = query.value(3).toString();
@@ -624,9 +626,152 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         //qDebug() << shikona1Ru << shikona2Ru;
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikona1Ru + " (" + res1 + ")</td> <td>" + history + "</td> <td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
-        trClass ^= 1;
+                "<td>" + shikona1Ru + " (" + res1 + ")</td>"
+                "<td>" + history + "</td>"
+                "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
         //qDebug() << Html;
+
+        trClass ^= 1;
+    }
+
+    Html += "</tbody>\n</table>\n";
+
+    db.close();
+
+    return Html;
+}
+
+QString MainWindow::torikumiResults2Html(int year, int month, int day, int division)
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
+    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    if (!db.open())
+        QMessageBox::warning(this, tr("Unable to open database"),
+                             tr("An error occurred while opening the connection: ") + db.lastError().text());
+
+    QSqlQuery query(db);
+
+    query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite "
+               "FROM torikumi "
+               "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+               "ORDER BY id_local");
+    query.bindValue(":year", year);
+    query.bindValue(":month", month);
+    query.bindValue(":day", day);
+    query.bindValue(":division", division);
+
+    query.exec();
+
+    int trClass = 0;
+    QString className[] = {"\"odd\"", "\"even\""};
+    QString Html = "<!-- year:" + QString::number(year)
+                   + " month:" + QString::number(month).rightJustified(2, '0')
+                   + " day:" + QString::number(day).rightJustified(2, '0')
+                   + " division:" + QString::number(division)
+                   + " -->\n";
+
+    Html += "<table>\n"
+            "<thead><tr>"
+            "<th width=\"25%\">" + QString::fromUtf8("Восток") + "</th>"
+            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
+            "<th width=\"20%\">" + QString::fromUtf8("Кимаритэ") + "</th>"
+            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
+            "<th width=\"25%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<tbody>\n";
+
+    while (query.next())
+    {
+        /*qDebug()<< query.value(0).toInt()
+                << query.value(1).toString()
+                << query.value(2).toString()
+                << query.value(3).toString()
+                << query.value(4).toString();*/
+
+        //int id = query.value(0).toInt();
+        QString shikona1 = query.value(1).toString();
+        QString result1  = query.value(2).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+        QString shikona2 = query.value(3).toString();
+        QString result2  = query.value(4).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+        QString kimarite = query.value(5).toString();
+
+        QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
+
+        QSqlQuery tmpQuery(db);
+
+        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+        tmpQuery.bindValue(":kanji", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            shikona1Ru = tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+        tmpQuery.bindValue(":kanji", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            shikona2Ru = tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT ru FROM kimarite WHERE kanji = :kanji");
+        tmpQuery.bindValue(":kanji", kimarite);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            kimariteRu = tmpQuery.value(0).toString();
+
+        QString res1, res2;
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString();
+
+        //qDebug() << shikona1Ru << shikona2Ru;
+
+        Html += "<tr class=" + className[trClass] + ">"
+                "<td>" + shikona1Ru + " (" + res1 + ")</td>"
+                "<td>" + result1 + "</td>"
+                "<td>" + kimariteRu + "</td>"
+                "<td>" + result2 + "</td>"
+                "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
+        //qDebug() << Html;
+
+        trClass ^= 1;
     }
 
     Html += "</tbody>\n</table>\n";
@@ -639,6 +784,15 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 void MainWindow::generateTorikumi()
 {
     ui->textEdit->setPlainText(torikumi2Html(
+            ui->comboBox_year->currentIndex() + 2002,
+            ui->comboBox_basho->currentIndex() * 2 + 1,
+            ui->comboBox_day->currentIndex() + 1,
+            ui->comboBox_division->currentIndex() + 1));
+}
+
+void MainWindow::generateTorikumiResults()
+{
+    ui->textEdit->setPlainText(torikumiResults2Html(
             ui->comboBox_year->currentIndex() + 2002,
             ui->comboBox_basho->currentIndex() * 2 + 1,
             ui->comboBox_day->currentIndex() + 1,
