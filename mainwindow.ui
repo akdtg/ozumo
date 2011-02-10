@@ -27,8 +27,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>120</y>
+      <x>340</x>
+      <y>60</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -40,8 +40,8 @@
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>120</y>
+      <x>20</x>
+      <y>60</y>
       <width>291</width>
       <height>20</height>
      </rect>
@@ -50,21 +50,21 @@
    <widget class="QPushButton" name="pushButton_Torikumi">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>50</y>
-      <width>91</width>
+      <x>20</x>
+      <y>90</y>
+      <width>131</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>Torikumi</string>
+     <string>Import torikumi 12</string>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox_year">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>50</y>
+      <x>20</x>
+      <y>20</y>
       <width>72</width>
       <height>22</height>
      </rect>
@@ -126,8 +126,8 @@
    <widget class="QComboBox" name="comboBox_basho">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>50</y>
+      <x>120</x>
+      <y>20</y>
       <width>81</width>
       <height>22</height>
      </rect>
@@ -166,8 +166,8 @@
    <widget class="QComboBox" name="comboBox_day">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>50</y>
+      <x>230</x>
+      <y>20</y>
       <width>72</width>
       <height>22</height>
      </rect>
@@ -254,8 +254,8 @@
    <widget class="QComboBox" name="comboBox_division">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>50</y>
+      <x>330</x>
+      <y>20</y>
       <width>91</width>
       <height>22</height>
      </rect>
@@ -270,12 +270,32 @@
       <string>juryo</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>makushita</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>sandanme</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>jonidan</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>jonokuchi</string>
+     </property>
+    </item>
    </widget>
    <widget class="QPushButton" name="pushButton_Hoshitori">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>120</y>
+      <x>310</x>
+      <y>90</y>
       <width>91</width>
       <height>23</height>
      </rect>
@@ -287,21 +307,21 @@
    <widget class="QPushButton" name="pushButton_Torikumi3456">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>80</y>
-      <width>91</width>
+      <x>160</x>
+      <y>90</y>
+      <width>141</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>Torikumi3456</string>
+     <string>Import torikumi 3456</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_torikumi2Banzuke">
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>160</y>
+      <y>90</y>
       <width>121</width>
       <height>23</height>
      </rect>
@@ -318,6 +338,19 @@
       <width>571</width>
       <height>181</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_generateTorikumi">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>131</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Generate torikumi</string>
     </property>
    </widget>
   </widget>

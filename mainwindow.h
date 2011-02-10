@@ -31,6 +31,7 @@ public slots:
                         QString kimarite,
                         int id_local);
     QString torikumi2Html(int year, int month, int day, int division);
+    void generateTorikumi();
 
 private:
     Ui::MainWindow *ui;

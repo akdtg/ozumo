@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 
-    ui->textEdit->setPlainText(torikumi2Html(2011, 1, 15, 1));
+    connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
 }
 
 MainWindow::~MainWindow()
@@ -574,7 +574,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
         //qDebug() << shikona1Ru << shikona2Ru;
 
-        Html += "<tr class=" + className[trClass] + "><td>" + shikona1Ru + "</td> <td>" + res + "</td> <td>" + shikona2Ru + "</td></tr>\n";
+        Html += "<tr class=" + className[trClass] + "><td>" + shikona1Ru + " (8-7)</td> <td>" + res + "</td> <td>" + shikona2Ru + " (7-8)</td></tr>\n";
         trClass ^= 1;
         //qDebug() << Html;
     }
@@ -584,6 +584,15 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
     db.close();
 
     return Html;
+}
+
+void MainWindow::generateTorikumi()
+{
+    ui->textEdit->setPlainText(torikumi2Html(
+            ui->comboBox_year->currentIndex() + 2002,
+            ui->comboBox_basho->currentIndex() * 2 + 1,
+            ui->comboBox_day->currentIndex() + 1,
+            ui->comboBox_division->currentIndex() + 1));
 }
 
 bool MainWindow::convertTorikumi3456()
