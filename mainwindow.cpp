@@ -535,51 +535,96 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
         QString shikona1Ru = shikona1, shikona2Ru = shikona2;
 
-        QSqlQuery queryShikona(db);
+        QSqlQuery tmpQuery(db);
 
-        queryShikona.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
-        queryShikona.bindValue(":kanji", shikona1);
-        queryShikona.exec();
-        if (queryShikona.next())
-            shikona1Ru = queryShikona.value(0).toString();
+        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+        tmpQuery.bindValue(":kanji", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            shikona1Ru = tmpQuery.value(0).toString();
 
-        queryShikona.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
-        queryShikona.bindValue(":kanji", shikona2);
-        queryShikona.exec();
-        if (queryShikona.next())
-            shikona2Ru = queryShikona.value(0).toString();
+        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+        tmpQuery.bindValue(":kanji", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            shikona2Ru = tmpQuery.value(0).toString();
 
-        QString res;
+        QString res1, res2;
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString() + "-";
 
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString();
+
+        QString history;
         for (int i = 1; i <= 6; i++)
         {
             //SELECT result1, result2 FROM torikumi WHERE (shikona1 = "白鵬" AND shikona2 = "魁皇") AND basho = 545
             //UNION ALL
             //SELECT result2, result1 FROM torikumi WHERE (shikona2 = "白鵬" AND shikona1 = "魁皇") AND basho = 545
-            queryShikona.prepare("SELECT result1, result2 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
+            tmpQuery.prepare("SELECT result1, result2 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
                                  "UNION "
                                  "SELECT result2, result1 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
 
-            queryShikona.bindValue(":shikona1a", shikona1);
-            queryShikona.bindValue(":shikona2a", shikona2);
-            queryShikona.bindValue(":shikona1b", shikona1);
-            queryShikona.bindValue(":shikona2b", shikona2);
-            queryShikona.bindValue(":bashoa", basho - i);
-            queryShikona.bindValue(":bashob", basho - i);
-            queryShikona.exec();
-            if (queryShikona.next())
+            tmpQuery.bindValue(":shikona1a", shikona1);
+            tmpQuery.bindValue(":shikona2a", shikona2);
+            tmpQuery.bindValue(":shikona1b", shikona1);
+            tmpQuery.bindValue(":shikona2b", shikona2);
+            tmpQuery.bindValue(":bashoa", basho - i);
+            tmpQuery.bindValue(":bashob", basho - i);
+            tmpQuery.exec();
+            if (tmpQuery.next())
             {
-                QString r = queryShikona.value(0).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
-                res.prepend(r);
+                QString r = tmpQuery.value(0).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+                history.prepend(r);
             }
             else
-                res.prepend(QString::fromUtf8("－"));
-            res.prepend(" ");
+                history.prepend(QString::fromUtf8("－"));
+            history.prepend(" ");
         }
 
         //qDebug() << shikona1Ru << shikona2Ru;
 
-        Html += "<tr class=" + className[trClass] + "><td>" + shikona1Ru + " (8-7)</td> <td>" + res + "</td> <td>" + shikona2Ru + " (7-8)</td></tr>\n";
+        Html += "<tr class=" + className[trClass] + ">"
+                "<td>" + shikona1Ru + " (" + res1 + ")</td> <td>" + history + "</td> <td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
         trClass ^= 1;
         //qDebug() << Html;
     }
