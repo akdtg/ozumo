@@ -506,9 +506,14 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
-    QString Html = "<table>\n";
+    QString Html = "<!-- year:" + QString::number(year)
+                   + " month:" + QString::number(month).rightJustified(2, '0')
+                   + " day:" + QString::number(day).rightJustified(2, '0')
+                   + " division:" + QString::number(division)
+                   + " -->\n";
 
-    Html += "<thead><tr><th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
+    Html += "<table>\n"
+            "<thead><tr><th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
             "<th width=\"33%\">" + QString::fromUtf8("История последних встреч") + "</th>"
             "<th width=\"33%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
             "<tbody>\n";
