@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 
-    torikumi2Html(2011, 1, 15, 1);
+    ui->textEdit->setPlainText(torikumi2Html(2011, 1, 15, 1));
 }
 
 MainWindow::~MainWindow()
@@ -506,6 +506,12 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
+    QString Html = "<table>\n";
+
+    Html += "<thead><tr><th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
+            "<th width=\"33%\">" + QString::fromUtf8("История последних встреч") + "</th>"
+            "<th width=\"33%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<tbody>\n";
 
     while (query.next())
     {
@@ -538,7 +544,8 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         if (queryShikona.next())
             shikona2Ru = queryShikona.value(0).toString();
 
-        QString res = "";
+        QString res;
+
         for (int i = 1; i <= 6; i++)
         {
             //SELECT result1, result2 FROM torikumi WHERE (shikona1 = "白鵬" AND shikona2 = "魁皇") AND basho = 545
@@ -566,15 +573,17 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         }
 
         //qDebug() << shikona1Ru << shikona2Ru;
-        QString Html;
-        Html = "<tr class=" + className[trClass] + "><td>" + shikona1Ru + "</td> <td>" + res + "</td> <td>" + shikona2Ru + "</td></tr>";
+
+        Html += "<tr class=" + className[trClass] + "><td>" + shikona1Ru + "</td> <td>" + res + "</td> <td>" + shikona2Ru + "</td></tr>\n";
         trClass ^= 1;
-        qDebug() << Html;
+        //qDebug() << Html;
     }
+
+    Html += "</tbody>\n</table>\n";
 
     db.close();
 
-    return "Well done :)";
+    return Html;
 }
 
 bool MainWindow::convertTorikumi3456()

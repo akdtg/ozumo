@@ -17,8 +17,8 @@
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>360</y>
+      <x>40</x>
+      <y>190</y>
       <width>531</width>
       <height>121</height>
      </rect>
@@ -46,91 +46,6 @@
       <height>20</height>
      </rect>
     </property>
-   </widget>
-   <widget class="QTableWidget" name="tableWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>201</y>
-      <width>531</width>
-      <height>131</height>
-     </rect>
-    </property>
-    <row>
-     <property name="text">
-      <string>1</string>
-     </property>
-    </row>
-    <column>
-     <property name="text">
-      <string>rank</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>shikona</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>boshi</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>kimarite</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>boshi</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>shikona</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>rank</string>
-     </property>
-    </column>
-    <item row="0" column="0">
-     <property name="text">
-      <string>s1e</string>
-     </property>
-    </item>
-    <item row="0" column="1">
-     <property name="text">
-      <string>ami</string>
-     </property>
-    </item>
-    <item row="0" column="2">
-     <property name="text">
-      <string>1</string>
-     </property>
-    </item>
-    <item row="0" column="3">
-     <property name="text">
-      <string>oshidashi</string>
-     </property>
-    </item>
-    <item row="0" column="4">
-     <property name="text">
-      <string>0</string>
-     </property>
-    </item>
-    <item row="0" column="5">
-     <property name="text">
-      <string>kaio</string>
-     </property>
-    </item>
-    <item row="0" column="6">
-     <property name="text">
-      <string>o1e</string>
-     </property>
-    </item>
    </widget>
    <widget class="QPushButton" name="pushButton_Torikumi">
     <property name="geometry">
@@ -393,6 +308,16 @@
     </property>
     <property name="text">
      <string>torikumi2Banzuke</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>320</y>
+      <width>571</width>
+      <height>181</height>
+     </rect>
     </property>
    </widget>
   </widget>
