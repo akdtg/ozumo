@@ -718,7 +718,7 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
         QString res1, res2;
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
         tmpQuery.bindValue(":y", year);
         tmpQuery.bindValue(":m", month);
         tmpQuery.bindValue(":d", day);
@@ -729,7 +729,7 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
             res1 += tmpQuery.value(0).toString() + "-";
 
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
         tmpQuery.bindValue(":y", year);
         tmpQuery.bindValue(":m", month);
         tmpQuery.bindValue(":d", day);
@@ -740,7 +740,7 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
             res1 += tmpQuery.value(0).toString();
 
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
         tmpQuery.bindValue(":y", year);
         tmpQuery.bindValue(":m", month);
         tmpQuery.bindValue(":d", day);
@@ -751,7 +751,7 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
             res2 += tmpQuery.value(0).toString() + "-";
 
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
         tmpQuery.bindValue(":y", year);
         tmpQuery.bindValue(":m", month);
         tmpQuery.bindValue(":d", day);
