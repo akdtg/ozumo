@@ -311,11 +311,11 @@
       </layout>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QTableWidget" name="tableWidget"/>
-    </item>
     <item row="3" column="0">
-     <widget class="QTextEdit" name="textEdit"/>
+     <widget class="QTextEdit" name="textEdit_htmlCode"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="QTextEdit" name="textEdit_htmlPreview"/>
     </item>
    </layout>
   </widget>

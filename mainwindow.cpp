@@ -814,20 +814,24 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
 void MainWindow::generateTorikumi()
 {
-    ui->textEdit->setPlainText(torikumi2Html(
+    ui->textEdit_htmlCode->setPlainText(torikumi2Html(
             ui->comboBox_year->currentIndex() + 2002,
             ui->comboBox_basho->currentIndex() * 2 + 1,
             ui->comboBox_day->currentIndex() + 1,
             ui->comboBox_division->currentIndex() + 1));
+
+    ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
 void MainWindow::generateTorikumiResults()
 {
-    ui->textEdit->setPlainText(torikumiResults2Html(
+    ui->textEdit_htmlCode->setPlainText(torikumiResults2Html(
             ui->comboBox_year->currentIndex() + 2002,
             ui->comboBox_basho->currentIndex() * 2 + 1,
             ui->comboBox_day->currentIndex() + 1,
             ui->comboBox_division->currentIndex() + 1));
+
+    ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
 bool MainWindow::convertTorikumi3456()
