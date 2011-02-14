@@ -181,24 +181,36 @@ QString translateShikona(QSqlDatabase db, QString shikona)
     }
     else
     {
-        tmpQuery.prepare("SELECT en1 FROM names WHERE kanji1 = :kanji");
+        tmpQuery.prepare("SELECT en1 FROM names WHERE kanji1 = :kanji AND en1 IS NOT NULL AND en1 != ''");
         tmpQuery.bindValue(":kanji", shikona);
         tmpQuery.exec();
         if (tmpQuery.next())
+        {
             shikonaRu = tmpQuery.value(0).toString();
+        }
     }
 
     return shikonaRu;
 }
 
-QString translateKimarite(QString kimarite)
+QString translateKimarite(QSqlDatabase db, QString kimarite)
 {
-    for (int i = 0 + 1 + 1; i < Kimarite.count(); i++, i++, i++)
+    QSqlQuery tmpQuery(db);
+    QString kimariteRu = kimarite;
+
+    tmpQuery.prepare("SELECT ru FROM kimarite WHERE kanji = :kanji");
+    tmpQuery.bindValue(":kanji", kimarite);
+    tmpQuery.exec();
+    if (tmpQuery.next())
     {
-        if (kimarite == Kimarite.at(i + 1 + 1))
-            return (Kimarite.at(i));
+        kimariteRu = tmpQuery.value(0).toString();
     }
-    return kimarite;
+    else
+    {
+        kimariteRu = QString::fromUtf8("неопределён");
+    }
+
+    return kimariteRu;
 }
 
 bool MainWindow::convertHoshitori()
@@ -741,11 +753,7 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
         shikona1Ru = translateShikona(db, shikona1);
         shikona2Ru = translateShikona(db, shikona2);
 
-        tmpQuery.prepare("SELECT ru FROM kimarite WHERE kanji = :kanji");
-        tmpQuery.bindValue(":kanji", kimarite);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            kimariteRu = tmpQuery.value(0).toString();
+        kimariteRu = translateKimarite(db, kimarite);
 
         QString res1, res2;
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
