@@ -167,14 +167,28 @@ QStringList readAndSimplifyBashoContent(QString content)
     return list;
 }
 
-QString translateShikona(QString shikona)
+QString translateShikona(QSqlDatabase db, QString shikona)
 {
-    for (int i = 0; i < Shikonas.count(); i++)
+    QSqlQuery tmpQuery(db);
+    QString shikonaRu = shikona;
+
+    tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+    tmpQuery.bindValue(":kanji", shikona);
+    tmpQuery.exec();
+    if (tmpQuery.next())
     {
-        if (shikona == Shikonas.at(i))
-            return (Shikonas.at(i + 1));
+        shikonaRu = tmpQuery.value(0).toString();
     }
-    return shikona;
+    else
+    {
+        tmpQuery.prepare("SELECT en1 FROM names WHERE kanji1 = :kanji");
+        tmpQuery.bindValue(":kanji", shikona);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            shikonaRu = tmpQuery.value(0).toString();
+    }
+
+    return shikonaRu;
 }
 
 QString translateKimarite(QString kimarite)
@@ -574,17 +588,8 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
         QSqlQuery tmpQuery(db);
 
-        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
-        tmpQuery.bindValue(":kanji", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            shikona1Ru = tmpQuery.value(0).toString();
-
-        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
-        tmpQuery.bindValue(":kanji", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            shikona2Ru = tmpQuery.value(0).toString();
+        shikona1Ru = translateShikona(db, shikona1);
+        shikona2Ru = translateShikona(db, shikona2);
 
         QString res1, res2;
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
@@ -733,17 +738,8 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
         QSqlQuery tmpQuery(db);
 
-        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
-        tmpQuery.bindValue(":kanji", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            shikona1Ru = tmpQuery.value(0).toString();
-
-        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
-        tmpQuery.bindValue(":kanji", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            shikona2Ru = tmpQuery.value(0).toString();
+        shikona1Ru = translateShikona(db, shikona1);
+        shikona2Ru = translateShikona(db, shikona2);
 
         tmpQuery.prepare("SELECT ru FROM kimarite WHERE kanji = :kanji");
         tmpQuery.bindValue(":kanji", kimarite);
