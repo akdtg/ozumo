@@ -79,6 +79,41 @@ void readKimarite()
     //qDebug() << Kimarite;
 }
 
+void readNames()
+{
+    QDir dir("/mnt/memory/rikishi/");
+
+    QStringList filters;
+    filters << "rikishi_*.html";
+    dir.setNameFilters(filters);
+
+    QStringList list = dir.entryList();
+
+    for (int i = 0; i < list.count(); i++)
+    {
+        QFile file0(dir.absoluteFilePath(list.at(i)));
+
+        if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            qDebug() << "error: file.open(/mnt/memory/rikishi/rikishi_...)";
+            return;
+        }
+
+        QTextStream in(&file0);
+
+        in.setCodec("EUC-JP");
+
+        QString content = in.readAll();
+        QString shikonaEn = content.mid(content.indexOf("<title>") + QString("<title>").size());
+        shikonaEn.truncate(shikonaEn.indexOf(" "));
+        QString id = list.at(i);
+        id.replace(QRegExp("rikishi_"), "");
+        id.replace(QRegExp(".html"), "");
+
+        qDebug() << id << shikonaEn;
+    }
+}
+
 QStringList readAndSimplifyBashoContent(QString content)
 {
     content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
