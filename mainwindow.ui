@@ -252,6 +252,11 @@
              <string>15</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>кэттэй-сэн</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
