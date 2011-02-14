@@ -671,7 +671,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
                 history.prepend(r);
             }
             else
-                history.prepend(QString::fromUtf8("－"));
+                history.prepend(QString::fromUtf8("−"));
             history.prepend(" ");
         }
 
