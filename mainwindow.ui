@@ -18,7 +18,7 @@
     <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox_2">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="title">
        <string>Import</string>
@@ -43,14 +43,7 @@
          <item>
           <widget class="QPushButton" name="pushButton_Torikumi">
            <property name="text">
-            <string>Import torikumi 12</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_Torikumi3456">
-           <property name="text">
-            <string>Import torikumi 3456</string>
+            <string>Import all torikumi from directory</string>
            </property>
           </widget>
          </item>

@@ -21,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->pushButton_Torikumi, SIGNAL(clicked()), this, SLOT(convertTorikumi()));
-    connect(ui->pushButton_Torikumi3456, SIGNAL(clicked()), this, SLOT(convertTorikumi3456()));
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 
@@ -907,118 +906,170 @@ void MainWindow::generateTorikumiResults()
     ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
-bool MainWindow::convertTorikumi3456()
+void MainWindow::parsingTorikumi3456(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
-    if (!db.open())
-        QMessageBox::warning(this, tr("Unable to open database"),
-                             tr("An error occurred while opening the connection: ") + db.lastError().text());
+    int dayx = day, id_local = 0;
+    int rikishi1 = 0, rikishi2 = 0;
 
-    for (int basho = START_INDEX; basho <= 545; basho++)
+    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+    content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->"))).simplified();
+    //content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->"))).simplified();
+
+    while (content.indexOf("torikumi_riki2") != -1)
     {
-        for (int day = 1; day <= 15; day++)
+        content = content.mid(content.indexOf("torikumi_riki2"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString rank1 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("torikumi_riki4"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString shikona1 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("torikumi_riki3"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString result1 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("torikumi_riki3"));
+        content = content.mid(content.indexOf(">") + 1);
+        if (content.startsWith("<a"))
+            content = content.mid(content.indexOf(">") + 1);
+        QString kimarite = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("torikumi_riki3"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString result2 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("torikumi_riki4"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString shikona2 = content.left(content.indexOf("<")).simplified();
+        if (shikona2.contains(QRegExp("\\d+")))
         {
-            for (int division = 3; division <= 6; division++)
-            {
-                QFile file0(WORK_DIR "torikumi-3456/"
-                            + QString("tori_")
-                            + QString::number(basho)
-                            + "_"
-                            + QString::number(division)
-                            + "_"
-                            + QString::number(day)
-                            + ".html");
-
-                if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
-                {
-                    qDebug() << "error: file.open(" << WORK_DIR << "torikumi/tori_...)";
-                    return false;
-                }
-
-                QTextStream in(&file0);
-
-                in.setCodec("EUC-JP");
-
-                QString content = in.readAll();
-
-                int year, month;
-
-                if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
-                {
-                    year = 2002 + (basho - START_INDEX) / 6;
-                    month = (basho - START_INDEX) % 6 * 2 + 1;
-                }
-
-                int rikishi1 = 0, rikishi2 = 0;
-                int dayx = day, id_local = 0;
-
-                content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
-                content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->"))).simplified();
-                //content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->"))).simplified();
-
-                while (content.indexOf("torikumi_riki2") != -1)
-                {
-                    content = content.mid(content.indexOf("torikumi_riki2"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    QString rank1 = content.left(content.indexOf("<")).simplified();
-
-                    content = content.mid(content.indexOf("torikumi_riki4"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    QString shikona1 = content.left(content.indexOf("<")).simplified();
-
-                    content = content.mid(content.indexOf("torikumi_riki3"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    QString result1 = content.left(content.indexOf("<")).simplified();
-
-                    content = content.mid(content.indexOf("torikumi_riki3"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    if (content.startsWith("<a"))
-                        content = content.mid(content.indexOf(">") + 1);
-                    QString kimarite = content.left(content.indexOf("<")).simplified();
-
-                    content = content.mid(content.indexOf("torikumi_riki3"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    QString result2 = content.left(content.indexOf("<")).simplified();
-
-                    content = content.mid(content.indexOf("torikumi_riki4"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    QString shikona2 = content.left(content.indexOf("<")).simplified();
-                    if (shikona2.contains(QRegExp("\\d+")))
-                    {
-                        content = content.mid(content.indexOf("torikumi_riki4"));
-                        content = content.mid(content.indexOf(">") + 1);
-                        shikona2 = content.left(content.indexOf("<")).simplified();
-                    }
-                    else
-                        dayx = 16;
-
-                    content = content.mid(content.indexOf("torikumi_riki2"));
-                    content = content.mid(content.indexOf(">") + 1);
-                    QString rank2 = content.left(content.indexOf("<")).simplified();
-
-                    ++id_local;
-
-                    int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
-
-                    if (!insertTorikumi(db, index, basho, year, month, dayx,
-                                        division,
-                                        rikishi1, shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
-                                        rikishi2, shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
-                                        kimarite,
-                                        id_local)
-                        )
-                        qDebug() << "-";
-                }
-
-                file0.close();
-            }
+            content = content.mid(content.indexOf("torikumi_riki4"));
+            content = content.mid(content.indexOf(">") + 1);
+            shikona2 = content.left(content.indexOf("<")).simplified();
         }
+        else
+            dayx = 16;
+
+        content = content.mid(content.indexOf("torikumi_riki2"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString rank2 = content.left(content.indexOf("<")).simplified();
+
+        ++id_local;
+
+        int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
+
+        if (!insertTorikumi(db, index, basho, year, month, dayx,
+                            division,
+                            rikishi1, shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
+                            rikishi2, shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
+                            kimarite,
+                            id_local)
+            )
+            qDebug() << "-";
     }
 
-    db.close();
+}
 
-    return true;
+void MainWindow::parsingTorikumi12(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division)
+{
+    int i = 0;
+    int dayx = day, id_local = 0;
+    QString rikishi1, rikishi2;
+
+    QStringList list = readAndSimplifyBashoContent(content);
+
+    while (i < list.count())
+    {
+        if (list.value(i).contains("rank"))
+        {
+            QString rank1 = list.value(i +  1);
+
+            QString shikona1 = list.value(i +  3);
+            if (shikona1 == "rikishi_id")
+            {
+                i++;
+                rikishi1 = list.value(i +  3);
+                i++;
+                shikona1 = list.value(i +  3);
+            }
+            else
+            {
+                rikishi1 = "0";
+            }
+
+            QString sum = list.value(i + 4);
+            if (sum.contains(QRegExp("\\d+")))
+            {
+                sum.replace(QString::fromUtf8("勝"), QString("-"));
+                sum.replace(QString::fromUtf8("敗"), QString(""));
+            }
+            else
+            {
+                sum = "";
+                dayx = 16;
+                i--;
+            }
+
+            QString result1 = list.value(i +  6);
+
+            QString kimarite = list.value(i +  8);
+            if (kimarite == "kimarite_id")
+            {
+                i++;
+                kimarite = list.value(i +  8);  // kimarite id, just skipped at this moment
+                i++;
+                kimarite = list.value(i +  8);
+            }
+
+            QString result2 = list.value(i + 10);
+
+            QString shikona2 = list.value(i + 12);
+            if (shikona2 == "rikishi_id")
+            {
+                i++;
+                rikishi2 = list.value(i +  12);
+                i++;
+                shikona2 = list.value(i +  12);
+            }
+            else
+            {
+                rikishi2 = "0";
+            }
+
+            sum = list.value(i + 13);
+            if (sum.contains(QRegExp("\\d+")))
+            {
+                sum.replace(QString::fromUtf8("勝"), QString("-"));
+                sum.replace(QString::fromUtf8("敗"), QString(""));
+            }
+            else
+            {
+                sum = "";
+                dayx = 16;
+                i--;
+            }
+
+            QString rank2 = list.value(i + 15);
+
+            ++id_local;
+
+            int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
+
+            if (!insertTorikumi(db, index, basho, year, month, dayx,
+                                division,
+                                rikishi1.toInt(), shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
+                                rikishi2.toInt(), shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
+                                kimarite,
+                                id_local)
+                )
+                qDebug() << "-";
+
+            i += 15;
+        }
+        i++;
+    }
+
 }
 
 bool MainWindow::convertTorikumi()
@@ -1029,141 +1080,52 @@ bool MainWindow::convertTorikumi()
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
 
-    for (int basho = START_INDEX; basho <= 545; basho++)
+    QDir dir(WORK_DIR "torikumi/");
+
+    QStringList filters;
+    filters << "tori_*_*_*.html";
+    dir.setNameFilters(filters);
+
+    QStringList list = dir.entryList();
+
+    for (int i = 0; i < list.count(); i++)
     {
-        for (int day = 1; day <= 15; day++)
+        QFile file0(dir.absoluteFilePath(list.at(i)));
+
+        if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            for (int division = 1; division <= 2; division++)
-            {
-                QFile file0(WORK_DIR "torikumi-12/"
-                            + QString("tori_")
-                            + QString::number(basho)
-                            + "_"
-                            + QString::number(division)
-                            + "_"
-                            + QString::number(day)
-                            + ".html");
-
-                if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
-                {
-                    qDebug() << "error: file.open(" << WORK_DIR << "torikumi/tori_...)";
-                    return false;
-                }
-
-                QTextStream in(&file0);
-
-                in.setCodec("EUC-JP");
-
-                QString content = in.readAll();
-
-                int year, month;
-
-                if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
-                {
-                    year = 2002 + (basho - START_INDEX) / 6;
-                    month = (basho - START_INDEX) % 6 * 2 + 1;
-                }
-
-                QStringList list = readAndSimplifyBashoContent(content);
-
-                int i = 0;
-                int dayx = day, id_local = 0;
-                QString rikishi1, rikishi2;
-
-                while (i < list.count())
-                {
-                    if (list.value(i).contains("rank"))
-                    {
-                        QString rank1 = list.value(i +  1);
-
-                        QString shikona1 = list.value(i +  3);
-                        if (shikona1 == "rikishi_id")
-                        {
-                            i++;
-                            rikishi1 = list.value(i +  3);
-                            i++;
-                            shikona1 = list.value(i +  3);
-                        }
-                        else
-                        {
-                            rikishi1 = "0";
-                        }
-
-                        QString sum = list.value(i + 4);
-                        if (sum.contains(QRegExp("\\d+")))
-                        {
-                            sum.replace(QString::fromUtf8("勝"), QString("-"));
-                            sum.replace(QString::fromUtf8("敗"), QString(""));
-                        }
-                        else
-                        {
-                            sum = "";
-                            dayx = 16;
-                            i--;
-                        }
-
-                        QString result1 = list.value(i +  6);
-
-                        QString kimarite = list.value(i +  8);
-                        if (kimarite == "kimarite_id")
-                        {
-                            i++;
-                            kimarite = list.value(i +  8);  // kimarite id, just skipped at this moment
-                            i++;
-                            kimarite = list.value(i +  8);
-                        }
-
-                        QString result2 = list.value(i + 10);
-
-                        QString shikona2 = list.value(i + 12);
-                        if (shikona2 == "rikishi_id")
-                        {
-                            i++;
-                            rikishi2 = list.value(i +  12);
-                            i++;
-                            shikona2 = list.value(i +  12);
-                        }
-                        else
-                        {
-                            rikishi2 = "0";
-                        }
-
-                        sum = list.value(i + 13);
-                        if (sum.contains(QRegExp("\\d+")))
-                        {
-                            sum.replace(QString::fromUtf8("勝"), QString("-"));
-                            sum.replace(QString::fromUtf8("敗"), QString(""));
-                        }
-                        else
-                        {
-                            sum = "";
-                            dayx = 16;
-                            i--;
-                        }
-
-                        QString rank2 = list.value(i + 15);
-
-                        ++id_local;
-
-                        int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
-
-                        if (!insertTorikumi(db, index, basho, year, month, dayx,
-                                            division,
-                                            rikishi1.toInt(), shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
-                                            rikishi2.toInt(), shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
-                                            kimarite,
-                                            id_local)
-                            )
-                            qDebug() << "-";
-
-                        i += 15;
-                    }
-                    i++;
-                }
-
-                file0.close();
-            }
+            qDebug() << "error: file.open(" << dir.absoluteFilePath(list.at(i)) << ")";
+            return false;
         }
+
+        QTextStream in(&file0);
+
+        in.setCodec("EUC-JP");
+
+        QString content = in.readAll();
+
+        int year, month;
+        int basho, division, day;
+
+        QString fName = list.at(i);
+        fName.replace('.', '_');
+        QStringList tempList= fName.split('_');
+        basho    = tempList.at(1).toInt();
+        division = tempList.at(2).toInt();
+        day      = tempList.at(3).toInt();
+
+        if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
+        {
+            year = 2002 + (basho - START_INDEX) / 6;
+            month = (basho - START_INDEX) % 6 * 2 + 1;
+        }
+
+        if (division <= 2)
+            parsingTorikumi12(db, content, basho, year, month, day, division);
+        else
+            parsingTorikumi3456(db, content, basho, year, month, day, division);
+
+        file0.close();
     }
 
     db.close();

@@ -19,8 +19,9 @@ public:
 
 public slots:
     bool convertTorikumi();
+    void parsingTorikumi12(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
+    void parsingTorikumi3456(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
     bool convertHoshitori();
-    bool convertTorikumi3456();
     bool torikumi2Banzuke();
     bool findDate(QString content, int *year, int *month);
     bool insertTorikumi(QSqlDatabase db,
