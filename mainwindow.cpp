@@ -8,6 +8,12 @@
 #define START_INDEX 491
 #define BASE_URL "http://sumo.goo.ne.jp/hon_basho/torikumi/"
 
+#ifdef __WIN32__
+#define WORK_DIR ""
+#else
+#define WORK_DIR "/mnt/memory/"
+#endif
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -83,7 +89,7 @@ void readKimarite()
 
 void readNames()
 {
-    QDir dir("/mnt/memory/rikishi/");
+    QDir dir(WORK_DIR "rikishi/");
 
     QStringList filters;
     filters << "rikishi_*.html";
@@ -97,7 +103,7 @@ void readNames()
 
         if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "error: file.open(/mnt/memory/rikishi/rikishi_...)";
+            qDebug() << "error: file.open(" << WORK_DIR << "rikishi/rikishi_...)";
             return;
         }
 
@@ -508,7 +514,7 @@ bool MainWindow::insertTorikumi(QSqlDatabase db,
 bool MainWindow::torikumi2Banzuke()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
         QMessageBox::warning(0, ("Unable to open database"),
                              ("An error occurred while opening the connection: ") + db.lastError().text());
@@ -561,7 +567,7 @@ bool MainWindow::torikumi2Banzuke()
 QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
@@ -709,7 +715,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 QString MainWindow::torikumiResults2Html(int year, int month, int day, int division)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
@@ -904,7 +910,7 @@ void MainWindow::generateTorikumiResults()
 bool MainWindow::convertTorikumi3456()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
@@ -915,7 +921,7 @@ bool MainWindow::convertTorikumi3456()
         {
             for (int division = 3; division <= 6; division++)
             {
-                QFile file0("/mnt/memory/torikumi-3456/"
+                QFile file0(WORK_DIR "torikumi-3456/"
                             + QString("tori_")
                             + QString::number(basho)
                             + "_"
@@ -926,7 +932,7 @@ bool MainWindow::convertTorikumi3456()
 
                 if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
                 {
-                    qDebug() << "error: file.open(/mnt/memory/torikumi/tori_...)";
+                    qDebug() << "error: file.open(" << WORK_DIR << "torikumi/tori_...)";
                     return false;
                 }
 
@@ -1021,7 +1027,7 @@ bool MainWindow::convertTorikumi()
 //    readShikonas();
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName("/mnt/memory/ozumo.sqlite");
+    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
@@ -1032,7 +1038,7 @@ bool MainWindow::convertTorikumi()
         {
             for (int division = 1; division <= 2; division++)
             {
-                QFile file0("/mnt/memory/torikumi-12/"
+                QFile file0(WORK_DIR "torikumi-12/"
                             + QString("tori_")
                             + QString::number(basho)
                             + "_"
@@ -1043,7 +1049,7 @@ bool MainWindow::convertTorikumi()
 
                 if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
                 {
-                    qDebug() << "error: file.open(/mnt/memory/torikumi/tori_...)";
+                    qDebug() << "error: file.open(" << WORK_DIR << "torikumi/tori_...)";
                     return false;
                 }
 
