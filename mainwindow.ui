@@ -298,6 +298,13 @@
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
+          <widget class="QPushButton" name="pushButton_downloadTorikumi">
+           <property name="text">
+            <string>Download and import torikumi</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pushButton_generateTorikumi">
            <property name="text">
             <string>Generate torikumi</string>

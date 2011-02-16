@@ -34,6 +34,8 @@ public slots:
     QString torikumi2Html(int year, int month, int day, int division);
     void generateTorikumiResults();
     QString torikumiResults2Html(int year, int month, int day, int division);
+    void downloadTorikumi();
+    int getAndImportTorikumi(int year, int month, int day, int division);
 
 private:
     Ui::MainWindow *ui;

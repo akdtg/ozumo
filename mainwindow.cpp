@@ -6,6 +6,7 @@
 #include <QtSql>
 
 #define START_INDEX 491
+#define BASE_URL "http://sumo.goo.ne.jp/hon_basho/torikumi/"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
     connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
+    connect(ui->pushButton_downloadTorikumi, SIGNAL(clicked()), this, SLOT(downloadTorikumi()));
 }
 
 MainWindow::~MainWindow()
@@ -112,6 +114,17 @@ void readNames()
 
         qDebug() << id << shikonaEn;
     }
+}
+
+int wgetDownload(QString url)
+{
+    QProcess process;
+
+    process.start("wget -N -t 1 -T 30 " + url);
+    if (process.waitForFinished(33000) == false)
+        return -1;
+
+    return process.exitCode();
 }
 
 QStringList readAndSimplifyBashoContent(QString content)
@@ -818,6 +831,52 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
     db.close();
 
     return Html;
+}
+
+int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
+{
+    // "http://sumo.goo.ne.jp/hon_basho/torikumi/tori_545_1_1.html"
+    QString url = BASE_URL;
+
+    int basho = (year - 2002) * 6 + START_INDEX + ((month - 1) >> 1);
+
+    if (day > 15)
+        day = 15;
+
+    url += "tori_" + QString::number(basho) + "_" + QString::number(division) + "_" + QString::number(day) + ".html";
+
+    int exitCode = wgetDownload(url);
+
+    if (exitCode == 0)
+    {
+        if (division < 3)
+        {
+            //importTorikumi12();
+        }
+        else
+        {
+            //importTorikumi3456();
+        }
+    }
+
+    return exitCode;
+}
+
+void MainWindow::downloadTorikumi()
+{
+    int exitCode = getAndImportTorikumi(
+            ui->comboBox_year->currentIndex() + 2002,
+            ui->comboBox_basho->currentIndex() * 2 + 1,
+            ui->comboBox_day->currentIndex() + 1,
+            ui->comboBox_division->currentIndex() + 1);
+
+    QString result;
+    if (exitCode == 0)
+        result = "Successful";
+    else
+        result = "Failed: " + QString::number(exitCode);
+
+    ui->textEdit_htmlCode->setPlainText(result);
 }
 
 void MainWindow::generateTorikumi()
