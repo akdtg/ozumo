@@ -1023,9 +1023,6 @@ bool MainWindow::convertTorikumi3456()
 
 bool MainWindow::convertTorikumi()
 {
-//    readKimarite();
-//    readShikonas();
-
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
@@ -1077,10 +1074,7 @@ bool MainWindow::convertTorikumi()
                 {
                     if (list.value(i).contains("rank"))
                     {
-                        //東前14 栃栄 3勝0敗 ○ 押し出し ● 寺尾 0勝3敗 西十2
-
                         QString rank1 = list.value(i +  1);
-                        //out << "<td>" << list.value(i +  1) << "</td>\n";   // rank 1
 
                         QString shikona1 = list.value(i +  3);
                         if (shikona1 == "rikishi_id")
@@ -1094,7 +1088,6 @@ bool MainWindow::convertTorikumi()
                         {
                             rikishi1 = "0";
                         }
-                        //out << "<td><strong>" << translateShikona(list.value(i +  3)) << "</strong><br />";   // shikona 1
 
                         QString sum = list.value(i + 4);
                         if (sum.contains(QRegExp("\\d+")))
@@ -1108,10 +1101,8 @@ bool MainWindow::convertTorikumi()
                             dayx = 16;
                             i--;
                         }
-                        //out << sum << "</td>\n";   // +- 1
 
                         QString result1 = list.value(i +  6);
-                        //out << "<td>" << list.value(i + 6) << "</td>\n";   // bout 1
 
                         QString kimarite = list.value(i +  8);
                         if (kimarite == "kimarite_id")
@@ -1121,10 +1112,8 @@ bool MainWindow::convertTorikumi()
                             i++;
                             kimarite = list.value(i +  8);
                         }
-                        //out << "<td>" << translateKimarite(list.value(i + 8)) << "</td>\n";   // kimarite
 
                         QString result2 = list.value(i + 10);
-                        //out << "<td>" << list.value(i + 10) << "</td>\n";   // bout 2
 
                         QString shikona2 = list.value(i + 12);
                         if (shikona2 == "rikishi_id")
@@ -1138,7 +1127,6 @@ bool MainWindow::convertTorikumi()
                         {
                             rikishi2 = "0";
                         }
-                        //out << "<td><strong>" << translateShikona(list.value(i + 12)) << "</strong><br />";   // shikona 2
 
                         sum = list.value(i + 13);
                         if (sum.contains(QRegExp("\\d+")))
@@ -1152,22 +1140,8 @@ bool MainWindow::convertTorikumi()
                             dayx = 16;
                             i--;
                         }
-                        //out << sum << "</td>\n";   // +- 2
 
                         QString rank2 = list.value(i + 15);
-                        //out << "<td>" << list.value(i + 15) << "</td>\n";   // rank 2
-
-                        QString id = QString::number(basho) + QString::number(day).rightJustified(2, '0');
-
-                        /*QString id = list.value(i +  1) + " "
-                                 + list.value(i +  3) + " "
-                                 + QString(list.value(i +  4).contains(QRegExp("\\d+")) ? list.value(i +  4) : "-") + " "
-                                 + list.value(i +  6) + " "
-                                 + list.value(i +  8) + " "
-                                 + list.value(i + 10) + " "
-                                 + list.value(i + 12) + " "
-                                 + QString(list.value(i + 13).contains(QRegExp("\\d+")) ? list.value(i + 13) : "-") + " "
-                                 + list.value(i + 15);*/
 
                         ++id_local;
 
@@ -1181,12 +1155,6 @@ bool MainWindow::convertTorikumi()
                                             id_local)
                             )
                             qDebug() << "-";
-
-                        //qDebug() << query.lastQuery();
-
-                        //out << "<!-- Original data: " << id << " -->\n";
-
-                        //out << "</tr>\n\n";
 
                         i += 15;
                     }
@@ -1202,4 +1170,3 @@ bool MainWindow::convertTorikumi()
 
     return true;
 }
-
