@@ -175,7 +175,7 @@
          <item>
           <widget class="QComboBox" name="comboBox_day">
            <property name="maxVisibleItems">
-            <number>15</number>
+            <number>16</number>
            </property>
            <item>
             <property name="text">
