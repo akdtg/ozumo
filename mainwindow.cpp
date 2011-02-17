@@ -28,6 +28,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
     connect(ui->pushButton_downloadTorikumi, SIGNAL(clicked()), this, SLOT(downloadTorikumi()));
 
+    if (!QFile::exists(WORK_DIR "ozumo.sqlite"))
+    {
+        QMessageBox::warning(this, tr("Unable to open database"), tr(WORK_DIR "ozumo.sqlite do not exist!") + db.lastError().text());
+    }
+
     db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName(WORK_DIR "ozumo.sqlite");
     if (!db.open())
