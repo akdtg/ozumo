@@ -38,6 +38,8 @@ public slots:
     QString torikumiResults2Html(int year, int month, int day, int division);
     void downloadTorikumi();
     int getAndImportTorikumi(int year, int month, int day, int division);
+    bool importBanzuke(QSqlDatabase db, QString fName);
+    void parsingBanzuke3456(QSqlDatabase db, QString content, int basho, int year, int month);
 
 public:
     QSqlDatabase db;

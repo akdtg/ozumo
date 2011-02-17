@@ -1121,3 +1121,77 @@ bool MainWindow::importAllTorikumi()
 
     return true;
 }
+
+void MainWindow::parsingBanzuke3456(QSqlDatabase db, QString content, int basho, int year, int month)
+{
+    content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
+    content = content.mid(content.indexOf(">") + 2);
+    QString division = content.left(content.indexOf("<")).simplified();
+
+    while (content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">") != -1)
+    {
+        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString kanji1 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d9eaf0\" class=\"common12-18-333\">"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString hiragana1 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("<td align='center' bgcolor='#6b248f' class='common12-18-fff'>"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString rank = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString kanji2 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d9eaf0\" class=\"common12-18-333\">"));
+        content = content.mid(content.indexOf(">") + 1);
+        QString hiragana2 = content.left(content.indexOf("<")).simplified();
+
+        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
+        content = content.mid(content.indexOf(">") + 1);
+
+        qDebug() << division << kanji1 << hiragana1 << rank << kanji2 << hiragana2;
+    }
+}
+
+bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
+{
+    QFile file0(fName);
+
+    if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "error: file.open(" << fName << ")";
+        return false;
+    }
+
+    QTextStream in(&file0);
+
+    in.setCodec("EUC-JP");
+
+    QString content = in.readAll();
+
+    file0.close();
+
+    int year, month;
+    int basho, division;
+
+    QFileInfo fi(fName);
+    division = QString(fi.fileName().at(4)).toInt();
+
+/*
+    if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
+    {
+        year = 2002 + (basho - START_INDEX) / 6;
+        month = (basho - START_INDEX) % 6 * 2 + 1;
+    }
+*/
+    if (division <= 2)
+        parsingBanzuke3456(db, content, basho, year, month);
+    else
+        parsingBanzuke3456(db, content, basho, year, month);
+
+    return true;
+}
