@@ -492,6 +492,12 @@ bool MainWindow::insertTorikumi(QSqlDatabase db,
 {
     QSqlQuery query(db);
 
+    query.prepare("DELETE FROM torikumi WHERE id = :id");
+
+    query.bindValue(":id",       id);
+
+    query.exec();
+
     query.prepare("INSERT INTO torikumi ("
                   "id, basho, year, month, day, division, "
                   "rikishi1, shikona1, rank1, result1, "
