@@ -41,7 +41,7 @@
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QPushButton" name="pushButton_Torikumi">
+          <widget class="QPushButton" name="pushButton_importAllTorikumi">
            <property name="text">
             <string>Import all torikumi from directory</string>
            </property>

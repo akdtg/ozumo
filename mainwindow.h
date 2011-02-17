@@ -18,7 +18,7 @@ public:
     ~MainWindow();
 
 public slots:
-    bool convertTorikumi();
+    bool importAllTorikumi();
     void parsingTorikumi12(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
     void parsingTorikumi3456(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
     bool convertHoshitori();

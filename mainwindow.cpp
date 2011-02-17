@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->pushButton_Torikumi, SIGNAL(clicked()), this, SLOT(convertTorikumi()));
+    connect(ui->pushButton_importAllTorikumi, SIGNAL(clicked()), this, SLOT(importAllTorikumi()));
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
 
@@ -1072,7 +1072,7 @@ void MainWindow::parsingTorikumi12(QSqlDatabase db, QString content, int basho, 
 
 }
 
-bool MainWindow::convertTorikumi()
+bool MainWindow::importAllTorikumi()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
     db.setDatabaseName(WORK_DIR "ozumo.sqlite");
