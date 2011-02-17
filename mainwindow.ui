@@ -27,7 +27,7 @@
        <item row="0" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLineEdit" name="lineEdit">
+          <widget class="QLineEdit" name="lineEdit_workDir">
            <property name="enabled">
             <bool>false</bool>
            </property>
