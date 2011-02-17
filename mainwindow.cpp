@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (!QFile::exists(WORK_DIR "ozumo.sqlite"))
     {
-        QMessageBox::warning(this, tr("Unable to open database"), tr(WORK_DIR "ozumo.sqlite do not exist!") + db.lastError().text());
+        QMessageBox::warning(this, tr("Unable to open database"), tr(WORK_DIR "ozumo.sqlite does not exist!"));
     }
 
     db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
-
 }
 
 MainWindow::~MainWindow()
