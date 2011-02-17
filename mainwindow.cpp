@@ -1107,7 +1107,5 @@ bool MainWindow::importAllTorikumi()
         importTorikumi(db, dir.absoluteFilePath(list.at(i)));
     }
 
-    db.close();
-
     return true;
 }
