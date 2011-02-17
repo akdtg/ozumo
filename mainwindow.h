@@ -18,6 +18,7 @@ public:
     ~MainWindow();
 
 public slots:
+    bool importTorikumi(QSqlDatabase db, QString fName);
     bool importAllTorikumi();
     void parsingTorikumi12(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
     void parsingTorikumi3456(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
@@ -37,6 +38,9 @@ public slots:
     QString torikumiResults2Html(int year, int month, int day, int division);
     void downloadTorikumi();
     int getAndImportTorikumi(int year, int month, int day, int division);
+
+public:
+    QSqlDatabase db;
 
 private:
     Ui::MainWindow *ui;

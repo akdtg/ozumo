@@ -27,10 +27,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
     connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
     connect(ui->pushButton_downloadTorikumi, SIGNAL(clicked()), this, SLOT(downloadTorikumi()));
+
+    db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
+    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
+    if (!db.open())
+        QMessageBox::warning(this, tr("Unable to open database"),
+                             tr("An error occurred while opening the connection: ") + db.lastError().text());
+
 }
 
 MainWindow::~MainWindow()
 {
+    db.close();
+
     delete ui;
 }
 
@@ -512,12 +521,6 @@ bool MainWindow::insertTorikumi(QSqlDatabase db,
 
 bool MainWindow::torikumi2Banzuke()
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
-    if (!db.open())
-        QMessageBox::warning(0, ("Unable to open database"),
-                             ("An error occurred while opening the connection: ") + db.lastError().text());
-
     QSqlQuery query(db), queryOut(db);
 
     query.exec("DROP TABLE IF EXISTS banzuke");
@@ -558,19 +561,11 @@ bool MainWindow::torikumi2Banzuke()
         queryOut.exec();
     }
 
-    db.close();
-
     return true;
 }
 
 QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
-    if (!db.open())
-        QMessageBox::warning(this, tr("Unable to open database"),
-                             tr("An error occurred while opening the connection: ") + db.lastError().text());
-
     QSqlQuery query(db);
 
     query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
@@ -706,19 +701,11 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
     Html += "</tbody>\n</table>\n";
 
-    db.close();
-
     return Html;
 }
 
 QString MainWindow::torikumiResults2Html(int year, int month, int day, int division)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
-    if (!db.open())
-        QMessageBox::warning(this, tr("Unable to open database"),
-                             tr("An error occurred while opening the connection: ") + db.lastError().text());
-
     QSqlQuery query(db);
 
     query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite "
@@ -833,8 +820,6 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
     Html += "</tbody>\n</table>\n";
 
-    db.close();
-
     return Html;
 }
 
@@ -848,20 +833,14 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
     if (day > 15)
         day = 15;
 
-    url += "tori_" + QString::number(basho) + "_" + QString::number(division) + "_" + QString::number(day) + ".html";
+    QString fName = "tori_" + QString::number(basho) + "_" + QString::number(division) + "_" + QString::number(day) + ".html";
+    url += fName;
 
     int exitCode = wgetDownload(url);
 
     if (exitCode == 0)
     {
-        if (division < 3)
-        {
-            //importTorikumi12();
-        }
-        else
-        {
-            //importTorikumi3456();
-        }
+        importTorikumi(db, fName);
     }
 
     return exitCode;
@@ -1072,14 +1051,49 @@ void MainWindow::parsingTorikumi12(QSqlDatabase db, QString content, int basho, 
 
 }
 
+bool MainWindow::importTorikumi(QSqlDatabase db, QString fName)
+{
+    QFile file0(fName);
+
+    if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "error: file.open(" << fName << ")";
+        return false;
+    }
+
+    QTextStream in(&file0);
+
+    in.setCodec("EUC-JP");
+
+    QString content = in.readAll();
+
+    file0.close();
+
+    int year, month;
+    int basho, division, day;
+
+    fName.replace('.', '_');
+    QStringList tempList= fName.split('_');
+    basho    = tempList.at(1).toInt();
+    division = tempList.at(2).toInt();
+    day      = tempList.at(3).toInt();
+
+    if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
+    {
+        year = 2002 + (basho - START_INDEX) / 6;
+        month = (basho - START_INDEX) % 6 * 2 + 1;
+    }
+
+    if (division <= 2)
+        parsingTorikumi12(db, content, basho, year, month, day, division);
+    else
+        parsingTorikumi3456(db, content, basho, year, month, day, division);
+
+    return true;
+}
+
 bool MainWindow::importAllTorikumi()
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "ozumo");
-    db.setDatabaseName(WORK_DIR "ozumo.sqlite");
-    if (!db.open())
-        QMessageBox::warning(this, tr("Unable to open database"),
-                             tr("An error occurred while opening the connection: ") + db.lastError().text());
-
     QDir dir(WORK_DIR "torikumi/");
 
     QStringList filters;
@@ -1090,42 +1104,7 @@ bool MainWindow::importAllTorikumi()
 
     for (int i = 0; i < list.count(); i++)
     {
-        QFile file0(dir.absoluteFilePath(list.at(i)));
-
-        if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            qDebug() << "error: file.open(" << dir.absoluteFilePath(list.at(i)) << ")";
-            return false;
-        }
-
-        QTextStream in(&file0);
-
-        in.setCodec("EUC-JP");
-
-        QString content = in.readAll();
-
-        int year, month;
-        int basho, division, day;
-
-        QString fName = list.at(i);
-        fName.replace('.', '_');
-        QStringList tempList= fName.split('_');
-        basho    = tempList.at(1).toInt();
-        division = tempList.at(2).toInt();
-        day      = tempList.at(3).toInt();
-
-        if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
-        {
-            year = 2002 + (basho - START_INDEX) / 6;
-            month = (basho - START_INDEX) % 6 * 2 + 1;
-        }
-
-        if (division <= 2)
-            parsingTorikumi12(db, content, basho, year, month, day, division);
-        else
-            parsingTorikumi3456(db, content, basho, year, month, day, division);
-
-        file0.close();
+        importTorikumi(db, dir.absoluteFilePath(list.at(i)));
     }
 
     db.close();
