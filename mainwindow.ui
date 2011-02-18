@@ -67,11 +67,22 @@
         </layout>
        </item>
        <item row="2" column="0">
-        <widget class="QPushButton" name="pushButton_torikumi2Banzuke">
-         <property name="text">
-          <string>Generate banzuke based on torikumi</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QPushButton" name="pushButton_torikumi2Banzuke">
+           <property name="text">
+            <string>Generate banzuke based on torikumi</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_downloadBanzuke">
+           <property name="text">
+            <string>Download and import banzuke</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -340,7 +351,7 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>23</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>
