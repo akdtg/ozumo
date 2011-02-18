@@ -50,7 +50,7 @@
          <item>
           <widget class="QPushButton" name="pushButton_importAllTorikumi">
            <property name="text">
-            <string>Import all torikumi from directory</string>
+            <string>Import all torikumi</string>
            </property>
           </widget>
          </item>
@@ -60,7 +60,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Import hoshitori</string>
+            <string>Import all hoshitori</string>
            </property>
           </widget>
          </item>
@@ -328,7 +328,7 @@
          <item>
           <widget class="QPushButton" name="pushButton_generateTorikumiResults">
            <property name="text">
-            <string>Generate torikumi results</string>
+            <string>Generate results</string>
            </property>
           </widget>
          </item>
