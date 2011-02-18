@@ -1122,11 +1122,157 @@ bool MainWindow::importAllTorikumi()
     return true;
 }
 
+bool MainWindow::insertBanzuke(QSqlDatabase db,
+                               int year, int month, QString rank, int position, int side,
+                               int rikishi, QString shikona)
+{
+    QSqlQuery query(db);
+
+    int rank_id = 0;
+    query.prepare("SELECT id, kanji FROM rank");
+    query.exec();
+    while (query.next())
+    {
+        if (rank.startsWith(query.value(1).toString()))
+            rank_id = query.value(0).toInt();
+    }
+
+    query.prepare("DELETE FROM banzuke WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
+
+    query.bindValue(":year",     year);
+    query.bindValue(":month",    month);
+    query.bindValue(":rank",     rank_id);
+    query.bindValue(":position", position);
+    query.bindValue(":side",     side);
+
+    query.exec();
+
+    query.prepare("INSERT INTO banzuke ("
+                  "year, month, rank, position, side, rikishi, shikona) "
+                  "VALUES ("
+                  ":year, :month, :rank, :position, :side, :rikishi, :shikona)");
+
+    query.bindValue(":year",     year);
+    query.bindValue(":month",    month);
+    query.bindValue(":rank",     rank_id);
+    query.bindValue(":position", position);
+    query.bindValue(":side",     side);
+    query.bindValue(":rikishi",  rikishi);
+    query.bindValue(":shikona",  shikona);
+
+    return query.exec();
+}
+
+void MainWindow::parsingBanzuke12(QSqlDatabase db, QString content, int basho, int year, int month)
+{
+    content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
+    content = content.mid(content.indexOf(">") + 2);
+    QString division = content.left(content.indexOf("<")).simplified();
+
+    // 平成22年12月21日更新
+    QRegExp rx(QString::fromUtf8("平成(\\d+)年(\\d+)月(\\d+)日"));
+    if (rx.indexIn(content) != -1) {
+        year  = 1988 + rx.cap(1).toInt();
+        month = rx.cap(2).toInt() + 1;
+        if (month == 13)
+        {
+            month = 1;
+            year++;
+        }
+    }
+
+    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+
+    QString prevRank;
+    int i = 1;
+
+    while (content.indexOf(QString::fromUtf8("=東=")) != -1)
+    {
+        content = content.mid(content.indexOf(QString::fromUtf8("=東=")));
+
+        QString contentEast = content;
+        contentEast.truncate(content.indexOf(QString::fromUtf8("=格付=")));
+
+        QString kanji1;
+        int id1;
+        if (contentEast.indexOf("<strong>") != -1)
+        {
+            QRegExp rx("rikishi_(\\d+)");
+            if (rx.indexIn(contentEast) != -1) {
+                id1 = rx.cap(1).toInt();
+            }
+
+            contentEast = contentEast.mid(contentEast.indexOf("<strong>"));
+            contentEast = contentEast.mid(contentEast.indexOf(">") + 1).simplified();
+            kanji1 = contentEast.left(contentEast.indexOf(" "));
+        }
+
+        content = content.mid(content.indexOf(QString::fromUtf8("=格付=")));
+
+        QString contentRank = content;
+        contentRank.truncate(contentRank.indexOf(QString::fromUtf8("=西=")));
+
+        contentRank = contentRank.mid(contentRank.indexOf("<td align='center' bgcolor='#d9eaf0' class='common12-18-333'>"));
+        contentRank = contentRank.mid(contentRank.indexOf(">") + 1);
+        QString rank = contentRank.left(contentRank.indexOf("<")).simplified();
+
+        if (rank != prevRank)
+        {
+            prevRank = rank;
+            i = 1;
+        }
+        else
+        {
+            i++;
+        }
+
+        if (!kanji1.isEmpty())
+            if (!insertBanzuke(db, year, month, rank, i, 0, id1, kanji1))
+                qDebug() << "-";
+
+        content = content.mid(content.indexOf(QString::fromUtf8("=西=")));
+
+        QString contentWest = content;
+        contentWest.truncate(contentWest.indexOf(QString::fromUtf8("=東=")));
+
+        QString kanji2;
+        int id2;
+        if (contentWest.indexOf("<strong>") != -1)
+        {
+            QRegExp rx("rikishi_(\\d+)");
+            if (rx.indexIn(contentWest) != -1) {
+                id2 = rx.cap(1).toInt();
+            }
+
+            contentWest = contentWest.mid(contentWest.indexOf("<strong>"));
+            contentWest = contentWest.mid(contentWest.indexOf(">") + 1).simplified();
+            kanji2 = contentWest.left(contentWest.indexOf(" "));
+        }
+        //qDebug() << division << kanji1 << id1 << rank << i << kanji2 << id2;
+
+        if (!kanji2.isEmpty())
+            if (!insertBanzuke(db, year, month, rank, i, 1, id2, kanji2))
+                qDebug() << "-";
+    }
+}
+
 void MainWindow::parsingBanzuke3456(QSqlDatabase db, QString content, int basho, int year, int month)
 {
     content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
     content = content.mid(content.indexOf(">") + 2);
     QString division = content.left(content.indexOf("<")).simplified();
+
+    // 平成22年12月21日更新
+    QRegExp rx(QString::fromUtf8("平成(\\d+)年(\\d+)月(\\d+)日"));
+    if (rx.indexIn(content) != -1) {
+        year  = 1988 + rx.cap(1).toInt();
+        month = rx.cap(2).toInt() + 1;
+        if (month == 13)
+        {
+            month = 1;
+            year++;
+        }
+    }
 
     while (content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">") != -1)
     {
@@ -1153,7 +1299,15 @@ void MainWindow::parsingBanzuke3456(QSqlDatabase db, QString content, int basho,
         content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
         content = content.mid(content.indexOf(">") + 1);
 
-        qDebug() << division << kanji1 << hiragana1 << rank << kanji2 << hiragana2;
+        // qDebug() << division << kanji1 << hiragana1 << rank << kanji2 << hiragana2;
+
+        if (!kanji1.isEmpty())
+            if (!insertBanzuke(db, year, month, division, rank.toInt(), 0, 0, kanji1))
+                qDebug() << "-";
+
+        if (!kanji2.isEmpty())
+            if (!insertBanzuke(db, year, month, division, rank.toInt(), 1, 0, kanji2))
+                qDebug() << "-";
     }
 }
 
@@ -1189,7 +1343,7 @@ bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
     }
 */
     if (division <= 2)
-        parsingBanzuke3456(db, content, basho, year, month);
+        parsingBanzuke12(db, content, basho, year, month);
     else
         parsingBanzuke3456(db, content, basho, year, month);
 
