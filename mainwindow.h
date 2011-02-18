@@ -39,8 +39,8 @@ public slots:
     void downloadTorikumi();
     int getAndImportTorikumi(int year, int month, int day, int division);
     bool importBanzuke(QSqlDatabase db, QString fName);
-    void parsingBanzuke12(QSqlDatabase db, QString content, int basho, int year, int month);
-    void parsingBanzuke3456(QSqlDatabase db, QString content, int basho, int year, int month);
+    bool parsingBanzuke12(QSqlDatabase db, QString content);
+    bool parsingBanzuke3456(QSqlDatabase db, QString content);
     bool insertBanzuke(QSqlDatabase db,
                        int year, int month, QString rank, int position, int side,
                        int rikishi_id, QString shikona);
