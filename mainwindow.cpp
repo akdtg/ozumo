@@ -930,8 +930,18 @@ bool MainWindow::importTorikumi(QString fName)
 
     if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
     {
-        year = 2002 + (basho - START_INDEX) / 6;
-        month = (basho - START_INDEX) % 6 * 2 + 1;
+        QSqlQuery query(db);
+
+        query.prepare("SELECT year, month FROM basho WHERE id = :basho");
+        query.bindValue(":basho", basho);
+        query.exec();
+        if (query.next())
+        {
+            year  = query.value(0).toInt();
+            month = query.value(1).toInt();
+        }
+        else
+            return false;
     }
 
     if (division <= 2)
