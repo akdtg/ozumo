@@ -1447,14 +1447,14 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
         {
             prevRank = QString(rank.at(0));
             position = 1;
-            if (side == 3)
+            if ((division == 1) && (side == 3))
             {
                 if (QString(rank.at(2)) == QString::fromUtf8("九"))
                     position = 9;
                 else
                     position = 10;
             }
-            if (side == 5)
+            if ((division == 2) && (side == 5))
                 position = 8;
         }
         else
