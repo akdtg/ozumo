@@ -1404,13 +1404,6 @@ bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
     QFileInfo fi(fName);
     division = QString(fi.fileName().at(4)).toInt();
 
-/*
-    if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
-    {
-        year = 2002 + (basho - START_INDEX) / 6;
-        month = (basho - START_INDEX) % 6 * 2 + 1;
-    }
-*/
     if (division <= 2)
         parsingBanzuke12(db, content);
     else
