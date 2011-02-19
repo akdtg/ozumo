@@ -666,7 +666,19 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
     // "http://sumo.goo.ne.jp/hon_basho/torikumi/tori_545_1_1.html"
     QString url = BASE_URL;
 
-    int basho = (year - 2002) * 6 + START_INDEX + ((month - 1) >> 1);
+    int basho;
+
+    QSqlQuery query(db);
+    query.prepare("SELECT id FROM basho WHERE year = :year AND month = :month");
+    query.bindValue(":year",     year);
+    query.bindValue(":month",    month);
+    query.exec();
+    if (query.next())
+    {
+        basho = query.value(0).toInt();
+    }
+    else
+        return -1;
 
     if (day > 15)
         day = 15;
