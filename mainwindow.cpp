@@ -493,8 +493,7 @@ bool MainWindow::findDate(QString content, int *year, int *month)
 
 }
 
-bool MainWindow::insertTorikumi(QSqlDatabase db,
-                                int id, int basho, int year, int month, int day,
+bool MainWindow::insertTorikumi(int id, int basho, int year, int month, int day,
                                 int division,
                                 int rikishi1, QString shikona1, QString rank1, int result1,
                                 int rikishi2, QString shikona2, QString rank2, int result2,
@@ -863,7 +862,7 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
 
     if (exitCode == 0)
     {
-        importTorikumi(db, fName);
+        importTorikumi(fName);
     }
 
     return exitCode;
@@ -908,7 +907,7 @@ void MainWindow::generateTorikumiResults()
     ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
-void MainWindow::parsingTorikumi3456(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division)
+void MainWindow::parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division)
 {
     int dayx = day, id_local = 0;
     int rikishi1 = 0, rikishi2 = 0;
@@ -961,7 +960,7 @@ void MainWindow::parsingTorikumi3456(QSqlDatabase db, QString content, int basho
 
         int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
 
-        if (!insertTorikumi(db, index, basho, year, month, dayx,
+        if (!insertTorikumi(index, basho, year, month, dayx,
                             division,
                             rikishi1, shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
                             rikishi2, shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
@@ -973,7 +972,7 @@ void MainWindow::parsingTorikumi3456(QSqlDatabase db, QString content, int basho
 
 }
 
-void MainWindow::parsingTorikumi12(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division)
+void MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
 {
     int i = 0;
     int dayx = day, id_local = 0;
@@ -1058,7 +1057,7 @@ void MainWindow::parsingTorikumi12(QSqlDatabase db, QString content, int basho, 
 
             int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
 
-            if (!insertTorikumi(db, index, basho, year, month, dayx,
+            if (!insertTorikumi(index, basho, year, month, dayx,
                                 division,
                                 rikishi1.toInt(), shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
                                 rikishi2.toInt(), shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
@@ -1074,7 +1073,7 @@ void MainWindow::parsingTorikumi12(QSqlDatabase db, QString content, int basho, 
 
 }
 
-bool MainWindow::importTorikumi(QSqlDatabase db, QString fName)
+bool MainWindow::importTorikumi(QString fName)
 {
     QFile file0(fName);
 
@@ -1108,9 +1107,9 @@ bool MainWindow::importTorikumi(QSqlDatabase db, QString fName)
     }
 
     if (division <= 2)
-        parsingTorikumi12(db, content, basho, year, month, day, division);
+        parsingTorikumi12(content, basho, year, month, day, division);
     else
-        parsingTorikumi3456(db, content, basho, year, month, day, division);
+        parsingTorikumi3456(content, basho, year, month, day, division);
 
     return true;
 }
@@ -1127,7 +1126,7 @@ bool MainWindow::importAllTorikumi()
 
     for (int i = 0; i < list.count(); i++)
     {
-        importTorikumi(db, dir.absoluteFilePath(list.at(i)));
+        importTorikumi(dir.absoluteFilePath(list.at(i)));
     }
 
     return true;
@@ -1151,8 +1150,7 @@ bool MainWindow::importAllHoshitori()
     return true;
 }
 
-bool MainWindow::insertBanzuke(QSqlDatabase db,
-                               int year, int month, QString rank, int position, int side,
+bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, int side,
                                int rikishi, QString shikona)
 {
     QSqlQuery query(db);
@@ -1204,7 +1202,7 @@ bool MainWindow::insertBanzuke(QSqlDatabase db,
     return query.exec();
 }
 
-bool MainWindow::parsingBanzuke12(QSqlDatabase db, QString content)
+bool MainWindow::parsingBanzuke12(QString content)
 {
     content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
     content = content.mid(content.indexOf(">") + 2);
@@ -1276,7 +1274,7 @@ bool MainWindow::parsingBanzuke12(QSqlDatabase db, QString content)
         }
 
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(db, year, month, rank, position, 0, id1, kanji1))
+            if (!insertBanzuke(year, month, rank, position, 0, id1, kanji1))
             {
                 qDebug() << "-";
                 return false;
@@ -1304,7 +1302,7 @@ bool MainWindow::parsingBanzuke12(QSqlDatabase db, QString content)
         //qDebug() << division << kanji1 << id1 << rank << i << kanji2 << id2;
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(db, year, month, rank, position, 1, id2, kanji2))
+            if (!insertBanzuke(year, month, rank, position, 1, id2, kanji2))
             {
                 qDebug() << "-";
                 return false;
@@ -1314,7 +1312,7 @@ bool MainWindow::parsingBanzuke12(QSqlDatabase db, QString content)
     return true;
 }
 
-bool MainWindow::parsingBanzuke3456(QSqlDatabase db, QString content)
+bool MainWindow::parsingBanzuke3456(QString content)
 {
     content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
     content = content.mid(content.indexOf(">") + 2);
@@ -1364,14 +1362,14 @@ bool MainWindow::parsingBanzuke3456(QSqlDatabase db, QString content)
         // qDebug() << division << kanji1 << hiragana1 << rank << kanji2 << hiragana2;
 
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(db, year, month, division, position.toInt(), 0, 0, kanji1))
+            if (!insertBanzuke(year, month, division, position.toInt(), 0, 0, kanji1))
             {
                 qDebug() << "-";
                 return false;
             }
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(db, year, month, division, position.toInt(), 1, 0, kanji2))
+            if (!insertBanzuke(year, month, division, position.toInt(), 1, 0, kanji2))
             {
                 qDebug() << "-";
                 return false;
@@ -1381,7 +1379,7 @@ bool MainWindow::parsingBanzuke3456(QSqlDatabase db, QString content)
     return true;
 }
 
-bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
+bool MainWindow::importBanzuke(QString fName)
 {
     QFile file0(fName);
 
@@ -1405,9 +1403,9 @@ bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
     division = QString(fi.fileName().at(4)).toInt();
 
     if (division <= 2)
-        parsingBanzuke12(db, content);
+        parsingBanzuke12(content);
     else
-        parsingBanzuke3456(db, content);
+        parsingBanzuke3456(content);
 
     return true;
 }
@@ -1480,7 +1478,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
 
         //qDebug() << rank << position << id1 << shikona1;
         if (!shikona1.isEmpty())
-            if (!insertBanzuke(db, year, month, rank, position, 0, id1, shikona1))
+            if (!insertBanzuke(year, month, rank, position, 0, id1, shikona1))
             {
                 qDebug() << "-";
                 return false;
@@ -1502,7 +1500,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
 
         //qDebug() << rank << position << id2 << shikona2;
         if (!shikona2.isEmpty())
-            if (!insertBanzuke(db, year, month, rank, position, 1, id2, shikona2))
+            if (!insertBanzuke(year, month, rank, position, 1, id2, shikona2))
             {
                 qDebug() << "-";
                 return false;
@@ -1560,7 +1558,7 @@ bool MainWindow::parsingHoshitori3456(QString content, int basho, int division, 
         //qDebug() << rank << shikona;
 
         if (!shikona.isEmpty())
-            if (!insertBanzuke(db, year, month, rank, position, side, 0, shikona))
+            if (!insertBanzuke(year, month, rank, position, side, 0, shikona))
             {
                 qDebug() << "-";
                 return false;

@@ -18,15 +18,14 @@ public:
     ~MainWindow();
 
 public slots:
-    bool importTorikumi(QSqlDatabase db, QString fName);
+    bool importTorikumi(QString fName);
     bool importAllTorikumi();
-    void parsingTorikumi12(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
-    void parsingTorikumi3456(QSqlDatabase db, QString content, int basho, int year, int month, int day, int division);
+    void parsingTorikumi12(QString content, int basho, int year, int month, int day, int division);
+    void parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division);
     bool convertHoshitori();
     bool torikumi2Banzuke();
     bool findDate(QString content, int *year, int *month);
-    bool insertTorikumi(QSqlDatabase db,
-                        int id, int basho, int year, int month, int day,
+    bool insertTorikumi(int id, int basho, int year, int month, int day,
                         int division,
                         int rikishi1, QString shikona1, QString rank1, int result1,
                         int rikishi2, QString shikona2, QString rank2, int result2,
@@ -38,11 +37,10 @@ public slots:
     QString torikumiResults2Html(int year, int month, int day, int division);
     void downloadTorikumi();
     int getAndImportTorikumi(int year, int month, int day, int division);
-    bool importBanzuke(QSqlDatabase db, QString fName);
-    bool parsingBanzuke12(QSqlDatabase db, QString content);
-    bool parsingBanzuke3456(QSqlDatabase db, QString content);
-    bool insertBanzuke(QSqlDatabase db,
-                       int year, int month, QString rank, int position, int side,
+    bool importBanzuke(QString fName);
+    bool parsingBanzuke12(QString content);
+    bool parsingBanzuke3456(QString content);
+    bool insertBanzuke(int year, int month, QString rank, int position, int side,
                        int rikishi_id, QString shikona);
     bool importAllHoshitori();
     bool importHoshitori(QString fName);
