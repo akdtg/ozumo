@@ -1457,7 +1457,12 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
             prevRank = QString(rank.at(0));
             position = 1;
             if (side == 3)
-                position = 9;
+            {
+                if (QString(rank.at(2)) == QString::fromUtf8("九"))
+                    position = 9;
+                else
+                    position = 10;
+            }
             if (side == 5)
                 position = 8;
         }
@@ -1480,7 +1485,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
             shikona1 = contentRow.left(contentRow.indexOf("<"));
         }
 
-        qDebug() << rank << position << id1 << shikona1;
+        //qDebug() << rank << position << id1 << shikona1;
         if (!shikona1.isEmpty())
             if (!insertBanzuke(db, year, month, rank, position, 0, id1, shikona1))
             {
@@ -1502,7 +1507,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
             shikona2 = contentRow.left(contentRow.indexOf("<"));
         }
 
-        qDebug() << rank << position << id2 << shikona2;
+        //qDebug() << rank << position << id2 << shikona2;
         if (!shikona2.isEmpty())
             if (!insertBanzuke(db, year, month, rank, position, 1, id2, shikona2))
             {
