@@ -1410,11 +1410,63 @@ bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
 bool MainWindow::parsingHoshitori12(QString content, int basho, int division)
 {
 
+    return true;
 }
 
-bool MainWindow::parsingHoshitori3456(QString content, int basho, int division)
+bool MainWindow::parsingHoshitori3456(QString content, int basho, int division, int side)
 {
+    QString rank;
+    int year, month;
 
+    QSqlQuery query(db);
+
+    query.prepare("SELECT year, month FROM basho WHERE id = :basho");
+    query.bindValue(":basho", basho);
+    query.exec();
+    if (query.next())
+    {
+        year  = query.value(0).toInt();
+        month = query.value(1).toInt();
+    }
+    else
+        return false;
+
+    query.prepare("SELECT kanji FROM rank WHERE division_id = :division");
+    query.bindValue(":division", division);
+    query.exec();
+    if (query.next())
+    {
+        rank = query.value(0).toString();
+    }
+    else
+        return false;
+
+    content = content.mid(content.indexOf(QString::fromUtf8("torikumi_boxbg")));
+    content.truncate(content.indexOf(QString("</table>")));
+
+    while (content.indexOf(QString::fromUtf8("hoshitori_riki3-1")) != -1)
+    {
+        content = content.mid(content.indexOf(QString::fromUtf8("hoshitori_riki3-1")));
+        content = content.mid(content.indexOf(">") + 1).simplified();
+        int position = content.left(content.indexOf("<")).toInt();
+
+        content = content.mid(content.indexOf(QString::fromUtf8("hoshitori_riki5")));
+        content = content.mid(content.indexOf(">") + 1).simplified();
+        QString shikona = content.left(content.indexOf("<"));
+
+        content = content.mid(content.indexOf(QString::fromUtf8("hoshitori_riki3-1")) + 1);
+
+        //qDebug() << rank << shikona;
+
+        if (!shikona.isEmpty())
+            if (!insertBanzuke(db, year, month, rank, position, side, 0, shikona))
+            {
+                qDebug() << "-";
+                return false;
+            }
+    }
+
+    return true;
 }
 
 bool MainWindow::importHoshitori(QString fName)
@@ -1435,7 +1487,7 @@ bool MainWindow::importHoshitori(QString fName)
 
     file0.close();
 
-    int basho, division;
+    int basho, division, side;
 
     QFileInfo fi(fName);
     // hoshi_545_3_1_1.html
@@ -1443,6 +1495,7 @@ bool MainWindow::importHoshitori(QString fName)
     if (rx.indexIn(fi.fileName()) != -1) {
         basho = rx.cap(1).toInt();
         division = rx.cap(2).toInt();
+        side = rx.cap(3).toInt() - 1;
     }
     else
         return false;
@@ -1450,7 +1503,7 @@ bool MainWindow::importHoshitori(QString fName)
     if (division <= 2)
         parsingHoshitori12(content, basho, division);
     else
-        parsingHoshitori3456(content, basho, division);
+        parsingHoshitori3456(content, basho, division, side);
 
     return true;
 }

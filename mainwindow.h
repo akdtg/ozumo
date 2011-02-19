@@ -47,7 +47,7 @@ public slots:
     bool importAllHoshitori();
     bool importHoshitori(QString fName);
     bool parsingHoshitori12(QString content, int basho, int division);
-    bool parsingHoshitori3456(QString content, int basho, int division);
+    bool parsingHoshitori3456(QString content, int basho, int division, int side);
 
 public:
     QSqlDatabase db;
