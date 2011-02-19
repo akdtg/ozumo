@@ -46,7 +46,7 @@ public slots:
                        int rikishi_id, QString shikona);
     bool importAllHoshitori();
     bool importHoshitori(QString fName);
-    bool parsingHoshitori12(QString content, int basho, int division);
+    bool parsingHoshitori12(QString content, int basho, int division, int side);
     bool parsingHoshitori3456(QString content, int basho, int division, int side);
 
 public:

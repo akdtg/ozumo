@@ -1166,21 +1166,33 @@ bool MainWindow::insertBanzuke(QSqlDatabase db,
             rank_id = query.value(0).toInt();
     }
 
-    query.prepare("DELETE FROM banzuke WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
+    int basho;
 
+    query.prepare("SELECT id FROM basho WHERE year = :year AND month = :month");
     query.bindValue(":year",     year);
     query.bindValue(":month",    month);
-    query.bindValue(":rank",     rank_id);
-    query.bindValue(":position", position);
-    query.bindValue(":side",     side);
+    query.exec();
+    if (query.next())
+    {
+        basho = query.value(0).toInt();
+    }
+    else
+        return false;
+
+    int id = ((basho * 100 + rank_id) * 1000 + position) * 10 + side;
+
+    query.prepare("DELETE FROM banzuke WHERE id = :id");
+
+    query.bindValue(":id",       id);
 
     query.exec();
 
     query.prepare("INSERT INTO banzuke ("
-                  "year, month, rank, position, side, rikishi, shikona) "
+                  "id, year, month, rank, position, side, rikishi, shikona) "
                   "VALUES ("
-                  ":year, :month, :rank, :position, :side, :rikishi, :shikona)");
+                  ":id, :year, :month, :rank, :position, :side, :rikishi, :shikona)");
 
+    query.bindValue(":id",       id);
     query.bindValue(":year",     year);
     query.bindValue(":month",    month);
     query.bindValue(":rank",     rank_id);
@@ -1407,8 +1419,99 @@ bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
     return true;
 }
 
-bool MainWindow::parsingHoshitori12(QString content, int basho, int division)
+bool MainWindow::parsingHoshitori12(QString content, int basho, int division, int side)
 {
+    int year, month;
+
+    QSqlQuery query(db);
+
+    query.prepare("SELECT year, month FROM basho WHERE id = :basho");
+    query.bindValue(":basho", basho);
+    query.exec();
+    if (query.next())
+    {
+        year  = query.value(0).toInt();
+        month = query.value(1).toInt();
+    }
+    else
+        return false;
+
+    content = content.mid(content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\"><table")));
+
+    QString prevRank;
+    int position = 1;
+
+    while (content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\"><table")) != -1)
+    {
+        content = content.mid(content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\"><table")));
+
+        QString contentRow = content;
+        contentRow.truncate(contentRow.indexOf(QString::fromUtf8("</div>")));
+
+        contentRow = contentRow.mid(contentRow.indexOf("<td colspan=\"4\" bgcolor=\"#6b248f\" class=\"common12-18-fff\">"));
+        contentRow = contentRow.mid(contentRow.indexOf(">") + 1);
+        QString rank = contentRow.left(contentRow.indexOf("<")).simplified();
+
+        if (QString(rank.at(0)) != prevRank)
+        {
+            prevRank = QString(rank.at(0));
+            position = 1;
+            if (side == 3)
+                position = 9;
+            if (side == 5)
+                position = 8;
+        }
+        else
+        {
+            position++;
+        }
+
+        QString shikona1;
+        int id1;
+        if (contentRow.indexOf("<strong>") != -1)
+        {
+            QRegExp rx("rikishi_(\\d+)");
+            if (rx.indexIn(contentRow) != -1) {
+                id1 = rx.cap(1).toInt();
+            }
+
+            contentRow = contentRow.mid(contentRow.indexOf("<strong>"));
+            contentRow = contentRow.mid(contentRow.indexOf(">") + 1).simplified();
+            shikona1 = contentRow.left(contentRow.indexOf("<"));
+        }
+
+        qDebug() << rank << position << id1 << shikona1;
+        if (!shikona1.isEmpty())
+            if (!insertBanzuke(db, year, month, rank, position, 0, id1, shikona1))
+            {
+                qDebug() << "-";
+                return false;
+            }
+
+        QString shikona2;
+        int id2;
+        if (contentRow.indexOf("<strong>") != -1)
+        {
+            QRegExp rx("rikishi_(\\d+)");
+            if (rx.indexIn(contentRow) != -1) {
+                id2 = rx.cap(1).toInt();
+            }
+
+            contentRow = contentRow.mid(contentRow.indexOf("<strong>"));
+            contentRow = contentRow.mid(contentRow.indexOf(">") + 1).simplified();
+            shikona2 = contentRow.left(contentRow.indexOf("<"));
+        }
+
+        qDebug() << rank << position << id2 << shikona2;
+        if (!shikona2.isEmpty())
+            if (!insertBanzuke(db, year, month, rank, position, 1, id2, shikona2))
+            {
+                qDebug() << "-";
+                return false;
+            }
+
+        content = content.mid(content.indexOf(QString::fromUtf8("</div>")));
+    }
 
     return true;
 }
@@ -1495,15 +1598,15 @@ bool MainWindow::importHoshitori(QString fName)
     if (rx.indexIn(fi.fileName()) != -1) {
         basho = rx.cap(1).toInt();
         division = rx.cap(2).toInt();
-        side = rx.cap(3).toInt() - 1;
+        side = rx.cap(3).toInt();
     }
     else
         return false;
 
     if (division <= 2)
-        parsingHoshitori12(content, basho, division);
+        parsingHoshitori12(content, basho, division, side);
     else
-        parsingHoshitori3456(content, basho, division, side);
+        parsingHoshitori3456(content, basho, division, side - 1);
 
     return true;
 }
