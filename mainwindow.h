@@ -44,6 +44,10 @@ public slots:
     bool insertBanzuke(QSqlDatabase db,
                        int year, int month, QString rank, int position, int side,
                        int rikishi_id, QString shikona);
+    bool importAllHoshitori();
+    bool importHoshitori(QString fName);
+    bool parsingHoshitori12(QString content, int basho, int division);
+    bool parsingHoshitori3456(QString content, int basho, int division);
 
 public:
     QSqlDatabase db;

@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->pushButton_importAllTorikumi, SIGNAL(clicked()), this, SLOT(importAllTorikumi()));
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
-    connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(convertHoshitori()));
+    connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(importAllHoshitori()));
 
     connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
     connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
 
-    importBanzuke(db, WORK_DIR "ban_1.html");
+/*    importBanzuke(db, WORK_DIR "ban_1.html");
     importBanzuke(db, WORK_DIR "ban_2.html");
     importBanzuke(db, WORK_DIR "ban_3_1.html");
     importBanzuke(db, WORK_DIR "ban_4_1.html");
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     importBanzuke(db, WORK_DIR "ban_5_1.html");
     importBanzuke(db, WORK_DIR "ban_5_2.html");
     importBanzuke(db, WORK_DIR "ban_5_3.html");
-    importBanzuke(db, WORK_DIR "ban_6_1.html");
+    importBanzuke(db, WORK_DIR "ban_6_1.html");*/
 
 }
 
@@ -1133,6 +1133,24 @@ bool MainWindow::importAllTorikumi()
     return true;
 }
 
+bool MainWindow::importAllHoshitori()
+{
+    QDir dir(WORK_DIR "hoshi/");
+
+    QStringList filters;
+    filters << "hoshi_*_*.html";
+    dir.setNameFilters(filters);
+
+    QStringList list = dir.entryList();
+
+    for (int i = 0; i < list.count(); i++)
+    {
+        importHoshitori(dir.absoluteFilePath(list.at(i)));
+    }
+
+    return true;
+}
+
 bool MainWindow::insertBanzuke(QSqlDatabase db,
                                int year, int month, QString rank, int position, int side,
                                int rikishi, QString shikona)
@@ -1385,6 +1403,54 @@ bool MainWindow::importBanzuke(QSqlDatabase db, QString fName)
         parsingBanzuke12(db, content);
     else
         parsingBanzuke3456(db, content);
+
+    return true;
+}
+
+bool MainWindow::parsingHoshitori12(QString content, int basho, int division)
+{
+
+}
+
+bool MainWindow::parsingHoshitori3456(QString content, int basho, int division)
+{
+
+}
+
+bool MainWindow::importHoshitori(QString fName)
+{
+    QFile file0(fName);
+
+    if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << "error: file.open(" << fName << ")";
+        return false;
+    }
+
+    QTextStream in(&file0);
+
+    in.setCodec("EUC-JP");
+
+    QString content = in.readAll();
+
+    file0.close();
+
+    int basho, division;
+
+    QFileInfo fi(fName);
+    // hoshi_545_3_1_1.html
+    QRegExp rx(QString::fromUtf8("hoshi_(\\d+)_(\\d+)_(\\d+).?"));
+    if (rx.indexIn(fi.fileName()) != -1) {
+        basho = rx.cap(1).toInt();
+        division = rx.cap(2).toInt();
+    }
+    else
+        return false;
+
+    if (division <= 2)
+        parsingHoshitori12(content, basho, division);
+    else
+        parsingHoshitori3456(content, basho, division);
 
     return true;
 }
