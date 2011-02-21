@@ -173,7 +173,7 @@ QString translateShikona(QSqlDatabase db, QString shikona)
     }
     else
     {
-        tmpQuery.prepare("SELECT en1 FROM names WHERE kanji1 = :kanji AND en1 IS NOT NULL AND en1 != ''");
+        tmpQuery.prepare("SELECT en1 FROM rikishi WHERE kanji1 = :kanji AND en1 IS NOT NULL AND en1 != ''");
         tmpQuery.bindValue(":kanji", shikona);
         tmpQuery.exec();
         if (tmpQuery.next())
