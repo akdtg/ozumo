@@ -6,10 +6,12 @@
 
 QT      += core gui sql
 
+win32 {
 CONFIG  -= debug_and_release
 CONFIG  += release
 
-win32:QMAKE_LFLAGS += -static
+QMAKE_LFLAGS += -static
+}
 
 TARGET = ozumo
 TEMPLATE = app
