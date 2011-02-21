@@ -11,7 +11,7 @@ CONFIG  += release
 
 win32:QMAKE_LFLAGS += -static
 
-TARGET = torikumi
+TARGET = ozumo
 TEMPLATE = app
 
 DESTDIR = release
