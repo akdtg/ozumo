@@ -6,7 +6,7 @@
 #include <QtSql>
 
 #define START_INDEX 491
-#define BASE_URL "http://sumo.goo.ne.jp/hon_basho/torikumi/"
+#define BASE_URL "http://sumo.goo.ne.jp/hon_basho/"
 
 #ifdef __WIN32__
 #define WORK_DIR ""
@@ -664,7 +664,7 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
 {
     // "http://sumo.goo.ne.jp/hon_basho/torikumi/tori_545_1_1.html"
-    QString url = BASE_URL;
+    QString url = BASE_URL "torikumi/";
 
     int basho;
 
