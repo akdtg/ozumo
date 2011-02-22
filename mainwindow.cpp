@@ -1558,149 +1558,141 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
     Html += "<table>\n"
             "<thead><tr>"
-            "<th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
-            "<th width=\"33%\">" + QString::fromUtf8("Ранг") + "</th>"
-            "<th width=\"33%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<th width=\"40%\">" + QString::fromUtf8("Восток") + "</th>"
+            "<th width=\"20%\">" + QString::fromUtf8("Ранг") + "</th>"
+            "<th width=\"40%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
             "<tbody>\n";
 
-    int rank1 = 0, rank2 = 0;
-    query.prepare("SELECT id FROM rank WHERE division_id = :division");
-    query.bindValue(":division", division);
-    query.exec();
-    if (query.next())
-    {
-        rank1 = query.value(0).toInt();
-        rank2 = rank1;
-    }
-    while (query.next())
-    {
-        rank2 = query.value(0).toInt();
-    }
-    if (rank1 == 0 || rank2 == 0)
-    {
-        return "Error";
-    }
+    int rank = 0;
+    QSqlQuery rankQuery(db);
+    rankQuery.prepare("SELECT id FROM rank WHERE division_id = :division");
+    rankQuery.bindValue(":division", division);
+    rankQuery.exec();
 
-    qDebug() << "ranks: " << rank1 << rank2;
-
-    int numOfRows = 0;
-    query.prepare("SELECT MAX (position) "
-                  "FROM banzuke "
-                  "WHERE year = :year AND month = :month AND rank = :rank1");
-    query.bindValue(":year", year);
-    query.bindValue(":month", month);
-    query.bindValue(":rank1", rank1);
-    query.exec();
-    if (query.next())
+    while (rankQuery.next())
     {
-        numOfRows = query.value(0).toInt();
-    }
+        rank = rankQuery.value(0).toInt();
 
-    for (int i = 0; i < numOfRows; i++)
-    {
-        QString shikonaRuEast, shikonaRuWest;
-        int rikishiIdEast, rikishiIdWest;
-        QString res1, res2;
-
-        query.prepare("SELECT rikishi, shikona "
+        int numOfRows = 0;
+        query.prepare("SELECT MAX (position) "
                       "FROM banzuke "
-                      "WHERE year = :year AND month = :month AND rank = :rank1 AND position = :position AND side = :side");
+                      "WHERE year = :year AND month = :month AND rank = :rank");
         query.bindValue(":year", year);
         query.bindValue(":month", month);
-        query.bindValue(":rank1", rank1);
-        query.bindValue(":position", i + 1);
-        query.bindValue(":side", 0);
-        query.exec();
-
-        if (query.next())
-        {
-            rikishiIdEast = query.value(0).toInt();
-            QString shikona = query.value(1).toString();
-
-            shikonaRuEast = translateShikona(db, shikona);
-
-            QSqlQuery tmpQuery(db);
-            tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                             "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-            tmpQuery.bindValue(":y", year);
-            tmpQuery.bindValue(":m", month);
-            tmpQuery.bindValue(":d", day);
-            tmpQuery.bindValue(":s1", shikona);
-            tmpQuery.bindValue(":s2", shikona);
-            tmpQuery.exec();
-            if (tmpQuery.next())
-                res1 += tmpQuery.value(0).toString() + "-";
-
-            tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                             "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-            tmpQuery.bindValue(":y", year);
-            tmpQuery.bindValue(":m", month);
-            tmpQuery.bindValue(":d", day);
-            tmpQuery.bindValue(":s1", shikona);
-            tmpQuery.bindValue(":s2", shikona);
-            tmpQuery.exec();
-            if (tmpQuery.next())
-                res1 += tmpQuery.value(0).toString();
-        }
-
-        query.prepare("SELECT rikishi, shikona "
-                      "FROM banzuke "
-                      "WHERE year = :year AND month = :month AND rank = :rank1 AND position = :position AND side = :side");
-        query.bindValue(":year", year);
-        query.bindValue(":month", month);
-        query.bindValue(":rank1", rank1);
-        query.bindValue(":position", i + 1);
-        query.bindValue(":side", 1);
-        query.exec();
-
-        if (query.next())
-        {
-            rikishiIdWest = query.value(0).toInt();
-            QString shikona = query.value(1).toString();
-
-            shikonaRuWest = translateShikona(db, shikona);
-
-            QSqlQuery tmpQuery(db);
-            tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                             "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-            tmpQuery.bindValue(":y", year);
-            tmpQuery.bindValue(":m", month);
-            tmpQuery.bindValue(":d", day);
-            tmpQuery.bindValue(":s1", shikona);
-            tmpQuery.bindValue(":s2", shikona);
-            tmpQuery.exec();
-            if (tmpQuery.next())
-                res2 += tmpQuery.value(0).toString() + "-";
-
-            tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                             "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-            tmpQuery.bindValue(":y", year);
-            tmpQuery.bindValue(":m", month);
-            tmpQuery.bindValue(":d", day);
-            tmpQuery.bindValue(":s1", shikona);
-            tmpQuery.bindValue(":s2", shikona);
-            tmpQuery.exec();
-            if (tmpQuery.next())
-                res2 += tmpQuery.value(0).toString();
-
-        }
-
-        QString rankRu;
-        query.prepare("SELECT ru FROM rank WHERE id = :rank");
-        query.bindValue(":rank", rank1);
+        query.bindValue(":rank", rank);
         query.exec();
         if (query.next())
         {
-            rankRu = query.value(0).toString();
+            numOfRows = query.value(0).toInt();
         }
 
-        Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikonaRuEast + " (" + res1 + ")<br/>O8O8O8O8O8O8O8O8O8O8O8O8O8O8O8</td>"
-                "<td>" + rankRu + "&nbsp;" + QString::number(i + 1) + "</td>"
-                "<td>" + shikonaRuWest + " (" + res2 + ")<br/>OXOXOXOXOXOXOXOXOXOXOXOXOXOXOX</td></tr>\n";
-        //qDebug() << Html;
+        for (int i = 0; i < numOfRows; i++)
+        {
+            QString shikonaRuEast, shikonaRuWest;
+            int rikishiIdEast, rikishiIdWest;
+            QString resEast, resWest;
+            QString hoshiEast, hoshiWest;
 
-        trClass ^= 1;
+            query.prepare("SELECT rikishi, shikona "
+                          "FROM banzuke "
+                          "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
+            query.bindValue(":year", year);
+            query.bindValue(":month", month);
+            query.bindValue(":rank", rank);
+            query.bindValue(":position", i + 1);
+            query.bindValue(":side", 0);
+            query.exec();
+
+            if (query.next())
+            {
+                rikishiIdEast = query.value(0).toInt();
+                QString shikona = query.value(1).toString();
+
+                shikonaRuEast = translateShikona(db, shikona);
+
+                QSqlQuery tmpQuery(db);
+                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                                 "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
+                tmpQuery.bindValue(":y", year);
+                tmpQuery.bindValue(":m", month);
+                tmpQuery.bindValue(":d", day);
+                tmpQuery.bindValue(":s1", shikona);
+                tmpQuery.bindValue(":s2", shikona);
+                tmpQuery.exec();
+                if (tmpQuery.next())
+                    resEast += "(" + tmpQuery.value(0).toString() + "-";
+
+                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                                 "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
+                tmpQuery.bindValue(":y", year);
+                tmpQuery.bindValue(":m", month);
+                tmpQuery.bindValue(":d", day);
+                tmpQuery.bindValue(":s1", shikona);
+                tmpQuery.bindValue(":s2", shikona);
+                tmpQuery.exec();
+                if (tmpQuery.next())
+                    resEast += tmpQuery.value(0).toString() + ")";
+            }
+
+            query.prepare("SELECT rikishi, shikona "
+                          "FROM banzuke "
+                          "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
+            query.bindValue(":year", year);
+            query.bindValue(":month", month);
+            query.bindValue(":rank", rank);
+            query.bindValue(":position", i + 1);
+            query.bindValue(":side", 1);
+            query.exec();
+
+            if (query.next())
+            {
+                rikishiIdWest = query.value(0).toInt();
+                QString shikona = query.value(1).toString();
+
+                shikonaRuWest = translateShikona(db, shikona);
+
+                QSqlQuery tmpQuery(db);
+                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                                 "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
+                tmpQuery.bindValue(":y", year);
+                tmpQuery.bindValue(":m", month);
+                tmpQuery.bindValue(":d", day);
+                tmpQuery.bindValue(":s1", shikona);
+                tmpQuery.bindValue(":s2", shikona);
+                tmpQuery.exec();
+                if (tmpQuery.next())
+                    resWest += "(" + tmpQuery.value(0).toString() + "-";
+
+                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                                 "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
+                tmpQuery.bindValue(":y", year);
+                tmpQuery.bindValue(":m", month);
+                tmpQuery.bindValue(":d", day);
+                tmpQuery.bindValue(":s1", shikona);
+                tmpQuery.bindValue(":s2", shikona);
+                tmpQuery.exec();
+                if (tmpQuery.next())
+                    resWest += tmpQuery.value(0).toString() + ")";
+
+            }
+
+            QString rankRu;
+            query.prepare("SELECT ru FROM rank WHERE id = :rank");
+            query.bindValue(":rank", rank);
+            query.exec();
+            if (query.next())
+            {
+                rankRu = query.value(0).toString();
+            }
+
+            Html += "<tr class=" + className[trClass] + ">"
+                    "<td>" + shikonaRuEast + " " + resEast + "<br/>O8O8O8O8O8O8O8O8O8O8O8O8O8O8O8</td>"
+                    "<td>" + rankRu + "&nbsp;" + QString::number(i + 1) + "</td>"
+                    "<td>" + shikonaRuWest + " " + resWest + "<br/>OXOXOXOXOXOXOXOXOXOXOXOXOXOXOX</td></tr>\n";
+            //qDebug() << Html;
+
+            trClass ^= 1;
+        }
     }
 
     Html += "</tbody>\n</table>\n";
