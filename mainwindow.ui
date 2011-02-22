@@ -50,7 +50,7 @@
          <item>
           <widget class="QPushButton" name="pushButton_importAllTorikumi">
            <property name="text">
-            <string>Import all torikumi</string>
+            <string>Import all the torikumi</string>
            </property>
           </widget>
          </item>
@@ -60,7 +60,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Import all hoshitori</string>
+            <string>Import all the hoshitori</string>
            </property>
           </widget>
          </item>
@@ -70,15 +70,18 @@
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QPushButton" name="pushButton_torikumi2Banzuke">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
-            <string>Generate banzuke based on torikumi</string>
+            <string>Generate the banzuke based on the torikumi</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_downloadBanzuke">
            <property name="text">
-            <string>Download and import banzuke</string>
+            <string>Download and import the current banzuke</string>
            </property>
           </widget>
          </item>
@@ -314,21 +317,21 @@
          <item>
           <widget class="QPushButton" name="pushButton_downloadTorikumi">
            <property name="text">
-            <string>Download and import torikumi</string>
+            <string>Download and import the torikumi</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_generateTorikumi">
            <property name="text">
-            <string>Generate torikumi</string>
+            <string>Generate the torikumi</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_generateTorikumiResults">
            <property name="text">
-            <string>Generate results</string>
+            <string>Generate the results</string>
            </property>
           </widget>
          </item>
@@ -351,7 +354,7 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
