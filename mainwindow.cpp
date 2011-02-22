@@ -151,7 +151,7 @@ QStringList readAndSimplifyBashoContent(QString content)
     return list;
 }
 
-QString translateShikona(QSqlDatabase db, QString shikona)
+QString MainWindow::translateShikona(QString shikona)
 {
     QSqlQuery tmpQuery(db);
     QString shikonaRu = shikona;
@@ -177,7 +177,7 @@ QString translateShikona(QSqlDatabase db, QString shikona)
     return shikonaRu;
 }
 
-QString translateKimarite(QSqlDatabase db, QString kimarite)
+QString MainWindow::translateKimarite(QString kimarite)
 {
     QSqlQuery tmpQuery(db);
     QString kimariteRu = kimarite;
@@ -443,8 +443,8 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
         QSqlQuery tmpQuery(db);
 
-        shikona1Ru = translateShikona(db, shikona1);
-        shikona2Ru = translateShikona(db, shikona2);
+        shikona1Ru = translateShikona(shikona1);
+        shikona2Ru = translateShikona(shikona2);
 
         QString res1, res2;
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
@@ -585,10 +585,10 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
         QSqlQuery tmpQuery(db);
 
-        shikona1Ru = translateShikona(db, shikona1);
-        shikona2Ru = translateShikona(db, shikona2);
+        shikona1Ru = translateShikona(shikona1);
+        shikona2Ru = translateShikona(shikona2);
 
-        kimariteRu = translateKimarite(db, kimarite);
+        kimariteRu = translateKimarite(kimarite);
 
         QString res1, res2;
         tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
@@ -1608,7 +1608,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                 rikishiIdEast = query.value(0).toInt();
                 QString shikonaEast = query.value(1).toString();
 
-                shikonaRuEast = translateShikona(db, shikonaEast);
+                shikonaRuEast = translateShikona(shikonaEast);
 
                 QSqlQuery tmpQuery(db);
                 tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
@@ -1674,7 +1674,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                 rikishiIdWest = query.value(0).toInt();
                 QString shikonaWest = query.value(1).toString();
 
-                shikonaRuWest = translateShikona(db, shikonaWest);
+                shikonaRuWest = translateShikona(shikonaWest);
 
                 QSqlQuery tmpQuery(db);
                 tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
