@@ -95,8 +95,8 @@
       <property name="title">
        <string>Generation</string>
       </property>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QComboBox" name="comboBox_year">
@@ -312,26 +312,26 @@
          </item>
         </layout>
        </item>
-       <item row="1" column="0">
+       <item>
+        <widget class="QPushButton" name="pushButton_downloadTorikumi">
+         <property name="text">
+          <string>Download and import the torikumi of the selected day</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pushButton_downloadTorikumi">
-           <property name="text">
-            <string>Download and import the torikumi</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QPushButton" name="pushButton_generateTorikumi">
            <property name="text">
-            <string>Generate the torikumi</string>
+            <string>Generate the torikumi's HTML code</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_generateTorikumiResults">
            <property name="text">
-            <string>Generate the results</string>
+            <string>Generate the results' HTML code</string>
            </property>
           </widget>
          </item>
