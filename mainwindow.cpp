@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_importAllTorikumi, SIGNAL(clicked()), this, SLOT(importAllTorikumi()));
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(importAllHoshitori()));
+    connect(ui->pushButton_downloadBanzuke, SIGNAL(clicked()), this, SLOT(downloadBanzuke()));
 
     connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
     connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
@@ -40,16 +41,6 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
-
-    importBanzuke(WORK_DIR "banzuke/ban_1.html");
-    importBanzuke(WORK_DIR "banzuke/ban_2.html");
-    importBanzuke(WORK_DIR "banzuke/ban_3_1.html");
-    importBanzuke(WORK_DIR "banzuke/ban_4_1.html");
-    importBanzuke(WORK_DIR "banzuke/ban_4_2.html");
-    importBanzuke(WORK_DIR "banzuke/ban_5_1.html");
-    importBanzuke(WORK_DIR "banzuke/ban_5_2.html");
-    importBanzuke(WORK_DIR "banzuke/ban_5_3.html");
-    importBanzuke(WORK_DIR "banzuke/ban_6_1.html");
 }
 
 MainWindow::~MainWindow()
@@ -710,6 +701,50 @@ void MainWindow::downloadTorikumi()
         result = "Failed: " + QString::number(exitCode);
 
     ui->textEdit_htmlCode->setPlainText(result);
+}
+
+void MainWindow::downloadBanzuke()
+{
+    QString url = BASE_URL "banzuke/";
+
+    QStringList parts = (QStringList()
+                         << "ban_1.html"
+                         << "ban_2.html"
+                         << "ban_3_1.html"
+                         << "ban_4_1.html"
+                         << "ban_4_2.html"
+                         << "ban_5_1.html"
+                         << "ban_5_2.html"
+                         << "ban_5_3.html"
+                         << "ban_6_1.html"
+                         );
+
+    ui->textEdit_htmlCode->clear();
+
+    for (int i = 0; i < parts.size(); i++)
+    {
+        int exitCode = wgetDownload("-P banzuke " +  url + parts[i]);
+
+        if (exitCode != 0)
+        {
+            ui->textEdit_htmlCode->append("Downloading " + url + parts[i] + " failed, Code: " + QString::number(exitCode));
+            return;
+        }
+        else
+        {
+            ui->textEdit_htmlCode->append("Downloading " + url + parts[i] + " complete");
+
+            if (!importBanzuke(WORK_DIR "banzuke/" + parts[i]))
+            {
+                ui->textEdit_htmlCode->append("Parsing " + url + parts[i] + " failed");
+                return;
+            }
+            else
+            {
+                ui->textEdit_htmlCode->append("Parsing " + url + parts[i] + " complete");
+            }
+        }
+    }
 }
 
 void MainWindow::generateTorikumi()
