@@ -41,16 +41,15 @@ MainWindow::MainWindow(QWidget *parent) :
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
 
-/*    importBanzuke(db, WORK_DIR "ban_1.html");
-    importBanzuke(db, WORK_DIR "ban_2.html");
-    importBanzuke(db, WORK_DIR "ban_3_1.html");
-    importBanzuke(db, WORK_DIR "ban_4_1.html");
-    importBanzuke(db, WORK_DIR "ban_4_2.html");
-    importBanzuke(db, WORK_DIR "ban_5_1.html");
-    importBanzuke(db, WORK_DIR "ban_5_2.html");
-    importBanzuke(db, WORK_DIR "ban_5_3.html");
-    importBanzuke(db, WORK_DIR "ban_6_1.html");*/
-
+    importBanzuke(WORK_DIR "banzuke/ban_1.html");
+    importBanzuke(WORK_DIR "banzuke/ban_2.html");
+    importBanzuke(WORK_DIR "banzuke/ban_3_1.html");
+    importBanzuke(WORK_DIR "banzuke/ban_4_1.html");
+    importBanzuke(WORK_DIR "banzuke/ban_4_2.html");
+    importBanzuke(WORK_DIR "banzuke/ban_5_1.html");
+    importBanzuke(WORK_DIR "banzuke/ban_5_2.html");
+    importBanzuke(WORK_DIR "banzuke/ban_5_3.html");
+    importBanzuke(WORK_DIR "banzuke/ban_6_1.html");
 }
 
 MainWindow::~MainWindow()
@@ -972,7 +971,7 @@ bool MainWindow::importAllTorikumi()
 
 bool MainWindow::importAllHoshitori()
 {
-    QDir dir(WORK_DIR "hoshi/");
+    QDir dir(WORK_DIR "hoshitori/");
 
     QStringList filters;
     filters << "hoshi_*_*.html";
@@ -996,12 +995,16 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
     QSqlQuery query(db);
 
     int rank_id = 0;
-    query.prepare("SELECT id, kanji FROM rank");
+    query.prepare("SELECT id FROM rank WHERE kanji = :kanji");
+    query.bindValue(":kanji", rank);
     query.exec();
-    while (query.next())
+    if (query.next())
     {
-        if (rank.startsWith(query.value(1).toString()))
-            rank_id = query.value(0).toInt();
+        rank_id = query.value(0).toInt();
+    }
+    else
+    {
+        return false;
     }
 
     int basho;
@@ -1015,14 +1018,14 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
         basho = query.value(0).toInt();
     }
     else
+    {
         return false;
+    }
 
     int id = ((basho * 100 + rank_id) * 1000 + position) * 10 + side;
 
     query.prepare("DELETE FROM banzuke WHERE id = :id");
-
     query.bindValue(":id",       id);
-
     query.exec();
 
     query.prepare("INSERT INTO banzuke ("
@@ -1369,6 +1372,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
         {
             position++;
         }
+        rank.truncate(2);
 
         /*qDebug() << "****** POSITION *****************" << position;*/
 
