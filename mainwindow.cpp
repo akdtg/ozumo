@@ -1076,7 +1076,7 @@ bool MainWindow::parsingBanzuke12(QString content)
             contentEast.truncate(content.indexOf(QString::fromUtf8("=格付=")));
 
         QString kanji1;
-        int id1;
+        int id1 = 0;
         if (contentEast.indexOf("<strong>") != -1)
         {
             QRegExp rx("rikishi_(\\d+)");
@@ -1125,7 +1125,7 @@ bool MainWindow::parsingBanzuke12(QString content)
             contentWest.truncate(contentWest.indexOf(QString::fromUtf8("=東=")));
 
         QString kanji2;
-        int id2;
+        int id2 = 0;
         if (contentWest.indexOf("<strong>") != -1)
         {
             QRegExp rx("rikishi_(\\d+)");
@@ -1301,7 +1301,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
         }
 
         QString shikona1;
-        int id1;
+        int id1 = 0;
         if (contentRow.indexOf("<strong>") != -1)
         {
             QRegExp rx("rikishi_(\\d+)");
@@ -1323,7 +1323,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
             }
 
         QString shikona2;
-        int id2;
+        int id2 = 0;
         if (contentRow.indexOf("<strong>") != -1)
         {
             QRegExp rx("rikishi_(\\d+)");
