@@ -313,6 +313,13 @@
         </layout>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_generateHoshitori">
+         <property name="text">
+          <string>Generate the hoshitori's HTML code </string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_downloadTorikumi">
          <property name="text">
           <string>Download and import the torikumi of the selected day</string>

@@ -46,6 +46,8 @@ public slots:
     bool parsingHoshitori12(QString content, int basho, int division, int side);
     bool parsingHoshitori3456(QString content, int basho, int division, int side);
     void downloadBanzuke();
+    void generateHoshitori();
+    QString hoshitori2Html(int year, int month, int day, int division);
 
 public:
     QSqlDatabase db;
