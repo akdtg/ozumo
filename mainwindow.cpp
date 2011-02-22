@@ -980,9 +980,11 @@ bool MainWindow::importAllHoshitori()
 
     QStringList list = dir.entryList();
 
+    bool importResult;
     for (int i = 0; i < list.count(); i++)
     {
-        importHoshitori(dir.absoluteFilePath(list.at(i)));
+        importResult = importHoshitori(dir.absoluteFilePath(list.at(i)));
+        ui->textEdit_htmlCode->append(dir.filePath(list.at(i)) + ": " + QString(importResult == true ? "Ok":"*** Error ***"));
     }
 
     return true;
@@ -1265,8 +1267,6 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
     else
         return false;
 
-    content = content.mid(content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\"><table")));
-
     QString prevRank;
     int position = 1;
 
@@ -1277,9 +1277,77 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
         QString contentRow = content;
         contentRow.truncate(contentRow.indexOf(QString::fromUtf8("</div>")));
 
-        contentRow = contentRow.mid(contentRow.indexOf("<td colspan=\"4\" bgcolor=\"#6b248f\" class=\"common12-18-fff\">"));
-        contentRow = contentRow.mid(contentRow.indexOf(">") + 1);
-        QString rank = contentRow.left(contentRow.indexOf("<")).simplified();
+        QString contentEast = contentRow;
+        contentEast = contentEast.mid(contentEast.indexOf(QString::fromUtf8("<td width=\"263\" valign=\"top\">")));
+        contentEast = contentEast.mid(1);
+
+        QString contentWest = contentEast;
+
+        contentEast.truncate(contentEast.indexOf((QString::fromUtf8("<td width=\"263\" valign=\"top\">"))));
+        contentWest = contentWest.mid(contentWest.indexOf(QString::fromUtf8("<td width=\"263\" valign=\"top\">")));
+
+        QString rankEast = contentEast;
+        rankEast.replace(QRegExp(".*class=\"common12-18-fff\">([^<]*)</td>.*"), "\\1");
+        if (rankEast == contentEast)
+        {
+            rankEast.clear();
+        }
+
+        int idEast = 0;
+        QString tempIdEast = contentEast;
+        tempIdEast.replace(QRegExp(".*/ozumo_meikan/rikishi_joho/rikishi_([^<]*)\\.html.*"), "\\1");
+        if (tempIdEast == contentEast)
+        {
+            tempIdEast.clear();
+        }
+        else
+        {
+            idEast = tempIdEast.toInt();
+        }
+
+        QString shikonaEast = contentEast;
+        shikonaEast.replace(QRegExp(".*<strong>([^<]*)</strong><.*"), "\\1");
+        if (shikonaEast == contentEast)
+        {
+            shikonaEast.clear();
+        }
+
+/*        qDebug() << "********** RANK EAST ************" << rankEast;
+        qDebug() << "********** ID   EAST ************" << idEast;
+        qDebug() << "******* SHIKONA EAST ************" << shikonaEast;*/
+
+        QString rankWest = contentWest;
+        rankWest.replace(QRegExp(".*class=\"common12-18-fff\">([^<]*)</td>.*"), "\\1");
+        if (rankWest == contentWest)
+        {
+            rankWest.clear();
+        }
+
+        int idWest = 0;
+        QString tempIdWest = contentWest;
+        tempIdWest.replace(QRegExp(".*/ozumo_meikan/rikishi_joho/rikishi_([^<]*)\\.html.*"), "\\1");
+        if (tempIdWest == contentWest)
+        {
+            tempIdWest.clear();
+        }
+        else
+        {
+            idWest = tempIdWest.toInt();
+        }
+
+        QString shikonaWest = contentWest;
+        shikonaWest.replace(QRegExp(".*<strong>([^<]*)</strong><.*"), "\\1");
+        if (shikonaWest == contentWest)
+        {
+            shikonaWest.clear();
+        }
+
+/*        qDebug() << "********** RANK WEST ************" << rankWest;
+        qDebug() << "********** ID   WEST ************" << idWest;
+        qDebug() << "******* SHIKONA WEST ************" << shikonaWest;*/
+
+        QString rank;
+        rank = rankEast.isEmpty() ? rankWest : rankEast;
 
         if (QString(rank.at(0)) != prevRank)
         {
@@ -1293,52 +1361,26 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
                     position = 10;
             }
             if ((division == 2) && (side == 5))
+            {
                 position = 8;
+            }
         }
         else
         {
             position++;
         }
 
-        QString shikona1;
-        int id1 = 0;
-        if (contentRow.indexOf("<strong>") != -1)
-        {
-            QRegExp rx("rikishi_(\\d+)");
-            if (rx.indexIn(contentRow) != -1) {
-                id1 = rx.cap(1).toInt();
-            }
+        /*qDebug() << "****** POSITION *****************" << position;*/
 
-            contentRow = contentRow.mid(contentRow.indexOf("<strong>"));
-            contentRow = contentRow.mid(contentRow.indexOf(">") + 1).simplified();
-            shikona1 = contentRow.left(contentRow.indexOf("<"));
-        }
-
-        //qDebug() << rank << position << id1 << shikona1;
-        if (!shikona1.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 0, id1, shikona1))
+        if (!shikonaEast.isEmpty())
+            if (!insertBanzuke(year, month, rank, position, 0, idEast, shikonaEast))
             {
                 qDebug() << "-";
                 return false;
             }
 
-        QString shikona2;
-        int id2 = 0;
-        if (contentRow.indexOf("<strong>") != -1)
-        {
-            QRegExp rx("rikishi_(\\d+)");
-            if (rx.indexIn(contentRow) != -1) {
-                id2 = rx.cap(1).toInt();
-            }
-
-            contentRow = contentRow.mid(contentRow.indexOf("<strong>"));
-            contentRow = contentRow.mid(contentRow.indexOf(">") + 1).simplified();
-            shikona2 = contentRow.left(contentRow.indexOf("<"));
-        }
-
-        //qDebug() << rank << position << id2 << shikona2;
-        if (!shikona2.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 1, id2, shikona2))
+        if (!shikonaWest.isEmpty())
+            if (!insertBanzuke(year, month, rank, position, 1, idWest, shikonaWest))
             {
                 qDebug() << "-";
                 return false;
@@ -1437,10 +1479,15 @@ bool MainWindow::importHoshitori(QString fName)
     else
         return false;
 
+    bool parsingResult;
     if (division <= 2)
-        parsingHoshitori12(content, basho, division, side);
+    {
+        parsingResult = parsingHoshitori12(content, basho, division, side);
+    }
     else
-        parsingHoshitori3456(content, basho, division, side - 1);
+    {
+        parsingResult = parsingHoshitori3456(content, basho, division, side - 1);
+    }
 
-    return true;
+    return parsingResult;
 }
