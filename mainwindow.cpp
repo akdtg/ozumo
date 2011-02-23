@@ -494,12 +494,9 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         QString history;
         for (int i = 1; i <= 6; i++)
         {
-            //SELECT result1, result2 FROM torikumi WHERE (shikona1 = "白鵬" AND shikona2 = "魁皇") AND basho = 545
-            //UNION ALL
-            //SELECT result2, result1 FROM torikumi WHERE (shikona2 = "白鵬" AND shikona1 = "魁皇") AND basho = 545
             tmpQuery.prepare("SELECT result1, result2 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
-                                 "UNION "
-                                 "SELECT result2, result1 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
+                             "UNION "
+                             "SELECT result2, result1 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
 
             tmpQuery.bindValue(":shikona1a", shikona1);
             tmpQuery.bindValue(":shikona2a", shikona2);
@@ -539,9 +536,9 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
     QSqlQuery query(db);
 
     query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite "
-               "FROM torikumi "
-               "WHERE year = :year AND month = :month AND day = :day AND division = :division "
-               "ORDER BY id_local");
+                  "FROM torikumi "
+                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+                  "ORDER BY id_local");
     query.bindValue(":year", year);
     query.bindValue(":month", month);
     query.bindValue(":day", day);
@@ -662,8 +659,8 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
 
     QSqlQuery query(db);
     query.prepare("SELECT id FROM basho WHERE year = :year AND month = :month");
-    query.bindValue(":year",     year);
-    query.bindValue(":month",    month);
+    query.bindValue(":year",  year);
+    query.bindValue(":month", month);
     query.exec();
     if (query.next())
     {
@@ -778,7 +775,6 @@ void MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
 
     content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
     content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->"))).simplified();
-    //content = content.mid(content.indexOf(QString("<!-- BASYO CONTENTS -->"))).simplified();
 
     while (content.indexOf("torikumi_riki2") != -1)
     {
@@ -1635,12 +1631,12 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
                 for (int d = 1; d <= day; d++)
                 {
-                    tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :shikona1 AND year = :year1 AND month = :month1 AND day = :day1 "
+                    tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :year1 AND month = :month1 AND day = :day1 "
                                      "UNION "
-                                     "SELECT result2 FROM torikumi WHERE shikona2 = :shikona2 AND year = :year2 AND month = :month2 AND day = :day2 ");
+                                     "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :year2 AND month = :month2 AND day = :day2 ");
 
-                    tmpQuery.bindValue(":shikona1", shikonaEast);
-                    tmpQuery.bindValue(":shikona2", shikonaEast);
+                    tmpQuery.bindValue(":s1", shikonaEast);
+                    tmpQuery.bindValue(":s2", shikonaEast);
                     tmpQuery.bindValue(":year1", year);
                     tmpQuery.bindValue(":year2", year);
                     tmpQuery.bindValue(":month1", month);
@@ -1701,12 +1697,12 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
                 for (int d = 1; d <= day; d++)
                 {
-                    tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :shikona1 AND year = :year1 AND month = :month1 AND day = :day1 "
+                    tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :year1 AND month = :month1 AND day = :day1 "
                                      "UNION "
-                                     "SELECT result2 FROM torikumi WHERE shikona2 = :shikona2 AND year = :year2 AND month = :month2 AND day = :day2 ");
+                                     "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :year2 AND month = :month2 AND day = :day2 ");
 
-                    tmpQuery.bindValue(":shikona1", shikonaWest);
-                    tmpQuery.bindValue(":shikona2", shikonaWest);
+                    tmpQuery.bindValue(":s1", shikonaWest);
+                    tmpQuery.bindValue(":s2", shikonaWest);
                     tmpQuery.bindValue(":year1", year);
                     tmpQuery.bindValue(":year2", year);
                     tmpQuery.bindValue(":month1", month);
