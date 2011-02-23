@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!db.open())
         QMessageBox::warning(this, tr("Unable to open database"),
                              tr("An error occurred while opening the connection: ") + db.lastError().text());
+
+    statistics();
 }
 
 MainWindow::~MainWindow()
@@ -1746,4 +1748,26 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
     Html += "</tbody>\n</table>\n";
 
     return Html;
+}
+
+void MainWindow::statistics()
+{
+    ui->textEdit_htmlCode->clear();
+    ui->textEdit_htmlCode->append("Database content:");
+
+    QSqlQuery query(db);
+
+    query.exec("SELECT tbl_name FROM sqlite_master WHERE type = 'table' ORDER BY tbl_name");
+    while (query.next())
+    {
+        QString tblName = query.value(0).toString();
+
+        QSqlQuery tblQuery(db);
+
+        tblQuery.exec("SELECT COUNT(*) FROM " + tblName);
+        while (tblQuery.next())
+        {
+            ui->textEdit_htmlCode->append(tblName + ": " + tblQuery.value(0).toString());
+        }
+    }
 }

@@ -50,6 +50,7 @@ public slots:
     QString hoshitori2Html(int year, int month, int day, int division);
     QString translateShikona(QString shikona);
     QString translateKimarite(QString kimarite);
+    void statistics();
 
 public:
     QSqlDatabase db;
