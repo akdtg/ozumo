@@ -514,7 +514,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
                 history.prepend(r);
             }
             else
-                history.prepend(QString::fromUtf8("−"));
+                history.prepend(QString::fromUtf8("‒"));
             history.prepend(" ");
         }
 
@@ -1654,8 +1654,8 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                         historyEast.append(r);
                     }
                     else
-                        historyEast.append(QString::fromUtf8("－"));
-                    historyEast.append(" ");
+                        historyEast.append(QString::fromUtf8("‒"));
+                    historyEast.append("");
                 }
             }
 
@@ -1721,8 +1721,8 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                         historyWest.append(r);
                     }
                     else
-                        historyWest.append(QString::fromUtf8("－"));
-                    historyWest.append(" ");
+                        historyWest.append(QString::fromUtf8("‒"));
+                    historyWest.append("");
                 }
             }
 
@@ -1736,9 +1736,11 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             }
 
             Html += "<tr class=" + className[trClass] + ">"
-                    "<td>" + shikonaRuEast + " " + resEast + "<br/>" + historyEast + "</td>"
+                    "<td><strong>" + shikonaRuEast + "</strong> " + resEast + "<br/>"
+                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyEast + "</font></td>"
                     "<td>" + rankRu + "&nbsp;" + QString::number(row) + "</td>"
-                    "<td>" + shikonaRuWest + " " + resWest + "<br/>" + historyWest + "</td></tr>\n";
+                    "<td><strong>" + shikonaRuWest + "</strong> " + resWest + "<br/>"
+                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyWest + "</td></tr>\n";
             //qDebug() << Html;
 
             trClass ^= 1;
