@@ -138,10 +138,6 @@ QString MainWindow::translateKimarite(QString kimarite)
     {
         kimariteRu = tmpQuery.value(0).toString();
     }
-    else
-    {
-        kimariteRu = QString::fromUtf8("неопределён");
-    }
 
     return kimariteRu;
 }
