@@ -1225,12 +1225,17 @@ bool MainWindow::importBanzuke(QString fName)
     QFileInfo fi(fName);
     division = QString(fi.fileName().at(4)).toInt();
 
+    bool parsingResult;
     if (division <= 2)
-        parsingBanzuke12(content);
+    {
+        parsingResult = parsingBanzuke12(content);
+    }
     else
-        parsingBanzuke3456(content);
+    {
+        parsingResult = parsingBanzuke3456(content);
+    }
 
-    return true;
+    return parsingResult;
 }
 
 bool MainWindow::parsingHoshitori12(QString content, int basho, int division, int side)
