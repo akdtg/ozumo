@@ -19,9 +19,9 @@ public:
 
 public slots:
     bool importTorikumi(QString fName);
-    bool importAllTorikumi();
-    void parsingTorikumi12(QString content, int basho, int year, int month, int day, int division);
-    void parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division);
+    void importAllTorikumi();
+    bool parsingTorikumi12(QString content, int basho, int year, int month, int day, int division);
+    bool parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division);
     bool torikumi2Banzuke();
     bool insertTorikumi(int id, int basho, int year, int month, int day,
                         int division,
@@ -40,7 +40,7 @@ public slots:
     bool parsingBanzuke3456(QString content);
     bool insertBanzuke(int year, int month, QString rank, int position, int side,
                        int rikishi_id, QString shikona);
-    bool importAllHoshitori();
+    void importAllHoshitori();
     bool importHoshitori(QString fName);
     bool parsingHoshitori12(QString content, int basho, int division, int side);
     bool parsingHoshitori3456(QString content, int basho, int division, int side);

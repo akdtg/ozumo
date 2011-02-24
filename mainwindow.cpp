@@ -598,7 +598,11 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
 
     if (exitCode == 0)
     {
-        importTorikumi(fName);
+        exitCode = -1;
+        if (importTorikumi(fName))
+        {
+            exitCode = 0;
+        }
     }
 
     return exitCode;
@@ -687,7 +691,7 @@ void MainWindow::generateTorikumiResults()
     ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
-void MainWindow::parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division)
+bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division)
 {
     int dayx = day, id_local = 0;
     int rikishi1 = 0, rikishi2 = 0;
@@ -744,14 +748,17 @@ void MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
                             rikishi1, shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
                             rikishi2, shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
                             kimarite,
-                            id_local)
-            )
+                            id_local))
+        {
             qDebug() << "-";
+            return false;
+        }
     }
 
+    return true;
 }
 
-void MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
+bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
 {
     int dayx = day, id_local = 0;
 
@@ -848,13 +855,17 @@ void MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
                                 id1.toInt(), shikona1, rank1, result1,
                                 id2.toInt(), shikona2, rank2, result2,
                                 kimarite,
-                                id_local)
-                )
+                                id_local))
+            {
                 qDebug() << "-";
+                return false;
+            }
         }
 
         content = content.mid(content.indexOf(QString::fromUtf8("</tr>")));
     }
+
+    return true;
 }
 
 bool MainWindow::importTorikumi(QString fName)
@@ -909,15 +920,20 @@ bool MainWindow::importTorikumi(QString fName)
         }
     }
 
+    bool parsingResult;
     if (division <= 2)
-        parsingTorikumi12(content, basho, year, month, day, division);
+    {
+        parsingResult = parsingTorikumi12(content, basho, year, month, day, division);
+    }
     else
-        parsingTorikumi3456(content, basho, year, month, day, division);
+    {
+        parsingResult = parsingTorikumi3456(content, basho, year, month, day, division);
+    }
 
-    return true;
+    return parsingResult;
 }
 
-bool MainWindow::importAllTorikumi()
+void MainWindow::importAllTorikumi()
 {
     QDir dir(WORK_DIR "torikumi/");
 
@@ -927,15 +943,17 @@ bool MainWindow::importAllTorikumi()
 
     QStringList list = dir.entryList();
 
+    ui->textEdit_htmlCode->clear();
+
+    bool importResult;
     for (int i = 0; i < list.count(); i++)
     {
-        importTorikumi(dir.absoluteFilePath(list.at(i)));
+        importResult = importTorikumi(dir.absoluteFilePath(list.at(i)));
+        ui->textEdit_htmlCode->append(dir.filePath(list.at(i)) + ": " + QString(importResult == true ? "Ok":"*** Error ***"));
     }
-
-    return true;
 }
 
-bool MainWindow::importAllHoshitori()
+void MainWindow::importAllHoshitori()
 {
     QDir dir(WORK_DIR "hoshitori/");
 
@@ -945,14 +963,14 @@ bool MainWindow::importAllHoshitori()
 
     QStringList list = dir.entryList();
 
+    ui->textEdit_htmlCode->clear();
+
     bool importResult;
     for (int i = 0; i < list.count(); i++)
     {
         importResult = importHoshitori(dir.absoluteFilePath(list.at(i)));
         ui->textEdit_htmlCode->append(dir.filePath(list.at(i)) + ": " + QString(importResult == true ? "Ok":"*** Error ***"));
     }
-
-    return true;
 }
 
 bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, int side,
