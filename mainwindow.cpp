@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->pushButton_importAllTorikumi, SIGNAL(clicked()), this, SLOT(importAllTorikumi()));
     connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
-    connect(ui->pushButton_Hoshitori, SIGNAL(clicked()), this, SLOT(importAllHoshitori()));
+    connect(ui->pushButton_importAllHoshitori, SIGNAL(clicked()), this, SLOT(importAllHoshitori()));
     connect(ui->pushButton_downloadBanzuke, SIGNAL(clicked()), this, SLOT(downloadBanzuke()));
 
     connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
