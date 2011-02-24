@@ -772,24 +772,23 @@ void MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
             //qDebug() << "ketteisen";
         }
 
-        QRegExp rx;
-        rx.setPattern("class=\"torikumi_riki2\">"
-                      "(.{1,6})"     // rank1
-                      "</td>"
+        QRegExp rx("class=\"torikumi_riki2\">"
+                   "(.{1,6})"     // rank1
+                   "</td>"
 
-                      ".*<span class=\"torikumi_btxt\">"
-                      ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id1 + '..>' + shikona1 + '</a>'
-                      "</span>"
+                   ".*<span class=\"torikumi_btxt\">"
+                   ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id1 + '..>' + shikona1 + '</a>'
+                   "</span>"
 
-                      "(.+)"     // res1 + kimarite + res2
+                   "(.+)"     // res1 + kimarite + res2
 
-                      ".*<span class=\"torikumi_btxt\">"
-                      ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id2 + '..>' + shikona2 + '</a>'
-                      "</span>"
+                   ".*<span class=\"torikumi_btxt\">"
+                   ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id2 + '..>' + shikona2 + '</a>'
+                   "</span>"
 
-                      ".*class=\"torikumi_riki2\">"
-                      "(.{1,6})"     // rank2
-                      "</td>");
+                   ".*class=\"torikumi_riki2\">"
+                   "(.{1,6})"     // rank2
+                   "</td>");
 
         if (rx.indexIn(contentRow) != -1)
         {
@@ -797,10 +796,9 @@ void MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
             QString rank2, id2, shikona2, res2;
             QString kimarite;
 
-            QRegExp rxResults;
-            rxResults.setPattern(".*class=\"torikumi_riki3\">(.{1})</td>"
-                                 ".*class=\"torikumi_riki3\">.*(<a.+>)?([^\\s][^<]+)(</a>)?.*</td>"
-                                 ".*class=\"torikumi_riki3\">(.{1})</td>");
+            QRegExp rxResults(".*class=\"torikumi_riki3\">(.{1})</td>"
+                              ".*class=\"torikumi_riki3\">.*(<a.+>)?([^\\s][^<]+)(</a>)?.*</td>"
+                              ".*class=\"torikumi_riki3\">(.{1})</td>");
 
             rank1    = rx.cap(1);
             id1      = rx.cap(3);
@@ -886,8 +884,7 @@ bool MainWindow::importTorikumi(QString fName)
     division = tempList.at(2).toInt();
     day      = tempList.at(3).toInt();
 
-    QRegExp rx;
-    rx.setPattern(QString::fromUtf8("(\\d{4})年(\\d{1,2})月(\\d{1,2})日"));
+    QRegExp rx(QString::fromUtf8("(\\d{4})年(\\d{1,2})月(\\d{1,2})日"));
 
     if (rx.indexIn(content) != -1)
     {
