@@ -100,59 +100,6 @@ int wgetDownload(QString url)
     return process.exitCode();
 }
 
-QStringList readAndSimplifyBashoContent(QString content)
-{
-    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
-    content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->")));
-
-    content.replace(QRegExp("<table([^<]*)>"), "");
-    content.replace(QRegExp("</table>"), "");
-
-    content.replace(QRegExp("<br>"), "<>");
-
-    content.replace(QRegExp("</td>"), "");
-
-    content.replace(QRegExp("<tr>"), "");
-    content.replace(QRegExp("</tr>"), "");
-
-    content.replace(QRegExp("<span([^<]*)>"), "");
-    content.replace(QRegExp("</span>"), "");
-
-    content.replace(QRegExp("<div class=\"torikumi_gyoji\">([^<]*)</div>"), "");
-    content.replace(QRegExp("<div([^<]*)>"), "");
-    content.replace(QRegExp("</div>"), "");
-
-    content.replace(QRegExp("<td([^<]*)class=\"basho78-150\">"), "<date>");
-
-    content.replace(QRegExp("<strong>"), "");
-    content.replace(QRegExp("</strong>"), "");
-
-    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki1\">"), "<shikona>");
-    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki2\">"), "<rank>");
-    content.replace(QRegExp("<td([^<]*)class=\"torikumi_riki3\">"), "<result>");
-
-    content.replace(QRegExp("<a([^<]*)rikishi_(\\d+).html\">"), "<rikishi_id><\\2>");
-    content.replace(QRegExp("<a([^<]*)kimarite/(\\d+).html\">"), "<kimarite_id><\\2>");
-
-    content.replace(QRegExp("<a([^<]*)>"), "");
-    content.replace(QRegExp("</a>"), "");
-
-    content.replace(">", "<");
-    content = content.simplified();
-    content.replace("< <", "<");
-    content = content.simplified();
-
-    QStringList list = content.split("<", QString::SkipEmptyParts);
-
-    for (int i = 0; i < list.count(); i++)
-    {
-        list.replace(i, list.value(i).simplified());
-    }
-
-    //qDebug() << list;
-    return list;
-}
-
 QString MainWindow::translateShikona(QString shikona)
 {
     QSqlQuery tmpQuery(db);
@@ -271,36 +218,6 @@ void splitRank (QString kanjiRank, int *side, int *rank, int *pos)
         *rank = 1;
         *pos = kanjiRank.mid(2).toInt();
     }
-}
-
-bool MainWindow::findDate(QString content, int *year, int *month)
-{
-    QStringList list = readAndSimplifyBashoContent(content);
-
-    *year = 0;
-    *month = 0;
-
-    int i = 0;
-    while (!list.value(i).contains("date"))
-    {
-        i++;
-    }
-
-    if (list.value(i).contains("date"))
-    {
-        QStringList tempList = list.value(i + 1).split(" ");
-        QString date = tempList.at(3);
-        tempList = date.split(QRegExp("(\\D+)"), QString::SkipEmptyParts);
-        *year = tempList.at(0).toInt();
-        *month = tempList.at(1).toInt();
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-
 }
 
 bool MainWindow::insertTorikumi(int id, int basho, int year, int month, int day,
@@ -964,7 +881,7 @@ bool MainWindow::importTorikumi(QString fName)
 
     file0.close();
 
-    int year, month;
+    int year = 0, month = 0;
     int basho, division, day;
 
     fName.replace('.', '_');
@@ -973,7 +890,15 @@ bool MainWindow::importTorikumi(QString fName)
     division = tempList.at(2).toInt();
     day      = tempList.at(3).toInt();
 
-    if (!findDate(content, &year, &month) || (year == 0) || (month == 0))
+    QRegExp rx;
+    rx.setPattern(QString::fromUtf8("(\\d{4})年(\\d{1,2})月(\\d{1,2})日"));
+
+    if (rx.indexIn(content) != -1)
+    {
+        year  = rx.cap(1).toInt();
+        month = rx.cap(2).toInt();
+    }
+    else
     {
         QSqlQuery query(db);
 
@@ -986,7 +911,9 @@ bool MainWindow::importTorikumi(QString fName)
             month = query.value(1).toInt();
         }
         else
+        {
             return false;
+        }
     }
 
     if (division <= 2)

@@ -23,7 +23,6 @@ public slots:
     void parsingTorikumi12(QString content, int basho, int year, int month, int day, int division);
     void parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division);
     bool torikumi2Banzuke();
-    bool findDate(QString content, int *year, int *month);
     bool insertTorikumi(int id, int basho, int year, int month, int day,
                         int division,
                         int rikishi1, QString shikona1, QString rank1, int result1,
