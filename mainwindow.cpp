@@ -21,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->pushButton_importAllTorikumi, SIGNAL(clicked()), this, SLOT(importAllTorikumi()));
-    connect(ui->pushButton_torikumi2Banzuke, SIGNAL(clicked()), this, SLOT(torikumi2Banzuke()));
     connect(ui->pushButton_importAllHoshitori, SIGNAL(clicked()), this, SLOT(importAllHoshitori()));
     connect(ui->pushButton_downloadBanzuke, SIGNAL(clicked()), this, SLOT(downloadBanzuke()));
 
@@ -262,51 +261,6 @@ bool MainWindow::insertTorikumi(int id, int basho, int year, int month, int day,
     query.bindValue(":id_local", id_local);
 
     return query.exec();
-}
-
-bool MainWindow::torikumi2Banzuke()
-{
-    QSqlQuery query(db), queryOut(db);
-
-    query.exec("DROP TABLE IF EXISTS banzuke");
-
-    query.exec("CREATE TABLE \"banzuke\" ("
-               "\"year\" INTEGER, "
-               "\"month\" INTEGER, "
-               "\"rank\" INTEGER, "
-               "\"position\" INTEGER, "
-               "\"side\" INTEGER, "
-               "\"rikishi\" INTEGER, "
-               "\"shikona\" VARCHAR)");
-
-    query.exec("SELECT year, month, rank1, rikishi1, shikona1 FROM torikumi "
-               "UNION "
-               "SELECT year, month, rank2, rikishi2, shikona2 FROM torikumi");
-
-    while (query.next())
-    {
-        int year        = query.value(0).toInt();
-        int month       = query.value(1).toInt();
-        QString rank    = query.value(2).toString();
-        int rikishi     = query.value(3).toInt();
-        QString shikona = query.value(4).toString();
-
-        int side, rankN, pos;
-        splitRank(rank, &side, &rankN, &pos);
-
-        queryOut.prepare("INSERT INTO banzuke (year, month, rank, position, side, rikishi, shikona)"
-                         "VALUES (:year, :month, :rank, :position, :side, :rikishi, :shikona)");
-        queryOut.bindValue(":year", year);
-        queryOut.bindValue(":month", month);
-        queryOut.bindValue(":rank", rankN);
-        queryOut.bindValue(":position", pos);
-        queryOut.bindValue(":side", side);
-        queryOut.bindValue(":rikishi", rikishi);
-        queryOut.bindValue(":shikona", shikona);
-        queryOut.exec();
-    }
-
-    return true;
 }
 
 QString MainWindow::torikumi2Html(int year, int month, int day, int division)

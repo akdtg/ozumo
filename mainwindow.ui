@@ -69,16 +69,6 @@
        <item row="2" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <widget class="QPushButton" name="pushButton_torikumi2Banzuke">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Generate the banzuke based on the torikumi</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QPushButton" name="pushButton_downloadBanzuke">
            <property name="text">
             <string>Download and import the current banzuke</string>
