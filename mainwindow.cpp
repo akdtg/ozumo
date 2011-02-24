@@ -836,147 +836,93 @@ void MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
 
 void MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
 {
+    int dayx = day, id_local = 0;
+
     content = content.mid(content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\">")));
+    content.truncate(content.indexOf(QString::fromUtf8("<!-- /BASYO CONTENTS -->")));
 
     while (content.indexOf(QString::fromUtf8("<tr>")) != -1)
     {
         content = content.mid(content.indexOf(QString::fromUtf8("<tr>")));
 
-        QString contentRow = content;
+        QString contentRow = content.simplified();
         contentRow.truncate(contentRow.indexOf(QString::fromUtf8("</tr>")));
 
         if (contentRow.indexOf(QString::fromUtf8("優勝決定戦")) != -1)
         {
-            day = 16;
-            qDebug() << "ketteisen";
+            dayx = 16;
+            id_local = 0;
+            //qDebug() << "ketteisen";
         }
-
-        QString rank1, id1, shikona1, res1;
-        QString rank2, id2, shikona2, res2;
-        QString kimarite;
 
         QRegExp rx;
-        rx.setPattern(".*class=\"torikumi_riki2\">"
-                      "([^<]*)"     // rank1
-                      "</td>.*"
-                      ".*/ozumo_meikan/rikishi_joho/rikishi_([^<]*)\\.html\">"      //id1
-                      "([^<]*)"     // shikona1
-                      "</a></span>.*"
-                      ".*class=\"torikumi_riki3\">"
-                      "([^<]*)"     // res1
-                      "</td>.*"
-                      "<a href=\"/kimarite/"
-                      "\\d+"
-                      ".html\">"
-                      "([^<]*)"     // kimarite
-                      "</a>.*"
-                      ".*class=\"torikumi_riki3\">"
-                      "([^<]*)"     // res2
-                      "</td>.*"
-                      ".*/ozumo_meikan/rikishi_joho/rikishi_([^<]*)\\.html\">"      // id2
-                      "([^<]*)"     // shikona2
-                      "</a></span>.*"
+        rx.setPattern("class=\"torikumi_riki2\">"
+                      "(.{1,6})"     // rank1
+                      "</td>"
+
+                      ".*<span class=\"torikumi_btxt\">"
+                      ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id1 + '..>' + shikona1 + '</a>'
+                      "</span>"
+
+                      "(.+)"     // res1 + kimarite + res2
+
+                      ".*<span class=\"torikumi_btxt\">"
+                      ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id2 + '..>' + shikona2 + '</a>'
+                      "</span>"
+
                       ".*class=\"torikumi_riki2\">"
-                      "([^<]*)"     // rank2
-                      "</td>.*");
+                      "(.{1,6})"     // rank2
+                      "</td>");
+
         if (rx.indexIn(contentRow) != -1)
         {
-            rank1 = rx.cap(1);
-            id1     = rx.cap(2);
-            shikona1 = rx.cap(3);
-            res1 = rx.cap(4);
-            kimarite = rx.cap(5);
-            res2 = rx.cap(6);
-            id2     = rx.cap(7);
-            shikona2 = rx.cap(8);
-            rank2 = rx.cap(9);
-            qDebug() << rank1 << id1 << shikona1 << res1 << kimarite << res2 << id2 << shikona2 << rank2;
-        }
+            QString rank1, id1, shikona1, res1;
+            QString rank2, id2, shikona2, res2;
+            QString kimarite;
 
-        content = content.mid(content.indexOf(QString::fromUtf8("</tr>")));
-    }
-}
+            QRegExp rxResults;
+            rxResults.setPattern(".*class=\"torikumi_riki3\">(.{1})</td>"
+                                 ".*class=\"torikumi_riki3\">.*(<a.+>)?([^\\s][^<]+)(</a>)?.*</td>"
+                                 ".*class=\"torikumi_riki3\">(.{1})</td>");
 
-/*void MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
-{
-    int i = 0;
-    int dayx = day, id_local = 0;
-    QString rikishi1, rikishi2;
+            rank1    = rx.cap(1);
+            id1      = rx.cap(3);
+            shikona1 = rx.cap(5);
 
-    QStringList list = readAndSimplifyBashoContent(content);
-
-    while (i < list.count())
-    {
-        if (list.value(i).contains("rank"))
-        {
-            QString rank1 = list.value(i +  1);
-
-            QString shikona1 = list.value(i +  3);
-            if (shikona1 == "rikishi_id")
+            QString results = rx.cap(7);
+            if (rxResults.indexIn(results) != -1)
             {
-                i++;
-                rikishi1 = list.value(i +  3);
-                i++;
-                shikona1 = list.value(i +  3);
+                res1     = rxResults.cap(1);
+                kimarite = rxResults.cap(3);
+                res2     = rxResults.cap(5);
+            }
+
+            int result1, result2;
+
+            if (res1.isEmpty())
+            {
+                result1 = -1;
             }
             else
             {
-                rikishi1 = "0";
+                result1 = res1 == QString::fromUtf8("○") ? 1:0;
             }
 
-            QString sum = list.value(i + 4);
-            if (sum.contains(QRegExp("\\d+")))
+            if (res2.isEmpty())
             {
-                sum.replace(QString::fromUtf8("勝"), QString("-"));
-                sum.replace(QString::fromUtf8("敗"), QString(""));
+                result2 = -1;
             }
             else
             {
-                sum = "";
-                dayx = 16;
-                i--;
+                result2 = res2 == QString::fromUtf8("○") ? 1:0;
             }
 
-            QString result1 = list.value(i +  6);
+            id2      = rx.cap(9);
+            shikona2 = rx.cap(11);
+            rank2    = rx.cap(13);
 
-            QString kimarite = list.value(i +  8);
-            if (kimarite == "kimarite_id")
-            {
-                i++;
-                kimarite = list.value(i +  8);  // kimarite id, just skipped at this moment
-                i++;
-                kimarite = list.value(i +  8);
-            }
-
-            QString result2 = list.value(i + 10);
-
-            QString shikona2 = list.value(i + 12);
-            if (shikona2 == "rikishi_id")
-            {
-                i++;
-                rikishi2 = list.value(i +  12);
-                i++;
-                shikona2 = list.value(i +  12);
-            }
-            else
-            {
-                rikishi2 = "0";
-            }
-
-            sum = list.value(i + 13);
-            if (sum.contains(QRegExp("\\d+")))
-            {
-                sum.replace(QString::fromUtf8("勝"), QString("-"));
-                sum.replace(QString::fromUtf8("敗"), QString(""));
-            }
-            else
-            {
-                sum = "";
-                dayx = 16;
-                i--;
-            }
-
-            QString rank2 = list.value(i + 15);
+            //qDebug() << rx.cap(1) << rx.cap(4) << rx.cap(5) << rx.cap(6) << rx.cap(7) << rx.cap(8);
+            //qDebug() << rank1 << id1 << shikona1 << res1 << kimarite << res2 << id2 << shikona2 << rank2;
 
             ++id_local;
 
@@ -984,19 +930,21 @@ void MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
 
             if (!insertTorikumi(index, basho, year, month, dayx,
                                 division,
-                                rikishi1.toInt(), shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
-                                rikishi2.toInt(), shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
+                                id1.toInt(), shikona1, rank1, result1,
+                                id2.toInt(), shikona2, rank2, result2,
                                 kimarite,
                                 id_local)
                 )
                 qDebug() << "-";
-
-            i += 15;
         }
-        i++;
-    }
+        else
+        {
+            qDebug() << contentRow;
+        }
 
-}*/
+        content = content.mid(content.indexOf(QString::fromUtf8("</tr>")));
+    }
+}
 
 bool MainWindow::importTorikumi(QString fName)
 {
