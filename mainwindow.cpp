@@ -854,10 +854,6 @@ void MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
                 )
                 qDebug() << "-";
         }
-        else
-        {
-            qDebug() << contentRow;
-        }
 
         content = content.mid(content.indexOf(QString::fromUtf8("</tr>")));
     }
