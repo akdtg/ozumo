@@ -836,6 +836,69 @@ void MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
 
 void MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
 {
+    content = content.mid(content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\">")));
+
+    while (content.indexOf(QString::fromUtf8("<tr>")) != -1)
+    {
+        content = content.mid(content.indexOf(QString::fromUtf8("<tr>")));
+
+        QString contentRow = content;
+        contentRow.truncate(contentRow.indexOf(QString::fromUtf8("</tr>")));
+
+        if (contentRow.indexOf(QString::fromUtf8("優勝決定戦")) != -1)
+        {
+            day = 16;
+            qDebug() << "ketteisen";
+        }
+
+        QString rank1, id1, shikona1, res1;
+        QString rank2, id2, shikona2, res2;
+        QString kimarite;
+
+        QRegExp rx;
+        rx.setPattern(".*class=\"torikumi_riki2\">"
+                      "([^<]*)"     // rank1
+                      "</td>.*"
+                      ".*/ozumo_meikan/rikishi_joho/rikishi_([^<]*)\\.html\">"      //id1
+                      "([^<]*)"     // shikona1
+                      "</a></span>.*"
+                      ".*class=\"torikumi_riki3\">"
+                      "([^<]*)"     // res1
+                      "</td>.*"
+                      "<a href=\"/kimarite/"
+                      "\\d+"
+                      ".html\">"
+                      "([^<]*)"     // kimarite
+                      "</a>.*"
+                      ".*class=\"torikumi_riki3\">"
+                      "([^<]*)"     // res2
+                      "</td>.*"
+                      ".*/ozumo_meikan/rikishi_joho/rikishi_([^<]*)\\.html\">"      // id2
+                      "([^<]*)"     // shikona2
+                      "</a></span>.*"
+                      ".*class=\"torikumi_riki2\">"
+                      "([^<]*)"     // rank2
+                      "</td>.*");
+        if (rx.indexIn(contentRow) != -1)
+        {
+            rank1 = rx.cap(1);
+            id1     = rx.cap(2);
+            shikona1 = rx.cap(3);
+            res1 = rx.cap(4);
+            kimarite = rx.cap(5);
+            res2 = rx.cap(6);
+            id2     = rx.cap(7);
+            shikona2 = rx.cap(8);
+            rank2 = rx.cap(9);
+            qDebug() << rank1 << id1 << shikona1 << res1 << kimarite << res2 << id2 << shikona2 << rank2;
+        }
+
+        content = content.mid(content.indexOf(QString::fromUtf8("</tr>")));
+    }
+}
+
+/*void MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
+{
     int i = 0;
     int dayx = day, id_local = 0;
     QString rikishi1, rikishi2;
@@ -933,7 +996,7 @@ void MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
         i++;
     }
 
-}
+}*/
 
 bool MainWindow::importTorikumi(QString fName)
 {
