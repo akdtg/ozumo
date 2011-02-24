@@ -1023,7 +1023,7 @@ bool MainWindow::parsingBanzuke12(QString content)
     int year, month;
 
     // 平成22年12月21日更新
-    QRegExp rx(QString::fromUtf8("平成(\\d+)年(\\d+)月(\\d+)日"));
+    QRegExp rx(QString::fromUtf8("平成(\\d{1,2})年(\\d{1,2})月(\\d{1,2})日"));
     if (rx.indexIn(content) != -1) {
         year  = 1988 + rx.cap(1).toInt();
         month = rx.cap(2).toInt() + 1;
@@ -1133,7 +1133,7 @@ bool MainWindow::parsingBanzuke3456(QString content)
     int year, month;
 
     // 平成22年12月21日更新
-    QRegExp rx(QString::fromUtf8("平成(\\d+)年(\\d+)月(\\d+)日"));
+    QRegExp rx(QString::fromUtf8("平成(\\d{1,2})年(\\d{1,2})月(\\d{1,2})日"));
     if (rx.indexIn(content) != -1) {
         year  = 1988 + rx.cap(1).toInt();
         month = rx.cap(2).toInt() + 1;
