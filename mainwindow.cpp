@@ -8,6 +8,14 @@
 #define START_INDEX 491
 #define BASE_URL "http://sumo.goo.ne.jp/hon_basho/"
 
+#define WIN_MARK    "○"
+#define LOSS_MARK   "●"
+#define DASH_MARK   "‒"
+
+QString WinMark  = QString::fromUtf8(WIN_MARK);
+QString LossMark = QString::fromUtf8(LOSS_MARK);
+QString DashMark = QString::fromUtf8(DASH_MARK);
+
 #ifdef __WIN32__
 #define WORK_DIR ""
 #else
@@ -376,11 +384,11 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
             tmpQuery.exec();
             if (tmpQuery.next())
             {
-                QString r = tmpQuery.value(0).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+                QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
                 history.prepend(r);
             }
             else
-                history.prepend(QString::fromUtf8("‒"));
+                history.prepend(DashMark);
             history.prepend(" ");
         }
 
@@ -442,9 +450,9 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
         //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
-        QString result1  = query.value(2).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+        QString result1  = query.value(2).toInt() == 1 ? WinMark:LossMark;
         QString shikona2 = query.value(3).toString();
-        QString result2  = query.value(4).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+        QString result2  = query.value(4).toInt() == 1 ? WinMark:LossMark;
         QString kimarite = query.value(5).toString();
 
         QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
@@ -695,8 +703,8 @@ bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
 
         if (!insertTorikumi(index, basho, year, month, dayx,
                             division,
-                            rikishi1, shikona1, rank1, result1 == QString::fromUtf8("○") ? 1:0,
-                            rikishi2, shikona2, rank2, result2 == QString::fromUtf8("○") ? 1:0,
+                            rikishi1, shikona1, rank1, result1 == WinMark ? 1:0,
+                            rikishi2, shikona2, rank2, result2 == WinMark ? 1:0,
                             kimarite,
                             id_local))
         {
@@ -777,7 +785,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
             }
             else
             {
-                result1 = res1 == QString::fromUtf8("○") ? 1:0;
+                result1 = res1 == WinMark ? 1:0;
             }
 
             if (res2.isEmpty())
@@ -786,7 +794,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
             }
             else
             {
-                result2 = res2 == QString::fromUtf8("○") ? 1:0;
+                result2 = res2 == WinMark ? 1:0;
             }
 
             id2      = rx.cap(9);
@@ -1552,11 +1560,11 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                     tmpQuery.exec();
                     if (tmpQuery.next())
                     {
-                        QString r = tmpQuery.value(0).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+                        QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
                         historyEast.append(r);
                     }
                     else
-                        historyEast.append(QString::fromUtf8("‒"));
+                        historyEast.append(DashMark);
                     historyEast.append("");
                 }
             }
@@ -1619,11 +1627,11 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                     tmpQuery.exec();
                     if (tmpQuery.next())
                     {
-                        QString r = tmpQuery.value(0).toInt() == 1 ? QString::fromUtf8("○"):QString::fromUtf8("●");
+                        QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
                         historyWest.append(r);
                     }
                     else
-                        historyWest.append(QString::fromUtf8("‒"));
+                        historyWest.append(DashMark);
                     historyWest.append("");
                 }
             }
