@@ -276,9 +276,9 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
     QSqlQuery query(db);
 
     query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
-               "FROM torikumi "
-               "WHERE year = :year AND month = :month AND day = :day AND division = :division "
-               "ORDER BY id_local");
+                  "FROM torikumi "
+                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+                  "ORDER BY id_local");
     query.bindValue(":year", year);
     query.bindValue(":month", month);
     query.bindValue(":day", day);
