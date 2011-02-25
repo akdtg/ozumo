@@ -646,13 +646,24 @@ void MainWindow::generateTorikumiResults()
             ui->comboBox_day->currentIndex() + 1,
             ui->comboBox_division->currentIndex() + 1));
 
-    ui->textEdit_htmlCode->setPlainText(torikumiResults2PhpBB(
-            ui->comboBox_year->currentIndex() + 2002,
-            ui->comboBox_basho->currentIndex() * 2 + 1,
-            ui->comboBox_day->currentIndex() + 1,
-            ui->comboBox_division->currentIndex() + 1));
+    int year = ui->comboBox_year->currentIndex() + 2002;
+    int month = ui->comboBox_basho->currentIndex() * 2 + 1;
+    int day = ui->comboBox_day->currentIndex() + 1;
+    int division = ui->comboBox_division->currentIndex() + 1;
 
-    ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
+    QString makuuchi = torikumiResults2PhpBB(year, month, day, 1);
+    QString juryo    = torikumiResults2PhpBB(year, month, day, 2);
+
+    ui->textEdit_htmlCode->setPlainText(juryo + "\n" + makuuchi);
+
+    QString makushita= torikumiResults2PhpBB(year, month, day, 3);
+    QString sandanme = torikumiResults2PhpBB(year, month, day, 4);
+    QString jonidan  = torikumiResults2PhpBB(year, month, day, 5);
+    QString jonokuchi= torikumiResults2PhpBB(year, month, day, 6);
+
+    ui->textEdit_htmlPreview->setPlainText(jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita);
+
+    //ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
 bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division)
@@ -1694,6 +1705,21 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
 {
     QSqlQuery query(db);
 
+    QString phpBB;
+    QString divisionRu;
+
+    phpBB = "[color=#0000FF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
+            QString::fromUtf8(", день ") + QString::number(day) + "[/color]\n\n";
+
+    query.exec("SELECT ru FROM division WHERE id = " + QString::number(division));
+    if (query.next())
+    {
+        divisionRu = query.value(0).toString();
+        divisionRu[0] = divisionRu[0].toUpper();
+    }
+
+    phpBB += "[color=#0000FF]" + divisionRu + "[/color]\n\n";
+
     query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite, rank1, rank2 "
                   "FROM torikumi "
                   "WHERE year = :year AND month = :month AND day = :day AND division = :division "
@@ -1706,7 +1732,7 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
     query.exec();
 
     int trClass = 0;
-    QString phpBB;
+
     QString className[] = {"\"odd\"", "\"even\""};
     QString Html = "<!-- year:" + QString::number(year)
                    + " month:" + QString::number(month).rightJustified(2, '0')
@@ -1818,15 +1844,15 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
                                 "[color=#008000]",
                                 "[color=#00BFFF]",
                                 "[color=#FF00FF]",
-                                "[color=#404040]",
-                                "[color=#404040]",
-                                "[color=#404040]",};
+                                "[color=#008080]",
+                                "[color=#BF0080]",
+                                "[color=#808000]"};
 
         phpBB += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" +
                  phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
                  phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
                  phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
-                 phpBBcolor[title2] + (shikona2Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
+                 phpBBcolor[title2] + (shikona2Ru + " (" + res2 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
 
         trClass ^= 1;
     }
@@ -1835,5 +1861,5 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
 
     qDebug() << phpBB;
 
-    return Html;
+    return phpBB;
 }
