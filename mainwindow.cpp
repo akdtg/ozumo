@@ -1640,7 +1640,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             Html += "<tr class=" + className[trClass] + ">"
                     "<td><strong>" + shikonaRuEast + "</strong> " + resEast + "<br/>"
                     "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyEast + "</font></td>"
-                    "<td>" + rankRu + "&nbsp;" + QString::number(row) + "</td>"
+                    "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + "</td>"
                     "<td><strong>" + shikonaRuWest + "</strong> " + resWest + "<br/>"
                     "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyWest + "</td></tr>\n";
             //qDebug() << Html;
