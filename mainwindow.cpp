@@ -396,7 +396,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
         Html += "<tr class=" + className[trClass] + ">"
                 "<td>" + shikona1Ru + " (" + res1 + ")</td>"
-                "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history + "</font></td>"
+                "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history.simplified() + "</font></td>"
                 "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
         //qDebug() << Html;
 
@@ -1647,10 +1647,10 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
             Html += "<tr class=" + className[trClass] + ">"
                     "<td><strong>" + shikonaRuEast + "</strong> " + resEast + "<br/>"
-                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyEast + "</font></td>"
+                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyEast.simplified() + "</font></td>"
                     "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + "</td>"
                     "<td><strong>" + shikonaRuWest + "</strong> " + resWest + "<br/>"
-                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyWest + "</td></tr>\n";
+                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyWest.simplified() + "</td></tr>\n";
             //qDebug() << Html;
 
             trClass ^= 1;
