@@ -49,6 +49,7 @@ public slots:
     QString translateShikona(QString shikona);
     QString translateKimarite(QString kimarite);
     void statistics();
+    QString torikumiResults2PhpBB(int year, int month, int day, int division);
 
 public:
     QSqlDatabase db;

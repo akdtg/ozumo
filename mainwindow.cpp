@@ -646,6 +646,12 @@ void MainWindow::generateTorikumiResults()
             ui->comboBox_day->currentIndex() + 1,
             ui->comboBox_division->currentIndex() + 1));
 
+    ui->textEdit_htmlCode->setPlainText(torikumiResults2PhpBB(
+            ui->comboBox_year->currentIndex() + 2002,
+            ui->comboBox_basho->currentIndex() * 2 + 1,
+            ui->comboBox_day->currentIndex() + 1,
+            ui->comboBox_division->currentIndex() + 1));
+
     ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
@@ -1682,4 +1688,152 @@ void MainWindow::statistics()
             ui->textEdit_htmlCode->append(tblName + ": " + tblQuery.value(0).toString());
         }
     }
+}
+
+QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int division)
+{
+    QSqlQuery query(db);
+
+    query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite, rank1, rank2 "
+                  "FROM torikumi "
+                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+                  "ORDER BY id_local");
+    query.bindValue(":year", year);
+    query.bindValue(":month", month);
+    query.bindValue(":day", day);
+    query.bindValue(":division", division);
+
+    query.exec();
+
+    int trClass = 0;
+    QString phpBB;
+    QString className[] = {"\"odd\"", "\"even\""};
+    QString Html = "<!-- year:" + QString::number(year)
+                   + " month:" + QString::number(month).rightJustified(2, '0')
+                   + " day:" + QString::number(day).rightJustified(2, '0')
+                   + " division:" + QString::number(division)
+                   + " -->\n";
+
+    Html += "<table>\n"
+            "<thead><tr>"
+            "<th width=\"25%\">" + QString::fromUtf8("Восток") + "</th>"
+            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
+            "<th width=\"20%\">" + QString::fromUtf8("Кимаритэ") + "</th>"
+            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
+            "<th width=\"25%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<tbody>\n";
+
+    while (query.next())
+    {
+        /*qDebug()<< query.value(0).toInt()
+                << query.value(1).toString()
+                << query.value(2).toString()
+                << query.value(3).toString()
+                << query.value(4).toString();*/
+
+        //int id = query.value(0).toInt();
+        QString shikona1 = query.value(1).toString();
+        QString result1  = query.value(2).toInt() == 1 ? WinMark:LossMark;
+        QString shikona2 = query.value(3).toString();
+        QString result2  = query.value(4).toInt() == 1 ? WinMark:LossMark;
+        QString kimarite = query.value(5).toString();
+        QString rank1    = query.value(6).toString();
+        QString rank2    = query.value(7).toString();
+
+        QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
+
+        QSqlQuery tmpQuery(db);
+
+        shikona1Ru = translateShikona(shikona1);
+        shikona2Ru = translateShikona(shikona2);
+
+        kimariteRu = translateKimarite(kimarite);
+
+        QString res1, res2;
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString();
+
+        //qDebug() << shikona1Ru << shikona2Ru;
+
+        Html += "<tr class=" + className[trClass] + ">"
+                "<td>" + shikona1Ru + " (" + res1 + ")</td>"
+                "<td>" + result1 + "</td>"
+                "<td>" + kimariteRu + "</td>"
+                "<td>" + result2 + "</td>"
+                "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
+        //qDebug() << Html;
+
+        int side1, title1, pos1;
+        int side2, title2, pos2;
+        splitRank(rank1, &side1, &title1, &pos1);
+        splitRank(rank2, &side2, &title2, &pos2);
+
+
+        QString phpBBcolor[] = {"[color=#404040]",
+                                "[color=#FF0000]",
+                                "[color=#FF8000]",
+                                "[color=#8000FF]",
+                                "[color=#8000FF]",
+                                "[color=#008000]",
+                                "[color=#00BFFF]",
+                                "[color=#FF00FF]",
+                                "[color=#404040]",
+                                "[color=#404040]",
+                                "[color=#404040]",};
+
+        phpBB += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" +
+                 phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
+                 phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
+                 phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
+                 phpBBcolor[title2] + (shikona2Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
+
+        trClass ^= 1;
+    }
+
+    Html += "</tbody>\n</table>\n";
+
+    qDebug() << phpBB;
+
+    return Html;
 }
