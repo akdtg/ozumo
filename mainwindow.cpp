@@ -396,7 +396,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
         Html += "<tr class=" + className[trClass] + ">"
                 "<td>" + shikona1Ru + " (" + res1 + ")</td>"
-                "<td>" + history + "</td>"
+                "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history + "</font></td>"
                 "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
         //qDebug() << Html;
 
