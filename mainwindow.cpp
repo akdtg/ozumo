@@ -16,6 +16,18 @@ QString WinMark  = QString::fromUtf8(WIN_MARK);
 QString LossMark = QString::fromUtf8(LOSS_MARK);
 QString DashMark = QString::fromUtf8(DASH_MARK);
 
+QString phpBBcolor[] = {"[color=#404040]",
+                        "[color=#FF0000]",
+                        "[color=#FF8000]",
+                        "[color=#8000FF]",
+                        "[color=#8000FF]",
+                        "[color=#008000]",
+                        "[color=#00BFFF]",
+                        "[color=#FF00FF]",
+                        "[color=#008080]",
+                        "[color=#BF0080]",
+                        "[color=#808000]"};
+
 #ifdef __WIN32__
 #define WORK_DIR ""
 #else
@@ -32,11 +44,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_importAllHoshitori, SIGNAL(clicked()), this, SLOT(importAllHoshitori()));
     connect(ui->pushButton_downloadBanzuke, SIGNAL(clicked()), this, SLOT(downloadBanzuke()));
 
-    connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
-    connect(ui->pushButton_generateTorikumiResults, SIGNAL(clicked()), this, SLOT(generateTorikumiResults()));
     connect(ui->pushButton_downloadTorikumi, SIGNAL(clicked()), this, SLOT(downloadTorikumi()));
 
     connect(ui->pushButton_generateHoshitori, SIGNAL(clicked()), this, SLOT(generateHoshitori()));
+    connect(ui->pushButton_generateTorikumi, SIGNAL(clicked()), this, SLOT(generateTorikumi()));
+    connect(ui->pushButton_generateResults, SIGNAL(clicked()), this, SLOT(generateResults()));
+
+    connect(ui->pushButton_generateBBCodeTorikumi, SIGNAL(clicked()), this, SLOT(generateBBCodeTorikumi()));
+    connect(ui->pushButton_generateBBCodeResults, SIGNAL(clicked()), this, SLOT(generateBBCodeResults()));
 
     ui->lineEdit_workDir->setText(WORK_DIR);
 
@@ -638,7 +653,7 @@ void MainWindow::generateTorikumi()
     ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
 
-void MainWindow::generateTorikumiResults()
+void MainWindow::generateResults()
 {
     ui->textEdit_htmlCode->setPlainText(torikumiResults2Html(
             ui->comboBox_year->currentIndex() + 2002,
@@ -646,25 +661,47 @@ void MainWindow::generateTorikumiResults()
             ui->comboBox_day->currentIndex() + 1,
             ui->comboBox_division->currentIndex() + 1));
 
+    ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
+}
+
+void MainWindow::generateBBCodeTorikumi()
+{
     int year = ui->comboBox_year->currentIndex() + 2002;
     int month = ui->comboBox_basho->currentIndex() * 2 + 1;
     int day = ui->comboBox_day->currentIndex() + 1;
-    int division = ui->comboBox_division->currentIndex() + 1;
 
-    QString makuuchi = torikumiResults2PhpBB(year, month, day, 1);
-    QString juryo    = torikumiResults2PhpBB(year, month, day, 2);
+    QString makuuchi = torikumi2BBCode(year, month, day, 1);
+    QString juryo    = torikumi2BBCode(year, month, day, 2);
 
     ui->textEdit_htmlCode->setPlainText(juryo + "\n" + makuuchi);
 
-    QString makushita= torikumiResults2PhpBB(year, month, day, 3);
-    QString sandanme = torikumiResults2PhpBB(year, month, day, 4);
-    QString jonidan  = torikumiResults2PhpBB(year, month, day, 5);
-    QString jonokuchi= torikumiResults2PhpBB(year, month, day, 6);
+    QString makushita= torikumi2BBCode(year, month, day, 3);
+    QString sandanme = torikumi2BBCode(year, month, day, 4);
+    QString jonidan  = torikumi2BBCode(year, month, day, 5);
+    QString jonokuchi= torikumi2BBCode(year, month, day, 6);
 
     ui->textEdit_htmlPreview->setPlainText(jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita);
-
-    //ui->textEdit_htmlPreview->setHtml(ui->textEdit_htmlCode->toPlainText());
 }
+
+void MainWindow::generateBBCodeResults()
+{
+    int year = ui->comboBox_year->currentIndex() + 2002;
+    int month = ui->comboBox_basho->currentIndex() * 2 + 1;
+    int day = ui->comboBox_day->currentIndex() + 1;
+
+    QString makuuchi = torikumiResults2BBCode(year, month, day, 1);
+    QString juryo    = torikumiResults2BBCode(year, month, day, 2);
+
+    ui->textEdit_htmlCode->setPlainText(juryo + "\n" + makuuchi);
+
+    QString makushita= torikumiResults2BBCode(year, month, day, 3);
+    QString sandanme = torikumiResults2BBCode(year, month, day, 4);
+    QString jonidan  = torikumiResults2BBCode(year, month, day, 5);
+    QString jonokuchi= torikumiResults2BBCode(year, month, day, 6);
+
+    ui->textEdit_htmlPreview->setPlainText(jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita);
+}
+
 
 bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division)
 {
@@ -1701,14 +1738,14 @@ void MainWindow::statistics()
     }
 }
 
-QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int division)
+QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int division)
 {
     QSqlQuery query(db);
 
-    QString phpBB;
+    QString BBCode;
     QString divisionRu;
 
-    phpBB = "[color=#0000FF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
+    BBCode = "[color=#0000FF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
             QString::fromUtf8(", день ") + QString::number(day) + "[/color]\n\n";
 
     query.exec("SELECT ru FROM division WHERE id = " + QString::number(division));
@@ -1718,7 +1755,7 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
         divisionRu[0] = divisionRu[0].toUpper();
     }
 
-    phpBB += "[color=#0000FF]" + divisionRu + "[/color]\n\n";
+    BBCode += "[color=#0000FF]" + divisionRu + "[/color]\n\n";
 
     query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite, rank1, rank2 "
                   "FROM torikumi "
@@ -1731,32 +1768,8 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
 
     query.exec();
 
-    int trClass = 0;
-
-    QString className[] = {"\"odd\"", "\"even\""};
-    QString Html = "<!-- year:" + QString::number(year)
-                   + " month:" + QString::number(month).rightJustified(2, '0')
-                   + " day:" + QString::number(day).rightJustified(2, '0')
-                   + " division:" + QString::number(division)
-                   + " -->\n";
-
-    Html += "<table>\n"
-            "<thead><tr>"
-            "<th width=\"25%\">" + QString::fromUtf8("Восток") + "</th>"
-            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
-            "<th width=\"20%\">" + QString::fromUtf8("Кимаритэ") + "</th>"
-            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
-            "<th width=\"25%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
-            "<tbody>\n";
-
     while (query.next())
     {
-        /*qDebug()<< query.value(0).toInt()
-                << query.value(1).toString()
-                << query.value(2).toString()
-                << query.value(3).toString()
-                << query.value(4).toString();*/
-
         //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
         QString result1  = query.value(2).toInt() == 1 ? WinMark:LossMark;
@@ -1820,46 +1833,145 @@ QString MainWindow::torikumiResults2PhpBB(int year, int month, int day, int divi
         if (tmpQuery.next())
             res2 += tmpQuery.value(0).toString();
 
-        //qDebug() << shikona1Ru << shikona2Ru;
+        int side1, title1, pos1;
+        int side2, title2, pos2;
+        splitRank(rank1, &side1, &title1, &pos1);
+        splitRank(rank2, &side2, &title2, &pos2);
 
-        Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikona1Ru + " (" + res1 + ")</td>"
-                "<td>" + result1 + "</td>"
-                "<td>" + kimariteRu + "</td>"
-                "<td>" + result2 + "</td>"
-                "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
-        //qDebug() << Html;
+        BBCode += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" +
+                  phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
+                  phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
+                  phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
+                  phpBBcolor[title2] + (shikona2Ru + " (" + res2 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
+    }
+
+    return BBCode;
+}
+
+QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
+{
+    QSqlQuery query(db);
+
+    QString BBCode;
+    QString divisionRu;
+
+    BBCode = "[color=#0000FF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
+            QString::fromUtf8(", день ") + QString::number(day) + "[/color]\n\n";
+
+    query.exec("SELECT ru FROM division WHERE id = " + QString::number(division));
+    if (query.next())
+    {
+        divisionRu = query.value(0).toString();
+        divisionRu[0] = divisionRu[0].toUpper();
+    }
+
+    BBCode += "[color=#0000FF]" + divisionRu + "[/color]\n\n";
+
+    query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
+                  "FROM torikumi "
+                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+                  "ORDER BY id_local");
+    query.bindValue(":year", year);
+    query.bindValue(":month", month);
+    query.bindValue(":day", day);
+    query.bindValue(":division", division);
+
+    query.exec();
+
+    while (query.next())
+    {
+        //int id = query.value(0).toInt();
+        QString shikona1 = query.value(1).toString();
+        QString rank1    = query.value(2).toString();
+        QString shikona2 = query.value(3).toString();
+        QString rank2    = query.value(4).toString();
+        int basho = query.value(5).toInt();
+
+        QString shikona1Ru = shikona1, shikona2Ru = shikona2;
+
+        QSqlQuery tmpQuery(db);
+
+        shikona1Ru = translateShikona(shikona1);
+        shikona2Ru = translateShikona(shikona2);
+
+        QString res1, res2;
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona1);
+        tmpQuery.bindValue(":s2", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res1 += tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString() + "-";
+
+        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
+                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":d", day);
+        tmpQuery.bindValue(":s1", shikona2);
+        tmpQuery.bindValue(":s2", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            res2 += tmpQuery.value(0).toString();
+
+        QString history;
+        for (int i = 1; i <= 6; i++)
+        {
+            tmpQuery.prepare("SELECT result1, result2 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
+                             "UNION "
+                             "SELECT result2, result1 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
+
+            tmpQuery.bindValue(":shikona1a", shikona1);
+            tmpQuery.bindValue(":shikona2a", shikona2);
+            tmpQuery.bindValue(":shikona1b", shikona1);
+            tmpQuery.bindValue(":shikona2b", shikona2);
+            tmpQuery.bindValue(":bashoa", basho - i);
+            tmpQuery.bindValue(":bashob", basho - i);
+            tmpQuery.exec();
+            if (tmpQuery.next())
+            {
+                QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
+                history.prepend(r);
+            }
+            else
+                history.prepend(DashMark);
+            history.prepend(" ");
+        }
 
         int side1, title1, pos1;
         int side2, title2, pos2;
         splitRank(rank1, &side1, &title1, &pos1);
         splitRank(rank2, &side2, &title2, &pos2);
 
+        BBCode += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(24, ' ') + "[/color]" +
+                  phpBBcolor[0]      + history.simplified().leftJustified(20, ' ') + "[/color]" +
+                  phpBBcolor[title2] + (shikona2Ru + " (" + res2 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
+   }
 
-        QString phpBBcolor[] = {"[color=#404040]",
-                                "[color=#FF0000]",
-                                "[color=#FF8000]",
-                                "[color=#8000FF]",
-                                "[color=#8000FF]",
-                                "[color=#008000]",
-                                "[color=#00BFFF]",
-                                "[color=#FF00FF]",
-                                "[color=#008080]",
-                                "[color=#BF0080]",
-                                "[color=#808000]"};
-
-        phpBB += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" +
-                 phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
-                 phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
-                 phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
-                 phpBBcolor[title2] + (shikona2Ru + " (" + res2 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
-
-        trClass ^= 1;
-    }
-
-    Html += "</tbody>\n</table>\n";
-
-    qDebug() << phpBB;
-
-    return phpBB;
+    return BBCode;
 }

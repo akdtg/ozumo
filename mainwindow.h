@@ -28,10 +28,12 @@ public slots:
                         int rikishi2, QString shikona2, QString rank2, int result2,
                         QString kimarite,
                         int id_local);
+
     void generateTorikumi();
     QString torikumi2Html(int year, int month, int day, int division);
-    void generateTorikumiResults();
+    void generateResults();
     QString torikumiResults2Html(int year, int month, int day, int division);
+
     void downloadTorikumi();
     int getAndImportTorikumi(int year, int month, int day, int division);
     bool importBanzuke(QString fName);
@@ -48,8 +50,13 @@ public slots:
     QString hoshitori2Html(int year, int month, int day, int division);
     QString translateShikona(QString shikona);
     QString translateKimarite(QString kimarite);
+
     void statistics();
-    QString torikumiResults2PhpBB(int year, int month, int day, int division);
+
+    void generateBBCodeTorikumi();
+    QString torikumi2BBCode(int year, int month, int day, int division);
+    void generateBBCodeResults();
+    QString torikumiResults2BBCode(int year, int month, int day, int division);
 
 public:
     QSqlDatabase db;

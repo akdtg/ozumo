@@ -48,6 +48,13 @@
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
+          <widget class="QPushButton" name="pushButton_downloadBanzuke">
+           <property name="text">
+            <string>Get the current banzuke</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pushButton_importAllTorikumi">
            <property name="text">
             <string>Import all the torikumi</string>
@@ -66,17 +73,6 @@
          </item>
         </layout>
        </item>
-       <item row="2" column="0">
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QPushButton" name="pushButton_downloadBanzuke">
-           <property name="text">
-            <string>Download and import the current banzuke</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
     </item>
@@ -85,8 +81,8 @@
       <property name="title">
        <string>Generation</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QComboBox" name="comboBox_year">
@@ -300,35 +296,60 @@
            </item>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_downloadTorikumi">
+           <property name="text">
+            <string>Get the latest data for this option</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_downloadTorikumi">
-         <property name="text">
-          <string>Download and import the torikumi of the selected day</string>
-         </property>
-        </widget>
-       </item>
-       <item>
+       <item row="2" column="0">
         <widget class="QPushButton" name="pushButton_generateHoshitori">
          <property name="text">
-          <string>Generate the hoshitori's HTML code </string>
+          <string>HTML hoshitori</string>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QPushButton" name="pushButton_generateTorikumi">
            <property name="text">
-            <string>Generate the torikumi's HTML code</string>
+            <string>HTML torikumi</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_generateTorikumiResults">
+          <widget class="QPushButton" name="pushButton_generateBBCodeTorikumi">
            <property name="text">
-            <string>Generate the results' HTML code</string>
+            <string>BBCode torikumi</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QPushButton" name="pushButton_generateResults">
+           <property name="text">
+            <string>HTML results</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_generateBBCodeResults">
+           <property name="text">
+            <string>BBCode results</string>
            </property>
           </widget>
          </item>
@@ -351,7 +372,7 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>23</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>
