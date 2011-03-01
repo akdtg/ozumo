@@ -12,11 +12,19 @@
 #define LOSS_MARK   "●"
 #define DASH_MARK   "‒"
 
-QString WinMark  = QString::fromUtf8(WIN_MARK);
-QString LossMark = QString::fromUtf8(LOSS_MARK);
-QString DashMark = QString::fromUtf8(DASH_MARK);
+#define FUZEN       "不戦"
+#define FUZEN_WIN   "□"
+#define FUZEN_LOSS  "■"
 
-QString phpBBcolor[] = {"[color=#404040]",
+QString WinMark   = QString::fromUtf8(WIN_MARK);
+QString LossMark  = QString::fromUtf8(LOSS_MARK);
+QString DashMark  = QString::fromUtf8(DASH_MARK);
+
+QString Fuzen     = QString::fromUtf8(FUZEN);
+QString FuzenWin  = QString::fromUtf8(FUZEN_WIN);
+QString FuzenLoss = QString::fromUtf8(FUZEN_LOSS);
+
+/*QString phpBBcolor[] = {"[color=#404040]",
                         "[color=#FF0000]",
                         "[color=#FF8000]",
                         "[color=#8000FF]",
@@ -26,7 +34,19 @@ QString phpBBcolor[] = {"[color=#404040]",
                         "[color=#FF00FF]",
                         "[color=#008080]",
                         "[color=#BF0080]",
-                        "[color=#808000]"};
+                        "[color=#808000]"};*/
+
+QString phpBBcolor[] = {"[color=#404040]",
+                        "[color=#A00000]",
+                        "[color=#A06000]",
+                        "[color=#6000A0]",
+                        "[color=#6000A0]",
+                        "[color=#006000]",
+                        "[color=#0060A0]",
+                        "[color=#A000A0]",
+                        "[color=#008080]",
+                        "[color=#A00060]",
+                        "[color=#A08000]"};
 
 #ifdef __WIN32__
 #define WORK_DIR ""
@@ -1745,7 +1765,7 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
     QString BBCode;
     QString divisionRu;
 
-    BBCode = "[color=#0000FF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
+    BBCode = "[color=#0000DF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
             QString::fromUtf8(", день ") + QString::number(day) + "[/color]\n\n";
 
     query.exec("SELECT ru FROM division WHERE id = " + QString::number(division));
@@ -1755,7 +1775,7 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         divisionRu[0] = divisionRu[0].toUpper();
     }
 
-    BBCode += "[color=#0000FF]" + divisionRu + "[/color]\n\n";
+    BBCode += "[color=#0000DF]" + divisionRu + "[/color]\n\n";
 
     query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite, rank1, rank2 "
                   "FROM torikumi "
@@ -1778,6 +1798,12 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         QString kimarite = query.value(5).toString();
         QString rank1    = query.value(6).toString();
         QString rank2    = query.value(7).toString();
+
+        if (kimarite == Fuzen)
+        {
+            result1  = query.value(2).toInt() == 1 ? FuzenWin:FuzenLoss;
+            result2  = query.value(4).toInt() == 1 ? FuzenWin:FuzenLoss;
+        }
 
         QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
 
@@ -1838,11 +1864,55 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         splitRank(rank1, &side1, &title1, &pos1);
         splitRank(rank2, &side2, &title2, &pos2);
 
-        BBCode += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(20, ' ') + "[/color]" +
+        QString rank1Ru, rank2Ru;
+        QString side1Ru, side2Ru;
+
+        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":s", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+        {
+            title1 = tmpQuery.value(0).toInt();
+            pos1   = tmpQuery.value(1).toInt();
+            side1  = tmpQuery.value(2).toInt();
+        }
+
+        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":s", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+        {
+            title2 = tmpQuery.value(0).toInt();
+            pos2   = tmpQuery.value(1).toInt();
+            side2  = tmpQuery.value(2).toInt();
+        }
+
+        side1Ru = side1 == 0 ? QString::fromUtf8("в"):QString::fromUtf8("з");
+        side2Ru = side2 == 0 ? QString::fromUtf8("в"):QString::fromUtf8("з");
+
+        tmpQuery.prepare("SELECT ru_short FROM rank WHERE id = :id");
+        tmpQuery.bindValue(":id", title1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            rank1Ru = tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT ru_short FROM rank WHERE id = :id");
+        tmpQuery.bindValue(":id", title2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            rank2Ru = tmpQuery.value(0).toString();
+
+        BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
+                  (shikona1Ru + " (" + res1 + ")").leftJustified(20, ' ') + "[/color]" +
                   phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
                   phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
                   phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
-                  phpBBcolor[title2] + (shikona2Ru + " (" + res2 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
+                  phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
+                  (shikona2Ru + " (" + res2 + ")").leftJustified(20, ' ') + "[/color]" + "\n";
     }
 
     return BBCode;
