@@ -2044,9 +2044,55 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
         splitRank(rank1, &side1, &title1, &pos1);
         splitRank(rank2, &side2, &title2, &pos2);
 
-        BBCode += phpBBcolor[title1] + (shikona1Ru + " (" + res1 + ")") .leftJustified(24, ' ') + "[/color]" +
+        QString rank1Ru, rank2Ru;
+        QString side1Ru, side2Ru;
+
+        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":s", shikona1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+        {
+            title1 = tmpQuery.value(0).toInt();
+            pos1   = tmpQuery.value(1).toInt();
+            side1  = tmpQuery.value(2).toInt();
+        }
+
+        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
+        tmpQuery.bindValue(":s", shikona2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+        {
+
+            title2 = tmpQuery.value(0).toInt();
+            pos2   = tmpQuery.value(1).toInt();
+            side2  = tmpQuery.value(2).toInt();
+        }
+
+        side1Ru = side1 == 0 ? QString::fromUtf8("в"):QString::fromUtf8("з");
+        side2Ru = side2 == 0 ? QString::fromUtf8("в"):QString::fromUtf8("з");
+
+        tmpQuery.prepare("SELECT ru_short FROM rank WHERE id = :id");
+        tmpQuery.bindValue(":id", title1);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            rank1Ru = tmpQuery.value(0).toString();
+
+        tmpQuery.prepare("SELECT ru_short FROM rank WHERE id = :id");
+        tmpQuery.bindValue(":id", title2);
+        tmpQuery.exec();
+        if (tmpQuery.next())
+            rank2Ru = tmpQuery.value(0).toString();
+
+        BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
+                  (shikona1Ru + " (" + res1 + ")").leftJustified(24, ' ') + "[/color]" +
                   phpBBcolor[0]      + history.simplified().leftJustified(20, ' ') + "[/color]" +
-                  phpBBcolor[title2] + (shikona2Ru + " (" + res2 + ")") .leftJustified(20, ' ') + "[/color]" + "\n";
+                  phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
+                  (shikona2Ru + " (" + res2 + ")").leftJustified(20, ' ') + "[/color]" + "\n";
+
    }
 
     return BBCode;
