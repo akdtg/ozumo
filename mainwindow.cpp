@@ -24,18 +24,6 @@ QString Fuzen     = QString::fromUtf8(FUZEN);
 QString FuzenWin  = QString::fromUtf8(FUZEN_WIN);
 QString FuzenLoss = QString::fromUtf8(FUZEN_LOSS);
 
-/*QString phpBBcolor[] = {"[color=#404040]",
-                        "[color=#FF0000]",
-                        "[color=#FF8000]",
-                        "[color=#8000FF]",
-                        "[color=#8000FF]",
-                        "[color=#008000]",
-                        "[color=#00BFFF]",
-                        "[color=#FF00FF]",
-                        "[color=#008080]",
-                        "[color=#BF0080]",
-                        "[color=#808000]"};*/
-
 QString phpBBcolor[] = {"[color=#404040]",
                         "[color=#A00000]",
                         "[color=#A06000]",
