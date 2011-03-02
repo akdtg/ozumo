@@ -1849,8 +1849,6 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
 
         int side1, title1, pos1;
         int side2, title2, pos2;
-        splitRank(rank1, &side1, &title1, &pos1);
-        splitRank(rank2, &side2, &title2, &pos2);
 
         QString rank1Ru, rank2Ru;
         QString side1Ru, side2Ru;
@@ -1866,6 +1864,11 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
             pos1   = tmpQuery.value(1).toInt();
             side1  = tmpQuery.value(2).toInt();
         }
+        else
+        {
+            splitRank(rank1, &side1, &title1, &pos1);
+        }
+
 
         tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
         tmpQuery.bindValue(":y", year);
@@ -1877,6 +1880,10 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
             title2 = tmpQuery.value(0).toInt();
             pos2   = tmpQuery.value(1).toInt();
             side2  = tmpQuery.value(2).toInt();
+        }
+        else
+        {
+            splitRank(rank2, &side2, &title2, &pos2);
         }
 
         side1Ru = side1 == 0 ? QString::fromUtf8("в"):QString::fromUtf8("з");
