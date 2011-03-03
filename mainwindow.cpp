@@ -1410,24 +1410,23 @@ void MainWindow::generateHoshitori()
 
 QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 {
-    QSqlQuery query(db);
-
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
-    QString Html = "<!-- year:" + QString::number(year)
-                   + " month:" + QString::number(month).rightJustified(2, '0')
-                   + " day:" + QString::number(day).rightJustified(2, '0')
-                   + " division:" + QString::number(division)
-                   + " -->\n";
+    QString Html = "<!--"
+                   " year:"     + QString::number(year    ) +
+                   " month:"    + QString::number(month   ).rightJustified(2, '0') +
+                   " day:"      + QString::number(day     ).rightJustified(2, '0') +
+                   " division:" + QString::number(division) +
+                   " -->\n";
 
     Html += "<table>\n"
             "<thead><tr>"
             "<th width=\"40%\">" + QString::fromUtf8("Восток") + "</th>"
-            "<th width=\"20%\">" + QString::fromUtf8("Ранг") + "</th>"
-            "<th width=\"40%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<th width=\"20%\">" + QString::fromUtf8("Ранг")   + "</th>"
+            "<th width=\"40%\">" + QString::fromUtf8("Запад")  + "</th>"
+            "</tr></thead>\n"
             "<tbody>\n";
 
-    int rank = 0;
     QSqlQuery rankQuery(db);
     rankQuery.prepare("SELECT id FROM rank WHERE division_id = :division");
     rankQuery.bindValue(":division", division);
@@ -1435,15 +1434,26 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
     while (rankQuery.next())
     {
-        rank = rankQuery.value(0).toInt();
+        int rank = rankQuery.value(0).toInt();
+
+        QSqlQuery query(db);
+
+        QString rankRu;
+        query.prepare("SELECT ru FROM rank WHERE id = :rank");
+        query.bindValue(":rank", rank);
+        query.exec();
+        if (query.next())
+        {
+            rankRu = query.value(0).toString();
+        }
 
         int numOfRows = 0;
         query.prepare("SELECT MAX (position) "
                       "FROM banzuke "
                       "WHERE year = :year AND month = :month AND rank = :rank");
-        query.bindValue(":year", year);
+        query.bindValue(":year",  year);
         query.bindValue(":month", month);
-        query.bindValue(":rank", rank);
+        query.bindValue(":rank",  rank);
         query.exec();
         if (query.next())
         {
@@ -1452,118 +1462,69 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
         for (int row = 1; row <= numOfRows; row++)
         {
-            QString shikonaEast, shikonaWest;
-            int rikishiIdEast, rikishiIdWest;
-            QString resEast, resWest;
-            QString historyEast, historyWest;
+            QString shikona[2], res[2], history[2];
+            int rikishiId[2];
 
-            query.prepare("SELECT rikishi, shikona "
-                          "FROM banzuke "
-                          "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
-            query.bindValue(":year", year);
-            query.bindValue(":month", month);
-            query.bindValue(":rank", rank);
-            query.bindValue(":position", row);
-            query.bindValue(":side", 0);
-            query.exec();
-
-            if (query.next())
+            for (int side = 0; side < 2; side ++)
             {
-                rikishiIdEast = query.value(0).toInt();
-                shikonaEast = query.value(1).toString();
+                query.prepare("SELECT rikishi, shikona "
+                              "FROM banzuke "
+                              "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
+                query.bindValue(":year",  year);
+                query.bindValue(":month", month);
+                query.bindValue(":rank",  rank);
+                query.bindValue(":position", row);
+                query.bindValue(":side",  side);
+                query.exec();
 
-                QSqlQuery tmpQuery(db);
-                resEast += " (" + QString::number(getNumOfBoshi(year, month, day, shikonaEast, 1)) +
-                           "-"  + QString::number(getNumOfBoshi(year, month, day, shikonaEast, 0)) + ")";
-
-                for (int d = 1; d <= day; d++)
+                if (query.next())
                 {
-                    tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :year1 AND month = :month1 AND day = :day1 "
-                                     "UNION "
-                                     "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :year2 AND month = :month2 AND day = :day2 ");
+                    rikishiId[side] = query.value(0).toInt();
+                    shikona[side] = query.value(1).toString();
 
-                    tmpQuery.bindValue(":s1", shikonaEast);
-                    tmpQuery.bindValue(":s2", shikonaEast);
-                    tmpQuery.bindValue(":year1", year);
-                    tmpQuery.bindValue(":year2", year);
-                    tmpQuery.bindValue(":month1", month);
-                    tmpQuery.bindValue(":month2", month);
-                    tmpQuery.bindValue(":day1", d);
-                    tmpQuery.bindValue(":day2", d);
-                    tmpQuery.exec();
-                    if (tmpQuery.next())
+                    res[side] += " (" + QString::number(getNumOfBoshi(year, month, day, shikona[side], 1)) +
+                                 "-"  + QString::number(getNumOfBoshi(year, month, day, shikona[side], 0)) + ")";
+
+                    for (int d = 1; d <= day; d++)
                     {
-                        QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
-                        historyEast.append(r);
+                        QSqlQuery tmpQuery(db);
+
+                        tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :y1 AND month = :m1 AND day = :d1 "
+                                         "UNION "
+                                         "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :y2 AND month = :m2 AND day = :d2 ");
+
+                        tmpQuery.bindValue(":s1", shikona[side]);
+                        tmpQuery.bindValue(":s2", shikona[side]);
+                        tmpQuery.bindValue(":y1", year);
+                        tmpQuery.bindValue(":y2", year);
+                        tmpQuery.bindValue(":m1", month);
+                        tmpQuery.bindValue(":m2", month);
+                        tmpQuery.bindValue(":d1", d);
+                        tmpQuery.bindValue(":d2", d);
+
+                        tmpQuery.exec();
+
+                        if (tmpQuery.next())
+                        {
+                            QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
+                            history[side].append(r);
+                        }
+                        else
+                        {
+                            history[side].append(DashMark);
+                        }
+
+                        //history[side].append("");
                     }
-                    else
-                        historyEast.append(DashMark);
-                    historyEast.append("");
                 }
-            }
-
-            query.prepare("SELECT rikishi, shikona "
-                          "FROM banzuke "
-                          "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
-            query.bindValue(":year", year);
-            query.bindValue(":month", month);
-            query.bindValue(":rank", rank);
-            query.bindValue(":position", row);
-            query.bindValue(":side", 1);
-            query.exec();
-
-            if (query.next())
-            {
-                rikishiIdWest = query.value(0).toInt();
-                shikonaWest = query.value(1).toString();
-
-                QSqlQuery tmpQuery(db);
-                resWest += "(" + QString::number(getNumOfBoshi(year, month, day, shikonaWest, 1)) +
-                           "-" + QString::number(getNumOfBoshi(year, month, day, shikonaWest, 0)) + ")";
-
-                for (int d = 1; d <= day; d++)
-                {
-                    tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :year1 AND month = :month1 AND day = :day1 "
-                                     "UNION "
-                                     "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :year2 AND month = :month2 AND day = :day2 ");
-
-                    tmpQuery.bindValue(":s1", shikonaWest);
-                    tmpQuery.bindValue(":s2", shikonaWest);
-                    tmpQuery.bindValue(":year1", year);
-                    tmpQuery.bindValue(":year2", year);
-                    tmpQuery.bindValue(":month1", month);
-                    tmpQuery.bindValue(":month2", month);
-                    tmpQuery.bindValue(":day1", d);
-                    tmpQuery.bindValue(":day2", d);
-
-                    tmpQuery.exec();
-                    if (tmpQuery.next())
-                    {
-                        QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
-                        historyWest.append(r);
-                    }
-                    else
-                        historyWest.append(DashMark);
-                    historyWest.append("");
-                }
-            }
-
-            QString rankRu;
-            query.prepare("SELECT ru FROM rank WHERE id = :rank");
-            query.bindValue(":rank", rank);
-            query.exec();
-            if (query.next())
-            {
-                rankRu = query.value(0).toString();
             }
 
             Html += "<tr class=" + className[trClass] + ">"
-                    "<td><strong>" + translateShikona(shikonaEast) + "</strong> " + resEast + "<br/>"
-                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyEast.simplified() + "</font></td>"
+                    "<td><strong>" + translateShikona(shikona[0]) + "</strong> " + res[0] + "<br/>"
+                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[0].simplified() + "</font></td>"
                     "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + "</td>"
-                    "<td><strong>" + translateShikona(shikonaWest) + "</strong> " + resWest + "<br/>"
-                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyWest.simplified() + "</td></tr>\n";
-            //qDebug() << Html;
+                    "<td><strong>" + translateShikona(shikona[1]) + "</strong> " + res[1] + "<br/>"
+                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[1].simplified() + "</td></tr>\n";
 
             trClass ^= 1;
         }
