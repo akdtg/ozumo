@@ -296,19 +296,6 @@ bool MainWindow::insertTorikumi(int id, int basho, int year, int month, int day,
 
 QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 {
-    QSqlQuery query(db);
-
-    query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
-                  "FROM torikumi "
-                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
-                  "ORDER BY id_local");
-    query.bindValue(":year", year);
-    query.bindValue(":month", month);
-    query.bindValue(":day", day);
-    query.bindValue(":division", division);
-
-    query.exec();
-
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
     QString Html = "<!-- year:" + QString::number(year)
@@ -323,6 +310,19 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
             "<th width=\"33%\">" + QString::fromUtf8("История последних встреч") + "</th>"
             "<th width=\"33%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
             "<tbody>\n";
+
+    QSqlQuery query(db);
+
+    query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
+                  "FROM torikumi "
+                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+                  "ORDER BY id_local");
+    query.bindValue(":year", year);
+    query.bindValue(":month", month);
+    query.bindValue(":day", day);
+    query.bindValue(":division", division);
+
+    query.exec();
 
     while (query.next())
     {
