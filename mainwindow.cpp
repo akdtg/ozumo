@@ -345,9 +345,9 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         QString history;
         for (int i = 1; i <= 6; i++)
         {
-            tmpQuery.prepare("SELECT result1, result2 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
+            tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
                              "UNION "
-                             "SELECT result2, result1 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
+                             "SELECT result2 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
 
             tmpQuery.bindValue(":shikona1a", shikona1);
             tmpQuery.bindValue(":shikona2a", shikona2);
