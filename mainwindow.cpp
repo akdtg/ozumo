@@ -305,12 +305,12 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
                    " division:" + QString::number(division) +
                    " -->\n";
 
-
     Html += "<table>\n"
             "<thead><tr>"
             "<th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
             "<th width=\"33%\">" + QString::fromUtf8("История последних встреч") + "</th>"
-            "<th width=\"33%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<th width=\"33%\">" + QString::fromUtf8("Запад")  + "</th>"
+            "</tr></thead>\n"
             "<tbody>\n";
 
     QSqlQuery query(db);
@@ -394,11 +394,12 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
     Html += "<table>\n"
             "<thead><tr>"
-            "<th width=\"25%\">" + QString::fromUtf8("Восток") + "</th>"
-            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
+            "<th width=\"25%\">" + QString::fromUtf8("Восток")   + "</th>"
+            "<th width=\"15%\">" + QString::fromUtf8("")         + "</th>"
             "<th width=\"20%\">" + QString::fromUtf8("Кимаритэ") + "</th>"
-            "<th width=\"15%\">" + QString::fromUtf8("") + "</th>"
-            "<th width=\"25%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
+            "<th width=\"15%\">" + QString::fromUtf8("")         + "</th>"
+            "<th width=\"25%\">" + QString::fromUtf8("Запад")    + "</th>"
+            "</tr></thead>\n"
             "<tbody>\n";
 
     QSqlQuery query(db);
@@ -1607,14 +1608,7 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
             result2  = query.value(4).toInt() == 1 ? FuzenWin:FuzenLoss;
         }
 
-        QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
-
         QSqlQuery tmpQuery(db);
-
-        shikona1Ru = translateShikona(shikona1);
-        shikona2Ru = translateShikona(shikona2);
-
-        kimariteRu = translateKimarite(kimarite);
 
         QString res1, res2;
         res1 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona1, 1)) +
@@ -1678,14 +1672,14 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
 
         BBCode += phpBBcolor[title1] +
                 (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                (shikona1Ru + res1).leftJustified(20, ' ') + "[/color]" +
+                (translateShikona(shikona1) + res1).leftJustified(20, ' ') + "[/color]" +
                 phpBBcolor[0] +
-                result1    .leftJustified( 4, ' ') +
-                kimariteRu .leftJustified(16, ' ') +
-                result2    .leftJustified( 4, ' ') + "[/color]" +
+                result1.leftJustified( 4, ' ') +
+                translateKimarite(kimarite).leftJustified(16, ' ') +
+                result2.leftJustified( 4, ' ') + "[/color]" +
                 phpBBcolor[title2] +
                 (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                (shikona2Ru + res2).leftJustified(20, ' ') + "[/color]" + "\n";
+                (translateShikona(shikona2) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
     }
 
     return BBCode;
@@ -1698,7 +1692,7 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
     QString BBCode;
     QString divisionRu;
 
-    BBCode = "[color=#0000FF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
+    BBCode = "[color=#0000DF]" + QString::number(year) + "/" + QString::number(month).rightJustified(2, '0') +
             QString::fromUtf8(", день ") + QString::number(day) + "[/color]\n\n";
 
     query.exec("SELECT ru FROM division WHERE id = " + QString::number(division));
@@ -1708,7 +1702,7 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
         divisionRu[0] = divisionRu[0].toUpper();
     }
 
-    BBCode += "[color=#0000FF]" + divisionRu + "[/color]\n\n";
+    BBCode += "[color=#0000DF]" + divisionRu + "[/color]\n\n";
 
     query.prepare("SELECT id_local, shikona1, rank1, shikona2, rank2, basho "
                   "FROM torikumi "
@@ -1730,12 +1724,7 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
         QString rank2    = query.value(4).toString();
         int basho = query.value(5).toInt();
 
-        QString shikona1Ru = shikona1, shikona2Ru = shikona2;
-
         QSqlQuery tmpQuery(db);
-
-        shikona1Ru = translateShikona(shikona1);
-        shikona2Ru = translateShikona(shikona2);
 
         QString res1, res2;
         res1 += " (" + QString::number(getNumOfBoshi(year, month, day-1, shikona1, 1)) +
@@ -1746,16 +1735,16 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
         QString history;
         for (int i = 1; i <= 6; i++)
         {
-            tmpQuery.prepare("SELECT result1, kimarite FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
+            tmpQuery.prepare("SELECT result1, kimarite FROM torikumi WHERE shikona1 = :s1a AND shikona2 = :s2a AND basho = :ba "
                              "UNION "
-                             "SELECT result2, kimarite FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
+                             "SELECT result2, kimarite FROM torikumi WHERE shikona2 = :s1b AND shikona1 = :s2b AND basho = :bb ");
 
-            tmpQuery.bindValue(":shikona1a", shikona1);
-            tmpQuery.bindValue(":shikona2a", shikona2);
-            tmpQuery.bindValue(":shikona1b", shikona1);
-            tmpQuery.bindValue(":shikona2b", shikona2);
-            tmpQuery.bindValue(":bashoa", basho - i);
-            tmpQuery.bindValue(":bashob", basho - i);
+            tmpQuery.bindValue(":s1a", shikona1);
+            tmpQuery.bindValue(":s2a", shikona2);
+            tmpQuery.bindValue(":s1b", shikona1);
+            tmpQuery.bindValue(":s2b", shikona2);
+            tmpQuery.bindValue(":ba", basho - i);
+            tmpQuery.bindValue(":bb", basho - i);
             tmpQuery.exec();
             if (tmpQuery.next())
             {
@@ -1822,10 +1811,10 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
             rank2Ru = tmpQuery.value(0).toString();
 
         BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                  (shikona1Ru + res1).leftJustified(24, ' ') + "[/color]" +
+                  (translateShikona(shikona1) + res1).leftJustified(24, ' ') + "[/color]" +
                   phpBBcolor[0]      + history.simplified().leftJustified(20, ' ') + "[/color]" +
                   phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                  (shikona2Ru + res2).leftJustified(20, ' ') + "[/color]" + "\n";
+                  (translateShikona(shikona2) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
 
    }
 
