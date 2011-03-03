@@ -440,13 +440,6 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
         QString result2  = query.value(4).toInt() == 1 ? WinMark:LossMark;
         QString kimarite = query.value(5).toString();
 
-        QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
-
-        shikona1Ru = translateShikona(shikona1);
-        shikona2Ru = translateShikona(shikona2);
-
-        kimariteRu = translateKimarite(kimarite);
-
         QString res1, res2;
         res1 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona1, 1)) +
                 "-"  + QString::number(getNumOfBoshi(year, month, day, shikona1, 0)) + ")";
@@ -457,11 +450,11 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
         //qDebug() << shikona1Ru << shikona2Ru;
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikona1Ru + res1 + "</td>"
+                "<td>" + translateShikona(shikona1) + res1 + "</td>"
                 "<td>" + result1 + "</td>"
-                "<td>" + kimariteRu + "</td>"
+                "<td>" + translateKimarite(kimarite) + "</td>"
                 "<td>" + result2 + "</td>"
-                "<td>" + shikona2Ru + res2 + "</td></tr>\n";
+                "<td>" + translateShikona(shikona2) + res2 + "</td></tr>\n";
         //qDebug() << Html;
 
         trClass ^= 1;
