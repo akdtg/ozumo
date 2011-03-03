@@ -1901,21 +1901,24 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
 
 int MainWindow::getNumOfBoshi(int year, int month, int day, QString shikona, int boshiColor)
 {
-    QSqlQuery tmpQuery(db);
+    QSqlQuery query(db);
 
-    tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+    query.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
                      "AND ((shikona1 = :s1 AND result1 = :r1) OR ( shikona2 = :s2 AND result2 = :r2))");
-    tmpQuery.bindValue(":y", year);
-    tmpQuery.bindValue(":m", month);
-    tmpQuery.bindValue(":d", day);
-    tmpQuery.bindValue(":s1", shikona);
-    tmpQuery.bindValue(":s2", shikona);
-    tmpQuery.bindValue(":r1", boshiColor);
-    tmpQuery.bindValue(":r2", boshiColor);
-    tmpQuery.exec();
-    if (tmpQuery.next())
+
+    query.bindValue(":y", year);
+    query.bindValue(":m", month);
+    query.bindValue(":d", day);
+    query.bindValue(":s1", shikona);
+    query.bindValue(":s2", shikona);
+    query.bindValue(":r1", boshiColor);
+    query.bindValue(":r2", boshiColor);
+
+    query.exec();
+
+    if (query.next())
     {
-        return tmpQuery.value(0).toInt();
+        return query.value(0).toInt();
     }
     else
     {
