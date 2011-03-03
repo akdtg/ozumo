@@ -326,7 +326,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
     while (query.next())
     {
-         //int id = query.value(0).toInt();
+        //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
         QString rank1    = query.value(2).toString();
         QString shikona2 = query.value(3).toString();
@@ -381,19 +381,6 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
 QString MainWindow::torikumiResults2Html(int year, int month, int day, int division)
 {
-    QSqlQuery query(db);
-
-    query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite "
-                  "FROM torikumi "
-                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
-                  "ORDER BY id_local");
-    query.bindValue(":year", year);
-    query.bindValue(":month", month);
-    query.bindValue(":day", day);
-    query.bindValue(":division", division);
-
-    query.exec();
-
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
     QString Html = "<!-- year:" + QString::number(year)
@@ -411,14 +398,21 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
             "<th width=\"25%\">" + QString::fromUtf8("Запад") + "</th></tr></thead>\n"
             "<tbody>\n";
 
+    QSqlQuery query(db);
+
+    query.prepare("SELECT id_local, shikona1, result1, shikona2, result2, kimarite "
+                  "FROM torikumi "
+                  "WHERE year = :year AND month = :month AND day = :day AND division = :division "
+                  "ORDER BY id_local");
+    query.bindValue(":year", year);
+    query.bindValue(":month", month);
+    query.bindValue(":day", day);
+    query.bindValue(":division", division);
+
+    query.exec();
+
     while (query.next())
     {
-        /*qDebug()<< query.value(0).toInt()
-                << query.value(1).toString()
-                << query.value(2).toString()
-                << query.value(3).toString()
-                << query.value(4).toString();*/
-
         //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
         QString result1  = query.value(2).toInt() == 1 ? WinMark:LossMark;
@@ -433,15 +427,12 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
         res2 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona2, 1)) +
                 "-"  + QString::number(getNumOfBoshi(year, month, day, shikona2, 0)) + ")";
 
-        //qDebug() << shikona1Ru << shikona2Ru;
-
         Html += "<tr class=" + className[trClass] + ">"
                 "<td>" + translateShikona(shikona1) + res1 + "</td>"
                 "<td>" + result1 + "</td>"
                 "<td>" + translateKimarite(kimarite) + "</td>"
                 "<td>" + result2 + "</td>"
                 "<td>" + translateShikona(shikona2) + res2 + "</td></tr>\n";
-        //qDebug() << Html;
 
         trClass ^= 1;
     }
