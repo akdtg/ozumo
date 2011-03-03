@@ -347,49 +347,11 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         shikona2Ru = translateShikona(shikona2);
 
         QString res1, res2;
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString() + "-";
+        res1 += " (" + QString::number(getNumOfBoshi(year, month, day-1, shikona1, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day-1, shikona1, 0)) + ")";
 
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString();
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString() + "-";
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString();
+        res2 += " (" + QString::number(getNumOfBoshi(year, month, day-1, shikona2, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day-1, shikona2, 0)) + ")";
 
         QString history;
         for (int i = 1; i <= 6; i++)
@@ -418,9 +380,9 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         //qDebug() << shikona1Ru << shikona2Ru;
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikona1Ru + " (" + res1 + ")</td>"
+                "<td>" + shikona1Ru + res1 + "</td>"
                 "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history.simplified() + "</font></td>"
-                "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
+                "<td>" + shikona2Ru + res2 + "</td></tr>\n";
         //qDebug() << Html;
 
         trClass ^= 1;
@@ -480,66 +442,26 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 
         QString shikona1Ru = shikona1, shikona2Ru = shikona2, kimariteRu = kimarite;
 
-        QSqlQuery tmpQuery(db);
-
         shikona1Ru = translateShikona(shikona1);
         shikona2Ru = translateShikona(shikona2);
 
         kimariteRu = translateKimarite(kimarite);
 
         QString res1, res2;
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString() + "-";
+        res1 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona1, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day, shikona1, 0)) + ")";
 
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString();
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString() + "-";
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString();
+        res2 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona2, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day, shikona2, 0)) + ")";
 
         //qDebug() << shikona1Ru << shikona2Ru;
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikona1Ru + " (" + res1 + ")</td>"
+                "<td>" + shikona1Ru + res1 + "</td>"
                 "<td>" + result1 + "</td>"
                 "<td>" + kimariteRu + "</td>"
                 "<td>" + result2 + "</td>"
-                "<td>" + shikona2Ru + " (" + res2 + ")</td></tr>\n";
+                "<td>" + shikona2Ru + res2 + "</td></tr>\n";
         //qDebug() << Html;
 
         trClass ^= 1;
@@ -1583,27 +1505,8 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                 shikonaRuEast = translateShikona(shikonaEast);
 
                 QSqlQuery tmpQuery(db);
-                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                                 "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-                tmpQuery.bindValue(":y", year);
-                tmpQuery.bindValue(":m", month);
-                tmpQuery.bindValue(":d", day);
-                tmpQuery.bindValue(":s1", shikonaEast);
-                tmpQuery.bindValue(":s2", shikonaEast);
-                tmpQuery.exec();
-                if (tmpQuery.next())
-                    resEast += "(" + tmpQuery.value(0).toString() + "-";
-
-                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                                 "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-                tmpQuery.bindValue(":y", year);
-                tmpQuery.bindValue(":m", month);
-                tmpQuery.bindValue(":d", day);
-                tmpQuery.bindValue(":s1", shikonaEast);
-                tmpQuery.bindValue(":s2", shikonaEast);
-                tmpQuery.exec();
-                if (tmpQuery.next())
-                    resEast += tmpQuery.value(0).toString() + ")";
+                resEast += " (" + QString::number(getNumOfBoshi(year, month, day, shikonaEast, 1)) +
+                           "-"  + QString::number(getNumOfBoshi(year, month, day, shikonaEast, 0)) + ")";
 
                 for (int d = 1; d <= day; d++)
                 {
@@ -1649,27 +1552,8 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                 shikonaRuWest = translateShikona(shikonaWest);
 
                 QSqlQuery tmpQuery(db);
-                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                                 "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-                tmpQuery.bindValue(":y", year);
-                tmpQuery.bindValue(":m", month);
-                tmpQuery.bindValue(":d", day);
-                tmpQuery.bindValue(":s1", shikonaWest);
-                tmpQuery.bindValue(":s2", shikonaWest);
-                tmpQuery.exec();
-                if (tmpQuery.next())
-                    resWest += "(" + tmpQuery.value(0).toString() + "-";
-
-                tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                                 "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-                tmpQuery.bindValue(":y", year);
-                tmpQuery.bindValue(":m", month);
-                tmpQuery.bindValue(":d", day);
-                tmpQuery.bindValue(":s1", shikonaWest);
-                tmpQuery.bindValue(":s2", shikonaWest);
-                tmpQuery.exec();
-                if (tmpQuery.next())
-                    resWest += tmpQuery.value(0).toString() + ")";
+                resWest += "(" + QString::number(getNumOfBoshi(year, month, day, shikonaWest, 1)) +
+                           "-" + QString::number(getNumOfBoshi(year, month, day, shikonaWest, 0)) + ")";
 
                 for (int d = 1; d <= day; d++)
                 {
@@ -1803,49 +1687,11 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         kimariteRu = translateKimarite(kimarite);
 
         QString res1, res2;
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString() + "-";
+        res1 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona1, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day, shikona1, 0)) + ")";
 
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString();
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR (shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString() + "-";
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR (shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString();
+        res2 += " (" + QString::number(getNumOfBoshi(year, month, day, shikona2, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day, shikona2, 0)) + ")";
 
         int side1, title1, pos1;
         int side2, title2, pos2;
@@ -1868,7 +1714,6 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         {
             splitRank(rank1, &side1, &title1, &pos1);
         }
-
 
         tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
         tmpQuery.bindValue(":y", year);
@@ -1902,12 +1747,12 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
             rank2Ru = tmpQuery.value(0).toString();
 
         BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                  (shikona1Ru + " (" + res1 + ")").leftJustified(20, ' ') + "[/color]" +
+                  (shikona1Ru + res1).leftJustified(20, ' ') + "[/color]" +
                   phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
                   phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
                   phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
                   phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                  (shikona2Ru + " (" + res2 + ")").leftJustified(20, ' ') + "[/color]" + "\n";
+                  (shikona2Ru + res2).leftJustified(20, ' ') + "[/color]" + "\n";
     }
 
     return BBCode;
@@ -1960,50 +1805,11 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
         shikona2Ru = translateShikona(shikona2);
 
         QString res1, res2;
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString() + "-";
+        res1 += " (" + QString::number(getNumOfBoshi(year, month, day-1, shikona1, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day-1, shikona1, 0)) + ")";
 
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona1);
-        tmpQuery.bindValue(":s2", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res1 += tmpQuery.value(0).toString();
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 1) OR ( shikona2 = :s2 AND result2 = 1))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString() + "-";
-
-        tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day < :d "
-                         "AND ((shikona1 = :s1 AND result1 = 0) OR ( shikona2 = :s2 AND result2 = 0))");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":d", day);
-        tmpQuery.bindValue(":s1", shikona2);
-        tmpQuery.bindValue(":s2", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-            res2 += tmpQuery.value(0).toString();
-
+        res2 += " (" + QString::number(getNumOfBoshi(year, month, day-1, shikona2, 1)) +
+                "-"  + QString::number(getNumOfBoshi(year, month, day-1, shikona2, 0)) + ")";
         QString history;
         for (int i = 1; i <= 6; i++)
         {
@@ -2083,12 +1889,36 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
             rank2Ru = tmpQuery.value(0).toString();
 
         BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                  (shikona1Ru + " (" + res1 + ")").leftJustified(24, ' ') + "[/color]" +
+                  (shikona1Ru + res1).leftJustified(24, ' ') + "[/color]" +
                   phpBBcolor[0]      + history.simplified().leftJustified(20, ' ') + "[/color]" +
                   phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                  (shikona2Ru + " (" + res2 + ")").leftJustified(20, ' ') + "[/color]" + "\n";
+                  (shikona2Ru + res2).leftJustified(20, ' ') + "[/color]" + "\n";
 
    }
 
     return BBCode;
+}
+
+int MainWindow::getNumOfBoshi(int year, int month, int day, QString shikona, int boshiColor)
+{
+    QSqlQuery tmpQuery(db);
+
+    tmpQuery.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
+                     "AND ((shikona1 = :s1 AND result1 = :r1) OR ( shikona2 = :s2 AND result2 = :r2))");
+    tmpQuery.bindValue(":y", year);
+    tmpQuery.bindValue(":m", month);
+    tmpQuery.bindValue(":d", day);
+    tmpQuery.bindValue(":s1", shikona);
+    tmpQuery.bindValue(":s2", shikona);
+    tmpQuery.bindValue(":r1", boshiColor);
+    tmpQuery.bindValue(":r2", boshiColor);
+    tmpQuery.exec();
+    if (tmpQuery.next())
+    {
+        return tmpQuery.value(0).toInt();
+    }
+    else
+    {
+        return 0;
+    }
 }

@@ -58,6 +58,8 @@ public slots:
     void generateBBCodeResults();
     QString torikumiResults2BBCode(int year, int month, int day, int division);
 
+    int getNumOfBoshi(int year, int month, int day, QString shikona, int boshiColor);
+
 public:
     QSqlDatabase db;
 
