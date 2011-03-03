@@ -326,13 +326,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 
     while (query.next())
     {
-        /*qDebug()<< query.value(0).toInt()
-                << query.value(1).toString()
-                << query.value(2).toString()
-                << query.value(3).toString()
-                << query.value(4).toString();*/
-
-        //int id = query.value(0).toInt();
+         //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
         QString rank1    = query.value(2).toString();
         QString shikona2 = query.value(3).toString();
@@ -372,13 +366,10 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
             history.prepend(" ");
         }
 
-        //qDebug() << shikona1Ru << shikona2Ru;
-
         Html += "<tr class=" + className[trClass] + ">"
                 "<td>" + translateShikona(shikona1) + res1 + "</td>"
                 "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history.simplified() + "</font></td>"
                 "<td>" + translateShikona(shikona2) + res2 + "</td></tr>\n";
-        //qDebug() << Html;
 
         trClass ^= 1;
     }
