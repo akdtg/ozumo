@@ -339,12 +339,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         QString rank2    = query.value(4).toString();
         int basho = query.value(5).toInt();
 
-        QString shikona1Ru = shikona1, shikona2Ru = shikona2;
-
         QSqlQuery tmpQuery(db);
-
-        shikona1Ru = translateShikona(shikona1);
-        shikona2Ru = translateShikona(shikona2);
 
         QString res1, res2;
         res1 += " (" + QString::number(getNumOfBoshi(year, month, day-1, shikona1, 1)) +
@@ -380,9 +375,9 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         //qDebug() << shikona1Ru << shikona2Ru;
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + shikona1Ru + res1 + "</td>"
+                "<td>" + translateShikona(shikona1) + res1 + "</td>"
                 "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history.simplified() + "</font></td>"
-                "<td>" + shikona2Ru + res2 + "</td></tr>\n";
+                "<td>" + translateShikona(shikona2) + res2 + "</td></tr>\n";
         //qDebug() << Html;
 
         trClass ^= 1;
