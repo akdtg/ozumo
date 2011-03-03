@@ -1746,13 +1746,16 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         if (tmpQuery.next())
             rank2Ru = tmpQuery.value(0).toString();
 
-        BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                  (shikona1Ru + res1).leftJustified(20, ' ') + "[/color]" +
-                  phpBBcolor[0]      + result1    .leftJustified( 4, ' ') + "[/color]" +
-                  phpBBcolor[0]      + kimariteRu .leftJustified(16, ' ') + "[/color]" +
-                  phpBBcolor[0]      + result2    .leftJustified( 4, ' ') + "[/color]" +
-                  phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                  (shikona2Ru + res2).leftJustified(20, ' ') + "[/color]" + "\n";
+        BBCode += phpBBcolor[title1] +
+                (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
+                (shikona1Ru + res1).leftJustified(20, ' ') + "[/color]" +
+                phpBBcolor[0] +
+                result1    .leftJustified( 4, ' ') +
+                kimariteRu .leftJustified(16, ' ') +
+                result2    .leftJustified( 4, ' ') + "[/color]" +
+                phpBBcolor[title2] +
+                (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
+                (shikona2Ru + res2).leftJustified(20, ' ') + "[/color]" + "\n";
     }
 
     return BBCode;
