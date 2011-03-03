@@ -1452,7 +1452,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
         for (int row = 1; row <= numOfRows; row++)
         {
-            QString shikonaRuEast, shikonaRuWest;
+            QString shikonaEast, shikonaWest;
             int rikishiIdEast, rikishiIdWest;
             QString resEast, resWest;
             QString historyEast, historyWest;
@@ -1470,9 +1470,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             if (query.next())
             {
                 rikishiIdEast = query.value(0).toInt();
-                QString shikonaEast = query.value(1).toString();
-
-                shikonaRuEast = translateShikona(shikonaEast);
+                shikonaEast = query.value(1).toString();
 
                 QSqlQuery tmpQuery(db);
                 resEast += " (" + QString::number(getNumOfBoshi(year, month, day, shikonaEast, 1)) +
@@ -1517,9 +1515,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             if (query.next())
             {
                 rikishiIdWest = query.value(0).toInt();
-                QString shikonaWest = query.value(1).toString();
-
-                shikonaRuWest = translateShikona(shikonaWest);
+                shikonaWest = query.value(1).toString();
 
                 QSqlQuery tmpQuery(db);
                 resWest += "(" + QString::number(getNumOfBoshi(year, month, day, shikonaWest, 1)) +
@@ -1562,10 +1558,10 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             }
 
             Html += "<tr class=" + className[trClass] + ">"
-                    "<td><strong>" + shikonaRuEast + "</strong> " + resEast + "<br/>"
+                    "<td><strong>" + translateShikona(shikonaEast) + "</strong> " + resEast + "<br/>"
                     "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyEast.simplified() + "</font></td>"
                     "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + "</td>"
-                    "<td><strong>" + shikonaRuWest + "</strong> " + resWest + "<br/>"
+                    "<td><strong>" + translateShikona(shikonaWest) + "</strong> " + resWest + "<br/>"
                     "<font style=\"font-family: monospace; letter-spacing:4px;\">" + historyWest.simplified() + "</td></tr>\n";
             //qDebug() << Html;
 
