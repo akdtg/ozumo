@@ -298,11 +298,13 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
 {
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
-    QString Html = "<!-- year:" + QString::number(year)
-                   + " month:" + QString::number(month).rightJustified(2, '0')
-                   + " day:" + QString::number(day).rightJustified(2, '0')
-                   + " division:" + QString::number(division)
-                   + " -->\n";
+    QString Html = "<!--"
+                   " year:"     + QString::number(year    ) +
+                   " month:"    + QString::number(month   ).rightJustified(2, '0') +
+                   " day:"      + QString::number(day     ).rightJustified(2, '0') +
+                   " division:" + QString::number(division) +
+                   " -->\n";
+
 
     Html += "<table>\n"
             "<thead><tr>"
@@ -383,11 +385,12 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
 {
     int trClass = 0;
     QString className[] = {"\"odd\"", "\"even\""};
-    QString Html = "<!-- year:" + QString::number(year)
-                   + " month:" + QString::number(month).rightJustified(2, '0')
-                   + " day:" + QString::number(day).rightJustified(2, '0')
-                   + " division:" + QString::number(division)
-                   + " -->\n";
+    QString Html = "<!--"
+                   " year:"     + QString::number(year    ) +
+                   " month:"    + QString::number(month   ).rightJustified(2, '0') +
+                   " day:"      + QString::number(day     ).rightJustified(2, '0') +
+                   " division:" + QString::number(division) +
+                   " -->\n";
 
     Html += "<table>\n"
             "<thead><tr>"
