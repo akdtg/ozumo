@@ -347,16 +347,16 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         QString history;
         for (int i = 1; i <= 6; i++)
         {
-            tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :shikona1a AND shikona2 = :shikona2a AND basho = :bashoa "
+            tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1a AND shikona2 = :s2a AND basho = :ba "
                              "UNION "
-                             "SELECT result2 FROM torikumi WHERE shikona2 = :shikona1b AND shikona1 = :shikona2b AND basho = :bashob ");
+                             "SELECT result2 FROM torikumi WHERE shikona2 = :s1b AND shikona1 = :s2b AND basho = :bb ");
 
-            tmpQuery.bindValue(":shikona1a", shikona1);
-            tmpQuery.bindValue(":shikona2a", shikona2);
-            tmpQuery.bindValue(":shikona1b", shikona1);
-            tmpQuery.bindValue(":shikona2b", shikona2);
-            tmpQuery.bindValue(":bashoa", basho - i);
-            tmpQuery.bindValue(":bashob", basho - i);
+            tmpQuery.bindValue(":s1a", shikona1);
+            tmpQuery.bindValue(":s2a", shikona2);
+            tmpQuery.bindValue(":s1b", shikona1);
+            tmpQuery.bindValue(":s2b", shikona2);
+            tmpQuery.bindValue(":ba", basho - i);
+            tmpQuery.bindValue(":bb", basho - i);
             tmpQuery.exec();
             if (tmpQuery.next())
             {
@@ -1826,7 +1826,7 @@ int MainWindow::getNumOfBoshi(int year, int month, int day, QString shikona, int
     QSqlQuery query(db);
 
     query.prepare("SELECT COUNT (*) FROM torikumi WHERE year = :y AND month = :m AND day <= :d "
-                     "AND ((shikona1 = :s1 AND result1 = :r1) OR ( shikona2 = :s2 AND result2 = :r2))");
+                     "AND ((shikona1 = :s1 AND result1 = :r1) OR (shikona2 = :s2 AND result2 = :r2))");
 
     query.bindValue(":y", year);
     query.bindValue(":m", month);
