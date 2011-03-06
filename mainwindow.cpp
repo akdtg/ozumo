@@ -890,7 +890,7 @@ void MainWindow::importAllHoshitori()
 }
 
 bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, int side,
-                               int rikishi, QString shikona)
+                               int rikishi, QString shikona, QString hiragana)
 {
     QSqlQuery query(db);
 
@@ -929,9 +929,9 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
     query.exec();
 
     query.prepare("INSERT INTO banzuke ("
-                  "id, year, month, rank, position, side, rikishi, shikona) "
+                  "id, year, month, rank, position, side, rikishi, shikona, hiragana) "
                   "VALUES ("
-                  ":id, :year, :month, :rank, :position, :side, :rikishi, :shikona)");
+                  ":id, :year, :month, :rank, :position, :side, :rikishi, :shikona, :hiragana)");
 
     query.bindValue(":id",       id);
     query.bindValue(":year",     year);
@@ -941,6 +941,7 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
     query.bindValue(":side",     side);
     query.bindValue(":rikishi",  rikishi);
     query.bindValue(":shikona",  shikona);
+    query.bindValue(":hiragana", hiragana);
 
     return query.exec();
 }
@@ -1017,7 +1018,7 @@ bool MainWindow::parsingBanzuke12(QString content)
         }
 
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 0, id1, kanji1))
+            if (!insertBanzuke(year, month, rank, position, 0, id1, kanji1, ""))
             {
                 qDebug() << "-";
                 return false;
@@ -1045,7 +1046,7 @@ bool MainWindow::parsingBanzuke12(QString content)
         //qDebug() << division << kanji1 << id1 << rank << i << kanji2 << id2;
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 1, id2, kanji2))
+            if (!insertBanzuke(year, month, rank, position, 1, id2, kanji2, ""))
             {
                 qDebug() << "-";
                 return false;
@@ -1105,14 +1106,14 @@ bool MainWindow::parsingBanzuke3456(QString content)
         // qDebug() << division << kanji1 << hiragana1 << rank << kanji2 << hiragana2;
 
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(year, month, division, position.toInt(), 0, 0, kanji1))
+            if (!insertBanzuke(year, month, division, position.toInt(), 0, 0, kanji1, hiragana1))
             {
                 qDebug() << "-";
                 return false;
             }
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(year, month, division, position.toInt(), 1, 0, kanji2))
+            if (!insertBanzuke(year, month, division, position.toInt(), 1, 0, kanji2, hiragana2))
             {
                 qDebug() << "-";
                 return false;
@@ -1282,14 +1283,14 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
         /*qDebug() << "****** POSITION *****************" << position;*/
 
         if (!shikonaEast.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 0, idEast, shikonaEast))
+            if (!insertBanzuke(year, month, rank, position, 0, idEast, shikonaEast, ""))
             {
                 qDebug() << "-";
                 return false;
             }
 
         if (!shikonaWest.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 1, idWest, shikonaWest))
+            if (!insertBanzuke(year, month, rank, position, 1, idWest, shikonaWest, ""))
             {
                 qDebug() << "-";
                 return false;
@@ -1342,12 +1343,16 @@ bool MainWindow::parsingHoshitori3456(QString content, int basho, int division, 
         content = content.mid(content.indexOf(">") + 1).simplified();
         QString shikona = content.left(content.indexOf("<"));
 
+        content = content.mid(content.indexOf(QString::fromUtf8("hoshitori_riki5")));
+        content = content.mid(content.indexOf(">") + 1).simplified();
+        QString hiragana = content.left(content.indexOf("<"));
+
         content = content.mid(content.indexOf(QString::fromUtf8("hoshitori_riki3-1")) + 1);
 
         //qDebug() << rank << shikona;
 
         if (!shikona.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, side, 0, shikona))
+            if (!insertBanzuke(year, month, rank, position, side, 0, shikona, hiragana))
             {
                 qDebug() << "-";
                 return false;

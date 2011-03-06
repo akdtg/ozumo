@@ -40,7 +40,7 @@ public slots:
     bool parsingBanzuke12(QString content);
     bool parsingBanzuke3456(QString content);
     bool insertBanzuke(int year, int month, QString rank, int position, int side,
-                       int rikishi_id, QString shikona);
+                       int rikishi_id, QString shikona, QString hiragana);
     void importAllHoshitori();
     bool importHoshitori(QString fName);
     bool parsingHoshitori12(QString content, int basho, int division, int side);
