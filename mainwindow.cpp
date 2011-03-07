@@ -135,7 +135,7 @@ QString MainWindow::translateShikona(QString shikona)
     QSqlQuery tmpQuery(db);
     QString shikonaRu = shikona;
 
-    tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji");
+    tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji AND ru IS NOT NULL AND ru != ''");
     tmpQuery.bindValue(":kanji", shikona);
     tmpQuery.exec();
     if (tmpQuery.next())
