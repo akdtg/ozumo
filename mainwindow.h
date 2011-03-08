@@ -48,7 +48,7 @@ public slots:
     void downloadBanzuke();
     void generateHoshitori();
     QString hoshitori2Html(int year, int month, int day, int division);
-    QString translateShikona(QString shikona);
+    QString translateShikona(QString shikona, int year, int month);
     QString translateKimarite(QString kimarite);
 
     void statistics();

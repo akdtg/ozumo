@@ -130,13 +130,32 @@ int wgetDownload(QString url)
     return process.exitCode();
 }
 
-QString MainWindow::translateShikona(QString shikona)
+QString MainWindow::translateShikona(QString shikona, int year, int month)
 {
     QSqlQuery tmpQuery(db);
-    QString shikonaRu = shikona;
+    QString hiragana, shikonaRu = shikona;
 
-    tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :kanji AND ru IS NOT NULL AND ru != ''");
-    tmpQuery.bindValue(":kanji", shikona);
+    tmpQuery.prepare("SELECT hiragana FROM banzuke WHERE shikona = :s AND year = :y AND month = :m");
+    tmpQuery.bindValue(":s", shikona);
+    tmpQuery.bindValue(":y", year);
+    tmpQuery.bindValue(":m", month);
+    tmpQuery.exec();
+    if (tmpQuery.next())
+    {
+        hiragana = tmpQuery.value(0).toString();
+    }
+
+    if (hiragana.size() > 0)
+    {
+        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :k AND hiragana = :h");
+        tmpQuery.bindValue(":k", shikona);
+        tmpQuery.bindValue(":h", hiragana);
+    }
+    else
+    {
+        tmpQuery.prepare("SELECT ru FROM shikona WHERE kanji = :k");
+        tmpQuery.bindValue(":k", shikona);
+    }
     tmpQuery.exec();
     if (tmpQuery.next())
     {
@@ -369,9 +388,9 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
         }
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + translateShikona(shikona1) + res1 + "</td>"
+                "<td>" + translateShikona(shikona1, year, month) + res1 + "</td>"
                 "<td><font style=\"font-family: monospace; letter-spacing:4px;\">" + history.simplified() + "</font></td>"
-                "<td>" + translateShikona(shikona2) + res2 + "</td></tr>\n";
+                "<td>" + translateShikona(shikona2, year, month) + res2 + "</td></tr>\n";
 
         trClass ^= 1;
     }
@@ -432,11 +451,11 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
                 "-"  + QString::number(getNumOfBoshi(year, month, day, shikona2, 0)) + ")";
 
         Html += "<tr class=" + className[trClass] + ">"
-                "<td>" + translateShikona(shikona1) + res1 + "</td>"
+                "<td>" + translateShikona(shikona1, year, month) + res1 + "</td>"
                 "<td>" + result1 + "</td>"
                 "<td>" + translateKimarite(kimarite) + "</td>"
                 "<td>" + result2 + "</td>"
-                "<td>" + translateShikona(shikona2) + res2 + "</td></tr>\n";
+                "<td>" + translateShikona(shikona2, year, month) + res2 + "</td></tr>\n";
 
         trClass ^= 1;
     }
@@ -1529,10 +1548,10 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             }
 
             Html += "<tr class=" + className[trClass] + ">"
-                    "<td><strong>" + translateShikona(shikona[0]) + "</strong> " + res[0] + "<br/>"
+                    "<td><strong>" + translateShikona(shikona[0], year, month) + "</strong> " + res[0] + "<br/>"
                     "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[0].simplified() + "</font></td>"
                     "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + "</td>"
-                    "<td><strong>" + translateShikona(shikona[1]) + "</strong> " + res[1] + "<br/>"
+                    "<td><strong>" + translateShikona(shikona[1], year, month) + "</strong> " + res[1] + "<br/>"
                     "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[1].simplified() + "</td></tr>\n";
 
             trClass ^= 1;
@@ -1677,14 +1696,14 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
 
         BBCode += phpBBcolor[title1] +
                 (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                (translateShikona(shikona1) + res1).leftJustified(20, ' ') + "[/color]" +
+                (translateShikona(shikona1, year, month) + res1).leftJustified(20, ' ') + "[/color]" +
                 phpBBcolor[0] +
                 result1.leftJustified( 4, ' ') +
                 translateKimarite(kimarite).leftJustified(16, ' ') +
                 result2.leftJustified( 4, ' ') + "[/color]" +
                 phpBBcolor[title2] +
                 (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                (translateShikona(shikona2) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
+                (translateShikona(shikona2, year, month) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
     }
 
     return BBCode;
@@ -1816,10 +1835,10 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
             rank2Ru = tmpQuery.value(0).toString();
 
         BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
-                  (translateShikona(shikona1) + res1).leftJustified(24, ' ') + "[/color]" +
+                  (translateShikona(shikona1, year, month) + res1).leftJustified(24, ' ') + "[/color]" +
                   phpBBcolor[0]      + history.simplified().leftJustified(20, ' ') + "[/color]" +
                   phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
-                  (translateShikona(shikona2) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
+                  (translateShikona(shikona2, year, month) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
 
    }
 
