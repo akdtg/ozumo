@@ -1512,12 +1512,12 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
             for (int ext = 0; ext <= 4; ext ++, ext ++)
             {
+                shikona[0] = shikona[1] = "";
+                res[0]     = res[1]     = "";
+                history[0] = history[1] = "";
+
                 for (int side = 0; side < 2; side ++)
                 {
-                    shikona[0] = shikona[1] = "";
-                    res[0]     = res[1]     = "";
-                    history[0] = history[1] = "";
-
                     query.prepare("SELECT rikishi, shikona "
                                   "FROM banzuke "
                                   "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
