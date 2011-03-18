@@ -1577,7 +1577,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
                             "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[0].simplified() + "</font></td>"
                             "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + ((ext >= 2) ? "*" : "") + "</td>"
                             "<td><strong>" + translateShikona(shikona[1], year, month) + "</strong> " + res[1] + "<br/>"
-                            "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[1].simplified() + "</td></tr>\n";
+                            "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[1].simplified() + "</font></td></tr>\n";
 
                     trClass ^= 1;
                 }
