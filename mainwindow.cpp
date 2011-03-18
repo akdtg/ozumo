@@ -1352,6 +1352,8 @@ bool MainWindow::parsingHoshitori3456(QString content, int basho, int division, 
     content = content.mid(content.indexOf(QString::fromUtf8("torikumi_boxbg")));
     content.truncate(content.indexOf(QString("</table>")));
 
+    int tsukedashi_position = 0;
+    int tsukedashi_side = 2;
     while (content.indexOf(QString::fromUtf8("hoshitori_riki3-1")) != -1)
     {
         content = content.mid(content.indexOf(QString::fromUtf8("hoshitori_riki3-1")));
@@ -1371,11 +1373,26 @@ bool MainWindow::parsingHoshitori3456(QString content, int basho, int division, 
         //qDebug() << rank << shikona;
 
         if (!shikona.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, side, 0, shikona, hiragana))
+        {
+            if (position != 0)
             {
-                qDebug() << "-";
-                return false;
+                tsukedashi_position = position;
+                if (!insertBanzuke(year, month, rank, position, side, 0, shikona, hiragana))
+                {
+                    qDebug() << "-";
+                    return false;
+                }
             }
+            else
+            {
+                if (!insertBanzuke(year, month, rank, tsukedashi_position, side + tsukedashi_side, 0, shikona, hiragana))
+                {
+                    qDebug() << "-";
+                    return false;
+                }
+                tsukedashi_side <<= 1;
+            }
+        }
     }
 
     return true;
@@ -1493,68 +1510,78 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
             QString shikona[2], res[2], history[2];
             int rikishiId[2];
 
-            for (int side = 0; side < 2; side ++)
+            for (int ext = 0; ext <= 4; ext ++, ext ++)
             {
-                query.prepare("SELECT rikishi, shikona "
-                              "FROM banzuke "
-                              "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
-                query.bindValue(":year",  year);
-                query.bindValue(":month", month);
-                query.bindValue(":rank",  rank);
-                query.bindValue(":position", row);
-                query.bindValue(":side",  side);
-                query.exec();
-
-                if (query.next())
+                for (int side = 0; side < 2; side ++)
                 {
-                    rikishiId[side] = query.value(0).toInt();
-                    shikona[side] = query.value(1).toString();
+                    shikona[0] = shikona[1] = "";
+                    res[0]     = res[1]     = "";
+                    history[0] = history[1] = "";
 
-                    res[side] += " (" + QString::number(getNumOfBoshi(year, month, day, shikona[side], 1)) +
-                                 "-"  + QString::number(getNumOfBoshi(year, month, day, shikona[side], 0)) + ")";
+                    query.prepare("SELECT rikishi, shikona "
+                                  "FROM banzuke "
+                                  "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
+                    query.bindValue(":year",  year);
+                    query.bindValue(":month", month);
+                    query.bindValue(":rank",  rank);
+                    query.bindValue(":position", row);
+                    query.bindValue(":side",  side + ext);
+                    query.exec();
 
-                    for (int d = 1; d <= day; d++)
+                    if (query.next())
                     {
-                        QSqlQuery tmpQuery(db);
+                        rikishiId[side] = query.value(0).toInt();
+                        shikona[side] = query.value(1).toString();
 
-                        tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :y1 AND month = :m1 AND day = :d1 "
-                                         "UNION "
-                                         "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :y2 AND month = :m2 AND day = :d2 ");
+                        res[side] += " (" + QString::number(getNumOfBoshi(year, month, day, shikona[side], 1)) +
+                                     "-"  + QString::number(getNumOfBoshi(year, month, day, shikona[side], 0)) + ")";
 
-                        tmpQuery.bindValue(":s1", shikona[side]);
-                        tmpQuery.bindValue(":s2", shikona[side]);
-                        tmpQuery.bindValue(":y1", year);
-                        tmpQuery.bindValue(":y2", year);
-                        tmpQuery.bindValue(":m1", month);
-                        tmpQuery.bindValue(":m2", month);
-                        tmpQuery.bindValue(":d1", d);
-                        tmpQuery.bindValue(":d2", d);
-
-                        tmpQuery.exec();
-
-                        if (tmpQuery.next())
+                        for (int d = 1; d <= day; d++)
                         {
-                            QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
-                            history[side].append(r);
-                        }
-                        else
-                        {
-                            history[side].append(DashMark);
-                        }
+                            QSqlQuery tmpQuery(db);
 
-                        //history[side].append("");
+                            tmpQuery.prepare("SELECT result1 FROM torikumi WHERE shikona1 = :s1 AND year = :y1 AND month = :m1 AND day = :d1 "
+                                             "UNION "
+                                             "SELECT result2 FROM torikumi WHERE shikona2 = :s2 AND year = :y2 AND month = :m2 AND day = :d2 ");
+
+                            tmpQuery.bindValue(":s1", shikona[side]);
+                            tmpQuery.bindValue(":s2", shikona[side]);
+                            tmpQuery.bindValue(":y1", year);
+                            tmpQuery.bindValue(":y2", year);
+                            tmpQuery.bindValue(":m1", month);
+                            tmpQuery.bindValue(":m2", month);
+                            tmpQuery.bindValue(":d1", d);
+                            tmpQuery.bindValue(":d2", d);
+
+                            tmpQuery.exec();
+
+                            if (tmpQuery.next())
+                            {
+                                QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
+                                history[side].append(r);
+                            }
+                            else
+                            {
+                                history[side].append(DashMark);
+                            }
+
+                            //history[side].append("");
+                        }
                     }
                 }
+
+                if (!shikona[0].isEmpty() || !shikona[1].isEmpty())
+                {
+                    Html += "<tr class=" + className[trClass] + ">"
+                            "<td><strong>" + translateShikona(shikona[0], year, month) + "</strong> " + res[0] + "<br/>"
+                            "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[0].simplified() + "</font></td>"
+                            "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + ((ext >= 2) ? "*" : "") + "</td>"
+                            "<td><strong>" + translateShikona(shikona[1], year, month) + "</strong> " + res[1] + "<br/>"
+                            "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[1].simplified() + "</td></tr>\n";
+
+                    trClass ^= 1;
+                }
             }
-
-            Html += "<tr class=" + className[trClass] + ">"
-                    "<td><strong>" + translateShikona(shikona[0], year, month) + "</strong> " + res[0] + "<br/>"
-                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[0].simplified() + "</font></td>"
-                    "<td>" + rankRu + ((rank >= 5) ? "&nbsp;" + QString::number(row) : "") + "</td>"
-                    "<td><strong>" + translateShikona(shikona[1], year, month) + "</strong> " + res[1] + "<br/>"
-                    "<font style=\"font-family: monospace; letter-spacing:4px;\">" + history[1].simplified() + "</td></tr>\n";
-
-            trClass ^= 1;
         }
     }
 
