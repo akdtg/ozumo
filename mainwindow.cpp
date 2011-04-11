@@ -10,7 +10,7 @@
 
 #define WIN_MARK    "○"
 #define LOSS_MARK   "●"
-#define DASH_MARK   "‒"
+#define DASH_MARK   "−"
 
 #define FUZEN       "不戦"
 #define FUZEN_WIN   "□"
