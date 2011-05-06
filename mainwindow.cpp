@@ -978,6 +978,10 @@ bool MainWindow::parsingBanzuke12(QString content)
     if (rx.indexIn(content) != -1) {
         year  = 1988 + rx.cap(1).toInt();
         month = rx.cap(2).toInt() + 1;
+        if ((month & 1) == 0)
+        {
+            month--;
+        }
         if (month == 13)
         {
             month = 1;
@@ -1088,6 +1092,10 @@ bool MainWindow::parsingBanzuke3456(QString content)
     if (rx.indexIn(content) != -1) {
         year  = 1988 + rx.cap(1).toInt();
         month = rx.cap(2).toInt() + 1;
+        if ((month & 1) == 0)
+        {
+            month--;
+        }
         if (month == 13)
         {
             month = 1;
