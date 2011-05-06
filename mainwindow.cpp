@@ -1474,9 +1474,9 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
     Html += "<table>\n"
             "<thead><tr>"
-            "<th width=\"40%\">" + QString::fromUtf8("Восток") + "</th>"
-            "<th width=\"20%\">" + QString::fromUtf8("Ранг")   + "</th>"
-            "<th width=\"40%\">" + QString::fromUtf8("Запад")  + "</th>"
+            "<th width=\"33%\">" + QString::fromUtf8("Восток") + "</th>"
+            "<th width=\"33%\">" + QString::fromUtf8("Ранг")   + "</th>"
+            "<th width=\"33%\">" + QString::fromUtf8("Запад")  + "</th>"
             "</tr></thead>\n"
             "<tbody>\n";
 
