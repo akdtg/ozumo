@@ -57,7 +57,7 @@
          <item>
           <widget class="QPushButton" name="pushButton_importAllTorikumi">
            <property name="text">
-            <string>Import all the torikumi</string>
+            <string>Import all torikumi</string>
            </property>
           </widget>
          </item>
@@ -67,7 +67,7 @@
             <bool>true</bool>
            </property>
            <property name="text">
-            <string>Import all the hoshitori</string>
+            <string>Import all hoshitori</string>
            </property>
           </widget>
          </item>
