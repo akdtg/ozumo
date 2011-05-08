@@ -109,6 +109,9 @@ void readNames()
         in.setCodec("EUC-JP");
 
         QString content = in.readAll();
+
+        file0.close();
+
         QString shikonaEn = content.mid(content.indexOf("<title>") + QString("<title>").size());
         shikonaEn.truncate(shikonaEn.indexOf(" "));
         QString id = list.at(i);
