@@ -145,32 +145,32 @@
           <widget class="QComboBox" name="comboBox_basho">
            <item>
             <property name="text">
-             <string>1 - Hatsu</string>
+             <string>01 - Hatsu</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>2 - Haru</string>
+             <string>03 - Haru</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>3 - Natsu</string>
+             <string>05 - Natsu</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>4 - Nagoya</string>
+             <string>07 - Nagoya</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>5 - Aki</string>
+             <string>09 - Aki</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>6 - Kyushu</string>
+             <string>11 - Kyushu</string>
             </property>
            </item>
           </widget>
