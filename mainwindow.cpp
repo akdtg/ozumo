@@ -61,6 +61,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pushButton_generateBBCodeTorikumi, SIGNAL(clicked()), this, SLOT(generateBBCodeTorikumi()));
     connect(ui->pushButton_generateBBCodeResults, SIGNAL(clicked()), this, SLOT(generateBBCodeResults()));
 
+    ui->comboBox_year->setCurrentIndex(ui->comboBox_year->findText(QString::number(QDate::currentDate().year())));
+    ui->comboBox_basho->setCurrentIndex((QDate::currentDate().month() - 1) >> 1);
+
     ui->lineEdit_workDir->setText(WORK_DIR);
 
     if (!QFile::exists(WORK_DIR "ozumo.sqlite"))
