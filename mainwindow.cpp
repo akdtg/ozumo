@@ -125,6 +125,29 @@ void readNames()
     }
 }
 
+QString res2mark(int result)
+{
+    switch (result)
+    {
+    case 0:
+        return(LossMark);
+    case 1:
+        return(WinMark);
+    default:
+        return(DashMark);
+    }
+}
+
+int mark2res(QString mark)
+{
+    if (mark == WinMark)
+        return(1);
+    else if (mark == LossMark)
+        return(0);
+    else
+        return(-1);
+}
+
 int wgetDownload(QString url)
 {
     QProcess process;
@@ -385,8 +408,7 @@ QString MainWindow::torikumi2Html(int year, int month, int day, int division)
             tmpQuery.exec();
             if (tmpQuery.next())
             {
-                QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
-                history.prepend(r);
+                history.prepend(res2mark(tmpQuery.value(0).toInt()));
             }
             else
                 history.prepend(DashMark);
@@ -444,9 +466,13 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
     {
         //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
-        QString result1  = query.value(2).toInt() == 1 ? WinMark:LossMark;
+
+        QString result1 = res2mark(query.value(2).toInt());
+
         QString shikona2 = query.value(3).toString();
-        QString result2  = query.value(4).toInt() == 1 ? WinMark:LossMark;
+
+        QString result2 = res2mark(query.value(4).toInt());
+
         QString kimarite = query.value(5).toString();
 
         QString res1, res2;
@@ -686,8 +712,8 @@ bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
 
         if (!insertTorikumi(index, basho, year, month, dayx,
                             division,
-                            rikishi1, shikona1, rank1, result1 == WinMark ? 1:0,
-                            rikishi2, shikona2, rank2, result2 == WinMark ? 1:0,
+                            rikishi1, shikona1, rank1, mark2res(result1),
+                            rikishi2, shikona2, rank2, mark2res(result2),
                             kimarite,
                             id_local))
         {
@@ -760,25 +786,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
                 res2     = rxResults.cap(5);
             }
 
-            int result1, result2;
-
-            if (res1.isEmpty())
-            {
-                result1 = -1;
-            }
-            else
-            {
-                result1 = res1 == WinMark ? 1:0;
-            }
-
-            if (res2.isEmpty())
-            {
-                result2 = -1;
-            }
-            else
-            {
-                result2 = res2 == WinMark ? 1:0;
-            }
+            int result1 = mark2res(res1), result2 = mark2res(res2);
 
             id2      = rx.cap(9);
             shikona2 = rx.cap(11);
@@ -1571,8 +1579,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
                             if (tmpQuery.next())
                             {
-                                QString r = tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark;
-                                history[side].append(r);
+                                history[side].append(res2mark(tmpQuery.value(0).toInt()));
                             }
                             else
                             {
@@ -1660,9 +1667,9 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
     {
         //int id = query.value(0).toInt();
         QString shikona1 = query.value(1).toString();
-        QString result1  = query.value(2).toInt() == 1 ? WinMark:LossMark;
+        QString result1  = res2mark(query.value(2).toInt());
         QString shikona2 = query.value(3).toString();
-        QString result2  = query.value(4).toInt() == 1 ? WinMark:LossMark;
+        QString result2  = res2mark(query.value(4).toInt());
         QString kimarite = query.value(5).toString();
         QString rank1    = query.value(6).toString();
         QString rank2    = query.value(7).toString();
@@ -1819,7 +1826,7 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
                 }
                 else
                 {
-                    history.prepend(tmpQuery.value(0).toInt() == 1 ? WinMark:LossMark);
+                    history.prepend(res2mark(tmpQuery.value(0).toInt()));
                 }
             }
             else
