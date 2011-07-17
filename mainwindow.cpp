@@ -640,14 +640,18 @@ void MainWindow::generateBBCodeTorikumi()
     QString makuuchi = torikumi2BBCode(year, month, day, 1);
     QString juryo    = torikumi2BBCode(year, month, day, 2);
 
-    ui->textEdit_htmlCode->setPlainText(juryo + "\n" + makuuchi);
+    ui->textEdit_htmlCode->setPlainText(QString::fromUtf8("[spoiler=Торикуми, старшие дивизионы][pre]\n") +
+                                        juryo + "\n" + makuuchi +
+                                        "[/pre][/spoiler]");
 
     QString makushita= torikumi2BBCode(year, month, day, 3);
     QString sandanme = torikumi2BBCode(year, month, day, 4);
     QString jonidan  = torikumi2BBCode(year, month, day, 5);
     QString jonokuchi= torikumi2BBCode(year, month, day, 6);
 
-    ui->textEdit_htmlPreview->setPlainText(jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita);
+    ui->textEdit_htmlPreview->setPlainText(QString::fromUtf8("[spoiler=Торикуми, младшие дивизионы][pre]\n") +
+                                           jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita +
+                                           "[/pre][/spoiler]");
 }
 
 void MainWindow::generateBBCodeResults()
@@ -659,14 +663,18 @@ void MainWindow::generateBBCodeResults()
     QString makuuchi = torikumiResults2BBCode(year, month, day, 1);
     QString juryo    = torikumiResults2BBCode(year, month, day, 2);
 
-    ui->textEdit_htmlCode->setPlainText(juryo + "\n" + makuuchi);
+    ui->textEdit_htmlCode->setPlainText(QString::fromUtf8("[spoiler=Результаты, старшие дивизионы][pre]\n") +
+                                        juryo + "\n" + makuuchi +
+                                        "[/pre][/spoiler]");
 
     QString makushita= torikumiResults2BBCode(year, month, day, 3);
     QString sandanme = torikumiResults2BBCode(year, month, day, 4);
     QString jonidan  = torikumiResults2BBCode(year, month, day, 5);
     QString jonokuchi= torikumiResults2BBCode(year, month, day, 6);
 
-    ui->textEdit_htmlPreview->setPlainText(jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita);
+    ui->textEdit_htmlPreview->setPlainText(QString::fromUtf8("[spoiler=Результаты, младшие дивизионы][pre]\n") +
+                                           jonokuchi + "\n" + jonidan + "\n" + sandanme + "\n" + makushita +
+                                           "[/pre][/spoiler]");
 }
 
 
