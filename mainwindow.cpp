@@ -1715,34 +1715,12 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         QString rank1Ru, rank2Ru;
         QString side1Ru, side2Ru;
 
-        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":s", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-        {
-            title1 = tmpQuery.value(0).toInt();
-            pos1   = tmpQuery.value(1).toInt();
-            side1  = tmpQuery.value(2).toInt();
-        }
-        else
+        if (getPosition(year, month, shikona1, &title1, &pos1, &side1) != 0)
         {
             splitRank(rank1, &side1, &title1, &pos1);
         }
 
-        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":s", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
-        {
-            title2 = tmpQuery.value(0).toInt();
-            pos2   = tmpQuery.value(1).toInt();
-            side2  = tmpQuery.value(2).toInt();
-        }
-        else
+        if (getPosition(year, month, shikona2, &title2, &pos2, &side2) != 0)
         {
             splitRank(rank2, &side2, &title2, &pos2);
         }
@@ -1856,35 +1834,18 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
 
         int side1, title1, pos1;
         int side2, title2, pos2;
-        splitRank(rank1, &side1, &title1, &pos1);
-        splitRank(rank2, &side2, &title2, &pos2);
 
         QString rank1Ru, rank2Ru;
         QString side1Ru, side2Ru;
 
-        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":s", shikona1);
-        tmpQuery.exec();
-        if (tmpQuery.next())
+        if (getPosition(year, month, shikona1, &title1, &pos1, &side1) != 0)
         {
-            title1 = tmpQuery.value(0).toInt();
-            pos1   = tmpQuery.value(1).toInt();
-            side1  = tmpQuery.value(2).toInt();
+            splitRank(rank1, &side1, &title1, &pos1);
         }
 
-        tmpQuery.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
-        tmpQuery.bindValue(":y", year);
-        tmpQuery.bindValue(":m", month);
-        tmpQuery.bindValue(":s", shikona2);
-        tmpQuery.exec();
-        if (tmpQuery.next())
+        if (getPosition(year, month, shikona2, &title2, &pos2, &side2) != 0)
         {
-
-            title2 = tmpQuery.value(0).toInt();
-            pos2   = tmpQuery.value(1).toInt();
-            side2  = tmpQuery.value(2).toInt();
+            splitRank(rank2, &side2, &title2, &pos2);
         }
 
         side1Ru = side1 == 0 ? QString::fromUtf8("в"):QString::fromUtf8("з");
@@ -1939,4 +1900,25 @@ int MainWindow::getNumOfBoshi(int year, int month, int day, QString shikona, int
     {
         return 0;
     }
+}
+
+int MainWindow::getPosition(int year, int month, QString shikona, int *title, int *pos, int *side)
+{
+    QSqlQuery query(db);
+
+    query.prepare("SELECT rank, position, side FROM banzuke WHERE year = :y AND month = :m AND shikona = :s");
+    query.bindValue(":y", year);
+    query.bindValue(":m", month);
+    query.bindValue(":s", shikona);
+    query.exec();
+    if (query.next())
+    {
+        *title = query.value(0).toInt();
+        *pos   = query.value(1).toInt();
+        *side  = query.value(2).toInt();
+
+        return 0;
+    }
+
+    return -1;
 }
