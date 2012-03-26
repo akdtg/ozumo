@@ -24,17 +24,17 @@ QString Fuzen     = QString::fromUtf8(FUZEN);
 QString FuzenWin  = QString::fromUtf8(FUZEN_WIN);
 QString FuzenLoss = QString::fromUtf8(FUZEN_LOSS);
 
-QString phpBBcolor[] = {"[color=#404040]",
-                        "[color=#A00000]",
-                        "[color=#A06000]",
-                        "[color=#6000A0]",
-                        "[color=#6000A0]",
-                        "[color=#006000]",
-                        "[color=#0060A0]",
-                        "[color=#A000A0]",
-                        "[color=#008080]",
-                        "[color=#A00060]",
-                        "[color=#A08000]"};
+QString color[] = { "#404040",
+                    "#A00000",
+                    "#A06000",
+                    "#6000A0",
+                    "#6000A0",
+                    "#006000",
+                    "#0060A0",
+                    "#A000A0",
+                    "#008080",
+                    "#A00060",
+                    "#A08000"};
 
 #ifdef __WIN32__
 #define WORK_DIR ""
@@ -1762,14 +1762,14 @@ QString MainWindow::torikumiResults2BBCode(int year, int month, int day, int div
         if (tmpQuery.next())
             rank2Ru = tmpQuery.value(0).toString();
 
-        BBCode += phpBBcolor[title1] +
+        BBCode += "[color=" + color[title1] + "]" +
                 (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
                 (translateShikona(shikona1, year, month, false) + res1).leftJustified(20, ' ') + "[/color]" +
-                phpBBcolor[0] +
+                "[color=" + color[0] + "]" +
                 result1.leftJustified( 4, ' ') +
                 translateKimarite(kimarite).leftJustified(16, ' ') +
                 result2.leftJustified( 4, ' ') + "[/color]" +
-                phpBBcolor[title2] +
+                "[color=" + color[title2] + "]" +
                 (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
                 (translateShikona(shikona2, year, month, false) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
     }
@@ -1902,12 +1902,13 @@ QString MainWindow::torikumi2BBCode(int year, int month, int day, int division)
         if (tmpQuery.next())
             rank2Ru = tmpQuery.value(0).toString();
 
-        BBCode += phpBBcolor[title1] + (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
+        BBCode += "[color=" + color[title1] + "]" +
+                  (rank1Ru + QString::number(pos1) + side1Ru).rightJustified(6, ' ') + "  " +
                   (translateShikona(shikona1, year, month, false) + res1).leftJustified(24, ' ') + "[/color]" +
-                  phpBBcolor[0]      + history.simplified().leftJustified(20, ' ') + "[/color]" +
-                  phpBBcolor[title2] + (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
+                  "[color=" + color[0] + "]" + history.simplified().leftJustified(20, ' ') + "[/color]" +
+                  "[color=" + color[title2] + "]" +
+                  (rank2Ru + QString::number(pos2) + side2Ru).rightJustified(6, ' ') + "  " +
                   (translateShikona(shikona2, year, month, false) + res2).leftJustified(20, ' ') + "[/color]" + "\n";
-
    }
 
     return BBCode;
