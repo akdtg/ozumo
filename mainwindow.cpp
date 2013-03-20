@@ -567,6 +567,52 @@ void MainWindow::downloadTorikumi()
     ui->textEdit_htmlCode->setPlainText(result);
 }
 
+void MainWindow::downloadHoshitori()
+{
+    int year = QDate::currentDate().year();
+    int month = QDate::currentDate().month();
+
+    int basho;
+
+    QSqlQuery query(db);
+    query.prepare("SELECT id FROM basho WHERE year = :year AND month = :month");
+    query.bindValue(":year",  year);
+    query.bindValue(":month", month);
+    query.exec();
+    if (query.next())
+    {
+        basho = query.value(0).toInt();
+    }
+    else
+    {
+        return;
+    }
+
+    QStringList parts = (QStringList()
+                         << "hoshi_" + QString::number(basho) + "_1_1.html"
+                         << "hoshi_" + QString::number(basho) + "_1_2.html"
+                         << "hoshi_" + QString::number(basho) + "_1_3.html"
+                         << "hoshi_" + QString::number(basho) + "_2_4.html"
+                         << "hoshi_" + QString::number(basho) + "_2_5.html"
+                        );
+    QString url;
+    int exitCode = 0;
+
+    for (int i = 0; i < parts.size(); i++)
+    {
+        url = BASE_URL "hoshitori/" + parts[i];
+        exitCode = wgetDownload("-P hoshitori " + url);
+
+        if (exitCode != 0)
+        {
+            ui->textEdit_htmlCode->append("Downloading " + url + " failed, Code: " + QString::number(exitCode));
+            return;
+        }
+    }
+
+    importAllHoshitori();
+}
+
 void MainWindow::downloadBanzuke()
 {
     QString url = BASE_URL "banzuke/index.html";
@@ -631,6 +677,8 @@ void MainWindow::downloadBanzuke()
             }
         }
     }
+
+    downloadHoshitori();
 }
 
 void MainWindow::generateTorikumi()
