@@ -1641,7 +1641,6 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
         for (int row = 1; row <= numOfRows; row++)
         {
             QString shikona[2], res[2], history[2];
-            int rikishiId[2];
 
             for (int ext = 0; ext <= 4; ext ++, ext ++)
             {
@@ -1651,7 +1650,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
                 for (int side = 0; side < 2; side ++)
                 {
-                    query.prepare("SELECT rikishi, shikona "
+                    query.prepare("SELECT shikona "
                                   "FROM banzuke "
                                   "WHERE year = :year AND month = :month AND rank = :rank AND position = :position AND side = :side");
                     query.bindValue(":year",  year);
@@ -1663,8 +1662,7 @@ QString MainWindow::hoshitori2Html(int year, int month, int day, int division)
 
                     if (query.next())
                     {
-                        rikishiId[side] = query.value(0).toInt();
-                        shikona[side] = query.value(1).toString();
+                        shikona[side] = query.value(0).toString();
 
                         res[side] += " (" + QString::number(getNumOfBoshi(year, month, day, shikona[side], 1)) +
                                      "-"  + QString::number(getNumOfBoshi(year, month, day, shikona[side], 0)) + ")";
