@@ -204,8 +204,10 @@ QString MainWindow::translateShikona(QString shikona, int year, int month, bool 
     if (asLink)
     {
         // <a href="?q=tosanoumi">Тосаноуми</a>
-        tmpQuery.prepare("SELECT en1 FROM rikishi WHERE kanji1 = :k");
+        tmpQuery.prepare("SELECT en FROM banzuke WHERE shikona = :k AND year = :y AND month = :m");
         tmpQuery.bindValue(":k", shikona);
+        tmpQuery.bindValue(":y", year);
+        tmpQuery.bindValue(":m", month);
         tmpQuery.exec();
         if (tmpQuery.next())
         {
@@ -1258,6 +1260,26 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
     }
     else
         return false;
+
+    QRegExp rx("/eng//ozumo_meikan/rikishi_joho/rikishi_(\\d+).html\"><strong>([^<]+)</strong></a>");
+    QStringList list;
+    int pos = 0;
+
+    while ((pos = rx.indexIn(content, pos)) != -1)
+    {
+        list << rx.cap(1) << rx.cap(2);
+        pos += rx.matchedLength();
+
+        query.prepare("UPDATE banzuke SET en=:en WHERE year=:y AND month=:m AND rikishi=:rid");
+
+        query.bindValue(":en",  rx.cap(2));
+        query.bindValue(":y",   year);
+        query.bindValue(":m",   month);
+        query.bindValue(":rid", rx.cap(1));
+        query.exec();
+    }
+    //qDebug() << list;
+
 
     QString prevRank;
     int position = 1;
