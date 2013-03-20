@@ -1261,7 +1261,7 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
     else
         return false;
 
-    QRegExp rx("/eng//ozumo_meikan/rikishi_joho/rikishi_(\\d+).html\"><strong>([^<]+)</strong></a>");
+    QRegExp rx("/eng/ozumo_meikan/rikishi_joho/rikishi_(\\d+).html\"><strong>([^<]+)</strong></a>");
     QStringList list;
     int pos = 0;
 
@@ -1279,7 +1279,6 @@ bool MainWindow::parsingHoshitori12(QString content, int basho, int division, in
         query.exec();
     }
     //qDebug() << list;
-
 
     QString prevRank;
     int position = 1;
