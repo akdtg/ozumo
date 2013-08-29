@@ -615,65 +615,43 @@ void MainWindow::downloadHoshitori()
 
 void MainWindow::downloadBanzuke()
 {
-    QString url = BASE_URL "banzuke/index.html";
+    QString url = BASE_URL "banzuke/";
 
-    int exitCode = wgetDownload("-P banzuke " + url);
+    QStringList parts = (QStringList()
+                         << "ban_1.html"
+                         << "ban_2.html"
+                         << "ban_3_1.html"
+                         << "ban_4_1.html"
+                         << "ban_4_2.html"
+                         << "ban_5_1.html"
+                         << "ban_5_2.html"
+                         << "ban_5_3.html"
+                         << "ban_6_1.html"
+                         );
 
-    if (exitCode != 0)
+    ui->textEdit_htmlCode->clear();
+
+    for (int i = 0; i < parts.size(); i++)
     {
-        ui->textEdit_htmlCode->append("Downloading " + url + " failed, Code: " + QString::number(exitCode));
-        return;
-    }
-    else
-    {
-        QFile file0(WORK_DIR "banzuke/index.html");
+        int exitCode = wgetDownload("-P banzuke " +  url + parts[i]);
 
-        if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
+        if (exitCode != 0)
         {
-            qDebug() << "error: file.open(" << WORK_DIR << "banzuke/index.html)";
+            ui->textEdit_htmlCode->append("Downloading " + url + parts[i] + " failed, Code: " + QString::number(exitCode));
             return;
         }
-
-        QTextStream in(&file0);
-        in.setCodec("EUC-JP");
-        QString content = in.readAll();
-        file0.close();
-
-        QRegExp rx("/hon_basho/banzuke/([^\"]+)\"");
-        QStringList parts;
-        int pos = 0;
-
-        while ((pos = rx.indexIn(content, pos)) != -1)
+        else
         {
-            parts << rx.cap(1);
-            pos += rx.matchedLength();
-        }
+            ui->textEdit_htmlCode->append("Downloading " + url + parts[i] + " complete");
 
-        ui->textEdit_htmlCode->clear();
-
-        for (int i = 0; i < parts.size(); i++)
-        {
-            url = BASE_URL "banzuke/" + parts[i];
-            exitCode = wgetDownload("-P banzuke " + url);
-
-            if (exitCode != 0)
+            if (!importBanzuke(WORK_DIR "banzuke/" + parts[i]))
             {
-                ui->textEdit_htmlCode->append("Downloading " + url + " failed, Code: " + QString::number(exitCode));
+                ui->textEdit_htmlCode->append("Parsing " + url + parts[i] + " failed");
                 return;
             }
             else
             {
-                ui->textEdit_htmlCode->append("Downloading " + url + " complete");
-
-                if (!importBanzuke(WORK_DIR "banzuke/" + parts[i]))
-                {
-                    ui->textEdit_htmlCode->append("Parsing " + url + " failed");
-                    return;
-                }
-                else
-                {
-                    ui->textEdit_htmlCode->append("Parsing " + url + " complete");
-                }
+                ui->textEdit_htmlCode->append("Parsing " + url + parts[i] + " complete");
             }
         }
     }
