@@ -6,7 +6,7 @@
 #include <QtSql>
 
 #define START_INDEX 491
-#define BASE_URL "http://sumo.goo.ne.jp/hon_basho/"
+#define BASE_URL "http://www.sumo.or.jp/honbasho/"
 
 #define WIN_MARK    "○"
 #define LOSS_MARK   "●"
@@ -109,7 +109,7 @@ void readNames()
 
         QTextStream in(&file0);
 
-        in.setCodec("EUC-JP");
+        in.setCodec("UTF-8");
 
         QString content = in.readAll();
 
@@ -618,15 +618,15 @@ void MainWindow::downloadBanzuke()
     QString url = BASE_URL "banzuke/";
 
     QStringList parts = (QStringList()
-                         << "ban_1.html"
-                         << "ban_2.html"
-                         << "ban_3_1.html"
-                         << "ban_4_1.html"
-                         << "ban_4_2.html"
-                         << "ban_5_1.html"
-                         << "ban_5_2.html"
-                         << "ban_5_3.html"
-                         << "ban_6_1.html"
+                         << "index?rank=1"
+                         << "index?rank=2"
+                         << "index?rank=3&page=1"
+                         << "index?rank=3&page=2"
+                         << "index?rank=4&page=1"
+                         << "index?rank=4&page=2"
+                         << "index?rank=5&page=1"
+                         << "index?rank=5&page=2"
+                         << "index?rank=6"
                          );
 
     ui->textEdit_htmlCode->clear();
@@ -899,7 +899,7 @@ bool MainWindow::importTorikumi(QString fName)
 
     QTextStream in(&file0);
 
-    in.setCodec("EUC-JP");
+    in.setCodec("UTF-8");
 
     QString content = in.readAll();
 
@@ -1246,7 +1246,7 @@ bool MainWindow::importBanzuke(QString fName)
 
     QTextStream in(&file0);
 
-    in.setCodec("EUC-JP");
+    in.setCodec("UTF-8");
 
     QString content = in.readAll();
 
@@ -1521,7 +1521,7 @@ bool MainWindow::importHoshitori(QString fName)
 
     QTextStream in(&file0);
 
-    in.setCodec("EUC-JP");
+    in.setCodec("UTF-8");
 
     QString content = in.readAll();
 
