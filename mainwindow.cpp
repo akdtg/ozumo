@@ -1291,7 +1291,7 @@ bool MainWindow::importBanzuke(QString fName)
     int division;
 
     QFileInfo fi(fName);
-    division = QString(fi.fileName().at(11)).toInt();
+    division = QString(fi.fileName().at(3)).toInt();
 
     bool parsingResult;
     if (division <= 2)
