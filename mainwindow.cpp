@@ -1049,6 +1049,26 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
     return query.exec();
 }
 
+QString Numbers = QString::fromUtf8("一二三四五六七八九十");
+
+int Chinese2Arabic(QString str)
+{
+    int number = 0;
+    int c = 0;
+
+    for (int i = 0; i < str.length(); i++)
+    {
+        c = Numbers.indexOf(str.at(i)) + 1;
+
+        if (c == 10)
+            number *= 10;
+        else
+            number += c;
+    }
+
+    return number;
+}
+
 bool MainWindow::parsingBanzuke12(QString content)
 {
     content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
@@ -1057,62 +1077,54 @@ bool MainWindow::parsingBanzuke12(QString content)
 
     int year, month;
 
-    // 平成22年12月21日更新
-    QRegExp rx(QString::fromUtf8("平成(\\d{1,2})年(\\d{1,2})月(\\d{1,2})日"));
-    if (rx.indexIn(content) != -1) {
-        year  = 1988 + rx.cap(1).toInt();
-        month = rx.cap(2).toInt() + 1;
-        if ((month & 1) == 0)
-        {
-            month--;
-        }
-        if (month == 13)
-        {
-            month = 1;
-            year++;
-        }
+    QRegExp rx;
+    rx.setMinimal(true);
+
+    // 平成二十五年七月場所
+    rx.setPattern(QString::fromUtf8("平成(.{1,3})年(.{1,3})月場所"));
+    if (rx.indexIn(content) != -1)
+    {
+        year = 1988 + Chinese2Arabic(rx.cap(1));
+        month = Chinese2Arabic(rx.cap(2));
     }
     else
+    {
+        qDebug() << "the date is not found";
         return false;
-
-    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
+    }
 
     QString prevRank;
     int position = 1;
 
-    while (content.indexOf(QString::fromUtf8("=東=")) != -1)
+    rx.setPattern(QString::fromUtf8(
+        "<td class=\"east\">"
+        ".*"
+        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;"
+        ".*"
+        "<td class=\"rank\">(.*)</td>"
+        ".*"
+        "<td class=\"west\">"
+        ".*"
+        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;"
+        ));
+
+    QString kanji1 = "K1";
+    int id1 = 0;
+    QString rank = "R";
+    QString kanji2 = "K2";
+    int id2 = 0;
+
+    int pos = 0;
+    while ((pos = rx.indexIn(content, pos)) != -1)
     {
-        content = content.mid(content.indexOf(QString::fromUtf8("=東=")));
+        id1 = rx.cap(1).toInt();
+        kanji1 = rx.cap(2);
+        rank = rx.cap(3);
+        id2 = rx.cap(4).toInt();
+        kanji2 = rx.cap(5);
+        pos += rx.matchedLength();
 
-        QString contentEast = content;
-        if (content.indexOf(QString::fromUtf8("=格付=")) != -1)
-            contentEast.truncate(content.indexOf(QString::fromUtf8("=格付=")));
-
-        QString kanji1;
-        int id1 = 0;
-        if (contentEast.indexOf("<strong>") != -1)
-        {
-            QRegExp rx("rikishi_(\\d+)");
-            if (rx.indexIn(contentEast) != -1) {
-                id1 = rx.cap(1).toInt();
-            }
-
-            contentEast = contentEast.mid(contentEast.indexOf("<strong>"));
-            contentEast = contentEast.mid(contentEast.indexOf(">") + 1).simplified();
-            kanji1 = contentEast.left(contentEast.indexOf(" "));
-        }
-
-        content = content.mid(content.indexOf(QString::fromUtf8("=格付=")));
-
-        QString contentRank = content;
-        if (contentRank.indexOf(QString::fromUtf8("=西=")) != -1)
-            contentRank.truncate(contentRank.indexOf(QString::fromUtf8("=西=")));
-
-        contentRank = contentRank.mid(contentRank.indexOf("<td align='center' bgcolor='#d9eaf0' class='common12-18-333'>"));
-        contentRank = contentRank.mid(contentRank.indexOf(">") + 1);
-        QString rank = contentRank.left(contentRank.indexOf("<")).simplified();
-        if (division == QString::fromUtf8("十両"))
-            rank = division;
+        rank.truncate(2);
 
         if (rank != prevRank)
         {
@@ -1130,27 +1142,6 @@ bool MainWindow::parsingBanzuke12(QString content)
                 qDebug() << "-";
                 return false;
             }
-
-        content = content.mid(content.indexOf(QString::fromUtf8("=西=")));
-
-        QString contentWest = content;
-        if (contentWest.indexOf(QString::fromUtf8("=東=")) != -1)
-            contentWest.truncate(contentWest.indexOf(QString::fromUtf8("=東=")));
-
-        QString kanji2;
-        int id2 = 0;
-        if (contentWest.indexOf("<strong>") != -1)
-        {
-            QRegExp rx("rikishi_(\\d+)");
-            if (rx.indexIn(contentWest) != -1) {
-                id2 = rx.cap(1).toInt();
-            }
-
-            contentWest = contentWest.mid(contentWest.indexOf("<strong>"));
-            contentWest = contentWest.mid(contentWest.indexOf(">") + 1).simplified();
-            kanji2 = contentWest.left(contentWest.indexOf(" "));
-        }
-        //qDebug() << division << kanji1 << id1 << rank << i << kanji2 << id2;
 
         if (!kanji2.isEmpty())
             if (!insertBanzuke(year, month, rank, position, 1, id2, kanji2, ""))
