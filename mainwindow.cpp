@@ -633,25 +633,28 @@ void MainWindow::downloadBanzuke()
 
     for (int i = 0; i < parts.size(); i++)
     {
-        int exitCode = wgetDownload("-P banzuke " +  url + parts[i]);
+        QString pageLink = url + parts[i];
+        QString outFile = "div" + QString(parts[i].at(11)) + (parts[i].indexOf("page") > 0 ? "p2" : "") + ".html";
+
+        int exitCode = wgetDownload("-P banzuke " + pageLink + " -O banzuke/" + outFile);
 
         if (exitCode != 0)
         {
-            ui->textEdit_htmlCode->append("Downloading " + url + parts[i] + " failed, Code: " + QString::number(exitCode));
+            ui->textEdit_htmlCode->append("Downloading " + pageLink + " failed, Code: " + QString::number(exitCode));
             return;
         }
         else
         {
-            ui->textEdit_htmlCode->append("Downloading " + url + parts[i] + " complete");
+            ui->textEdit_htmlCode->append("Downloading " + pageLink + " complete");
 
-            if (!importBanzuke(WORK_DIR "banzuke/" + parts[i]))
+            if (!importBanzuke(WORK_DIR "banzuke/" + outFile))
             {
-                ui->textEdit_htmlCode->append("Parsing " + url + parts[i] + " failed");
+                ui->textEdit_htmlCode->append("Parsing " + outFile + " failed");
                 return;
             }
             else
             {
-                ui->textEdit_htmlCode->append("Parsing " + url + parts[i] + " complete");
+                ui->textEdit_htmlCode->append("Parsing " + outFile + " complete");
             }
         }
     }
