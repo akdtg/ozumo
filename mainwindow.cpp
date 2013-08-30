@@ -620,11 +620,11 @@ void MainWindow::downloadBanzuke()
     QStringList parts = (QStringList()
                          << "index?rank=1"
                          << "index?rank=2"
-                         << "index?rank=3&page=1"
+                         << "index?rank=3"
                          << "index?rank=3&page=2"
-                         << "index?rank=4&page=1"
+                         << "index?rank=4"
                          << "index?rank=4&page=2"
-                         << "index?rank=5&page=1"
+                         << "index?rank=5"
                          << "index?rank=5&page=2"
                          << "index?rank=6"
                          );
@@ -1049,7 +1049,29 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
     return query.exec();
 }
 
-QString Numbers = QString::fromUtf8("一二三四五六七八九十");
+struct numbers_s
+{
+        QString c;
+        int n;
+};
+
+struct numbers_s Numbers[] =
+{
+    {QString::fromUtf8("〇"), 0},
+    {QString::fromUtf8("一"), 1},
+    {QString::fromUtf8("二"), 2},
+    {QString::fromUtf8("三"), 3},
+    {QString::fromUtf8("四"), 4},
+    {QString::fromUtf8("五"), 5},
+    {QString::fromUtf8("六"), 6},
+    {QString::fromUtf8("七"), 7},
+    {QString::fromUtf8("八"), 8},
+    {QString::fromUtf8("九"), 9},
+    {QString::fromUtf8("十"), 10},
+    {QString::fromUtf8("百"), 100},
+    {QString::fromUtf8("千"), 1000},
+    {QString::fromUtf8("万"), 10000}
+};
 
 int Chinese2Arabic(QString str)
 {
@@ -1058,10 +1080,16 @@ int Chinese2Arabic(QString str)
 
     for (int i = 0; i < str.length(); i++)
     {
-        c = Numbers.indexOf(str.at(i)) + 1;
+        for (unsigned j = 0; j < sizeof(Numbers)/sizeof(Numbers[0]); j++)
+        {
+            if (QString(str.at(i)) == Numbers[j].c)
+            {
+                c = Numbers[j].n;
+            }
+        }
 
-        if (c == 10)
-            number *= 10;
+        if (c >= 10)
+            number = (number == 0) ? c : (number * c);
         else
             number += c;
     }
@@ -1071,10 +1099,6 @@ int Chinese2Arabic(QString str)
 
 bool MainWindow::parsingBanzuke12(QString content)
 {
-    content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
-    content = content.mid(content.indexOf(">") + 2);
-    QString division = content.left(content.indexOf("<")).simplified();
-
     int year, month;
 
     QRegExp rx;
@@ -1156,66 +1180,84 @@ bool MainWindow::parsingBanzuke12(QString content)
 
 bool MainWindow::parsingBanzuke3456(QString content)
 {
-    content = content.mid(content.indexOf(QString::fromUtf8("<strong>■")));
-    content = content.mid(content.indexOf(">") + 2);
-    QString division = content.left(content.indexOf("<")).simplified();
-
     int year, month;
 
-    // 平成22年12月21日更新
-    QRegExp rx(QString::fromUtf8("平成(\\d{1,2})年(\\d{1,2})月(\\d{1,2})日"));
-    if (rx.indexIn(content) != -1) {
-        year  = 1988 + rx.cap(1).toInt();
-        month = rx.cap(2).toInt() + 1;
-        if ((month & 1) == 0)
-        {
-            month--;
-        }
-        if (month == 13)
-        {
-            month = 1;
-            year++;
-        }
+    QRegExp rx;
+    rx.setMinimal(true);
+
+    // 平成二十五年七月場所
+    rx.setPattern(QString::fromUtf8("平成(.{1,3})年(.{1,3})月場所"));
+    if (rx.indexIn(content) != -1)
+    {
+        year = 1988 + Chinese2Arabic(rx.cap(1));
+        month = Chinese2Arabic(rx.cap(2));
     }
     else
-        return false;
-
-    while (content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">") != -1)
     {
-        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString kanji1 = content.left(content.indexOf("<")).simplified();
+        qDebug() << "the date is not found";
+        return false;
+    }
 
-        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d9eaf0\" class=\"common12-18-333\">"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString hiragana1 = content.left(content.indexOf("<")).simplified();
+    QString division = "D";
 
-        content = content.mid(content.indexOf("<td align='center' bgcolor='#6b248f' class='common12-18-fff'>"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString position = content.left(content.indexOf("<")).simplified();
+    // <span class="dayNum">幕下 筆頭～五十枚目</span>
+    rx.setPattern(QString::fromUtf8("<span class=\"dayNum\">(.{3}).*</span>"));
+    if (rx.indexIn(content) != -1)
+    {
+        division = rx.cap(1);
+        division = division.simplified();
+    }
+//    qDebug() << "division:" << division;
 
-        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString kanji2 = content.left(content.indexOf("<")).simplified();
+    QString prevRank;
+    int position = 1;
 
-        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d9eaf0\" class=\"common12-18-333\">"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString hiragana2 = content.left(content.indexOf("<")).simplified();
+    rx.setPattern(QString::fromUtf8(
+        "<dl class=\"player\">"
+        ".*"
+        "<dt>(.*)[(](.*)[)]</dt>"
+        ".*"
+        "<td class=\"num\">(.*)</td>"
+        ".*"
+        "<dl class=\"player\">"
+        ".*"
+        "<dt>(.*)[(](.*)[)]</dt>"
+        ));
 
-        content = content.mid(content.indexOf("<td align=\"center\" bgcolor=\"#d0a3f5\" class=\"common12-18-333\">"));
-        content = content.mid(content.indexOf(">") + 1);
+    QString kanji1 = "K1";
+    QString hiragana1 = "H1";
+    QString positions = "P";
+    QString kanji2 = "K2";
+    QString hiragana2 = "H2";
 
-        // qDebug() << division << kanji1 << hiragana1 << rank << kanji2 << hiragana2;
+    int pos = 0;
+    while ((pos = rx.indexIn(content, pos)) != -1)
+    {
+        kanji1 = rx.cap(1);
+        hiragana1 = rx.cap(2);
+        positions = rx.cap(3);
+        kanji2 = rx.cap(4);
+        hiragana2 = rx.cap(5);
+
+        pos += rx.matchedLength();
+
+        if (positions == QString::fromUtf8("筆頭"))
+                position = 1;
+        else
+                position = Chinese2Arabic(positions);
+
+//        qDebug() << kanji1 << hiragana1 << position;
+//        qDebug() << kanji2 << hiragana2 << position;
 
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(year, month, division, position.toInt(), 0, 0, kanji1, hiragana1))
+            if (!insertBanzuke(year, month, division, position, 0, 0, kanji1, hiragana1))
             {
                 qDebug() << "-";
                 return false;
             }
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(year, month, division, position.toInt(), 1, 0, kanji2, hiragana2))
+            if (!insertBanzuke(year, month, division, position, 1, 0, kanji2, hiragana2))
             {
                 qDebug() << "-";
                 return false;
@@ -1246,7 +1288,7 @@ bool MainWindow::importBanzuke(QString fName)
     int division;
 
     QFileInfo fi(fName);
-    division = QString(fi.fileName().at(4)).toInt();
+    division = QString(fi.fileName().at(11)).toInt();
 
     bool parsingResult;
     if (division <= 2)
