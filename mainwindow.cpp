@@ -6,7 +6,9 @@
 #include <QtSql>
 
 #define START_INDEX 491
-#define BASE_URL "http://www.sumo.or.jp/honbasho/"
+
+#define BASE_URL    "http://www.sumo.or.jp/honbasho/"
+#define BASE_URL_EN "http://www.sumo.or.jp/en/honbasho/"
 
 #define WIN_MARK    "○"
 #define LOSS_MARK   "●"
@@ -37,9 +39,9 @@ QString color[] = { "#404040",
                     "#A08000"};
 
 #ifdef __WIN32__
-#define WORK_DIR ""
+#define WORK_DIR    ""
 #else
-#define WORK_DIR "/mnt/memory/"
+#define WORK_DIR    "/mnt/memory/"
 #endif
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -613,41 +615,73 @@ void MainWindow::downloadHoshitori()
     importAllHoshitori();
 }
 
+struct strings_pair_s
+{
+    QString src;
+    QString dst;
+};
+
+struct strings_pair_s BanzukeJP[] =
+{
+    {"index?rank=1",        "div1.jp.html"},
+    {"index?rank=2",        "div2.jp.html"},
+    {"index?rank=3",        "div3.jp.html"},
+    {"index?rank=3&page=2", "div3p2.jp.html"},
+    {"index?rank=4",        "div4.jp.html"},
+    {"index?rank=4&page=2", "div4p2.jp.html"},
+    {"index?rank=5",        "div5.jp.html"},
+    {"index?rank=5&page=2", "div5p2.jp.html"},
+    {"index?rank=6",        "div6.jp.html"}
+};
+
+struct strings_pair_s BanzukeEN[] =
+{
+    {"index?rank=1",        "div1.en.html"},
+    {"index?rank=2",        "div2.en.html"},
+    {"index?rank=3",        "div3.en.html"},
+    {"index?rank=3&page=2", "div3p2.en.html"},
+    {"index?rank=4",        "div4.en.html"},
+    {"index?rank=4&page=2", "div4p2.en.html"},
+    {"index?rank=5",        "div5.en.html"},
+    {"index?rank=5&page=2", "div5p2.en.html"},
+    {"index?rank=6",        "div6.en.html"}
+};
+
+#define BANZUKE_DIR  "banzuke-new"
+
 void MainWindow::downloadBanzuke()
 {
-    QString url = BASE_URL "banzuke/";
-
-    QStringList parts = (QStringList()
-                         << "index?rank=1"
-                         << "index?rank=2"
-                         << "index?rank=3"
-                         << "index?rank=3&page=2"
-                         << "index?rank=4"
-                         << "index?rank=4&page=2"
-                         << "index?rank=5"
-                         << "index?rank=5&page=2"
-                         << "index?rank=6"
-                         );
-
     ui->textEdit_htmlCode->clear();
 
-    for (int i = 0; i < parts.size(); i++)
-    {
-        QString pageLink = url + parts[i];
-        QString outFile = "div" + QString(parts[i].at(11)) + (parts[i].indexOf("page") > 0 ? "p2" : "") + ".html";
+    QDir dir(WORK_DIR);
+    dir.mkdir(BANZUKE_DIR);
 
-        int exitCode = wgetDownload("-P banzuke " + pageLink + " -O banzuke/" + outFile);
+    int size = sizeof(BanzukeJP)/sizeof(BanzukeJP[0]);
+
+    QString url;
+    QString srcFile;
+    QString outFile;
+    int exitCode;
+
+    for (int i = 0; i < size; i++)
+    {
+        srcFile = BanzukeJP[i].src;
+        outFile = BanzukeJP[i].dst;
+
+        url = QString(BASE_URL) + "banzuke/" + srcFile;
+
+        exitCode = wgetDownload(url + " -O " + QString(BANZUKE_DIR) + "/" + outFile);
 
         if (exitCode != 0)
         {
-            ui->textEdit_htmlCode->append("Downloading " + pageLink + " failed, Code: " + QString::number(exitCode));
+            ui->textEdit_htmlCode->append("Downloading " + srcFile + " failed, Code: " + QString::number(exitCode));
             return;
         }
         else
         {
-            ui->textEdit_htmlCode->append("Downloading " + pageLink + " complete");
+            ui->textEdit_htmlCode->append("Downloading " + srcFile + " complete");
 
-            if (!importBanzuke(WORK_DIR "banzuke/" + outFile))
+            if (!importBanzuke(QString(WORK_DIR) + QString(BANZUKE_DIR) + "/" + outFile))
             {
                 ui->textEdit_htmlCode->append("Parsing " + outFile + " failed");
                 return;
@@ -657,9 +691,37 @@ void MainWindow::downloadBanzuke()
                 ui->textEdit_htmlCode->append("Parsing " + outFile + " complete");
             }
         }
+
+        url = QString(BASE_URL_EN) + "banzuke/" + srcFile;
+
+        srcFile = BanzukeEN[i].src;
+        outFile = BanzukeEN[i].dst;
+
+        exitCode = wgetDownload(url + " -O " + QString(BANZUKE_DIR) + "/" + outFile);
+
+        if (exitCode != 0)
+        {
+            ui->textEdit_htmlCode->append("Downloading " + srcFile + " failed, Code: " + QString::number(exitCode));
+            return;
+        }
+        else
+        {
+            ui->textEdit_htmlCode->append("Downloading " + srcFile + " complete");
+
+            if (!importBanzuke(QString(WORK_DIR) + QString(BANZUKE_DIR) + "/" + outFile))
+            {
+                ui->textEdit_htmlCode->append("Parsing " + outFile + " failed");
+                return;
+            }
+            else
+            {
+                ui->textEdit_htmlCode->append("Parsing " + outFile + " complete");
+            }
+        }
+
     }
 
-    downloadHoshitori();
+///    downloadHoshitori();
 }
 
 void MainWindow::generateTorikumi()
@@ -1181,6 +1243,129 @@ bool MainWindow::parsingBanzuke12(QString content)
     return true;
 }
 
+unsigned Month2Number(QString month)
+{
+    QString months[] =
+        { "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        };
+
+    for (unsigned i = 0; i < sizeof(months)/sizeof(months[0]); i++)
+        if (month.compare(months[i], Qt::CaseInsensitive) == 0)
+            return (i + 1);
+
+    return 0;
+}
+
+bool MainWindow::parsingBanzuke12_EN(QString content)
+{
+    int year, month;
+
+    QRegExp rx;
+    rx.setMinimal(true);
+
+    // <p class="mdDate">2013 September  Grand Sumo Tournament</p>
+    rx.setPattern(QString::fromUtf8("<p class=\"mdDate\">.*(\\d{4})\\s(\\w+).*</p>"));
+    if (rx.indexIn(content) != -1)
+    {
+        year = rx.cap(1).toInt();
+        month = Month2Number(rx.cap(2));
+    }
+    else
+    {
+        qDebug() << "the date is not found";
+        return false;
+    }
+
+    QString prevRank;
+    int position = 1;
+
+    rx.setPattern(QString::fromUtf8(
+        "<td class=\"east\">"
+        ".*"
+        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>"
+        ".*"
+        "<td class=\"rank\">(.*)</td>"
+        ".*"
+        "<td class=\"west\">"
+        ".*"
+        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>"
+        ));
+
+    QString kanji1 = "K1";
+    int id1 = 0;
+    QString rank = "R";
+    QString kanji2 = "K2";
+    int id2 = 0;
+
+    int pos = 0;
+    while ((pos = rx.indexIn(content, pos)) != -1)
+    {
+        id1 = rx.cap(1).toInt();
+        kanji1 = rx.cap(2);
+        rank = rx.cap(3);
+        id2 = rx.cap(4).toInt();
+        kanji2 = rx.cap(5);
+        pos += rx.matchedLength();
+
+        rank.truncate(2);
+
+        if (rank != prevRank)
+        {
+            prevRank = rank;
+            position = 1;
+        }
+        else
+        {
+            position++;
+        }
+
+        if (!kanji1.isEmpty())
+        {
+            QSqlQuery query(db);
+            query.prepare("UPDATE banzuke SET en = :en WHERE rikishi = :id AND year = :year AND month = :month");
+            query.bindValue(":year",     year);
+            query.bindValue(":month",    month);
+            query.bindValue(":id",       id1);
+            query.bindValue(":en",       kanji1);
+
+            if (!query.exec())
+            {
+                qDebug() << "-";
+                return false;
+            }
+        }
+
+        if (!kanji2.isEmpty())
+        {
+            QSqlQuery query(db);
+            query.prepare("UPDATE banzuke SET en = :en WHERE rikishi = :id AND year = :year AND month = :month");
+            query.bindValue(":year",     year);
+            query.bindValue(":month",    month);
+            query.bindValue(":id",       id2);
+            query.bindValue(":en",       kanji2);
+
+            if (!query.exec())
+            {
+                qDebug() << "-";
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 bool MainWindow::parsingBanzuke3456(QString content)
 {
     int year, month;
@@ -1288,19 +1473,56 @@ bool MainWindow::importBanzuke(QString fName)
 
     file0.close();
 
-    int division;
+    QRegExp rx;
+    rx.setMinimal(true);
 
-    QFileInfo fi(fName);
-    division = QString(fi.fileName().at(3)).toInt();
+    int locale = 0;
 
-    bool parsingResult;
-    if (division <= 2)
+    // <meta property="og:locale" content="ja_JP" />
+    // <meta property="og:locale" content="en_US" />
+    rx.setPattern(QString::fromUtf8("<meta property=\"og:locale\" content=\"(\\w*)\" />"));
+    if (rx.indexIn(content) != -1)
     {
-        parsingResult = parsingBanzuke12(content);
+        if (rx.cap(1) == "ja_JP")
+            locale = 1;
+        else if (rx.cap(1) == "en_US")
+            locale = 2;
+        else
+            locale = 0;
     }
     else
     {
-        parsingResult = parsingBanzuke3456(content);
+        qDebug() << "cannot get locale";
+        return false;
+    }
+
+    int division = 0;
+
+    // <li class="rank3 current">Makushita Division</li>
+    // <li class="rank6 current">序ノ口</li>
+    rx.setPattern(QString::fromUtf8("<li class=\"rank(\\d) current\">"));
+    if (rx.indexIn(content) != -1)
+    {
+        division = rx.cap(1).toInt();
+    }
+    else
+    {
+        qDebug() << "cannot get division";
+        return false;
+    }
+
+    bool parsingResult = true;
+    if (division <= 2)
+    {
+        if (locale == 1)
+            parsingResult = parsingBanzuke12(content);
+        else
+            parsingResult = parsingBanzuke12_EN(content);
+    }
+    else
+    {
+        if (locale == 1)
+            parsingResult = parsingBanzuke3456(content);
     }
 
     return parsingResult;

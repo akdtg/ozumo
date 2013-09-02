@@ -38,6 +38,7 @@ public slots:
     int getAndImportTorikumi(int year, int month, int day, int division);
     bool importBanzuke(QString fName);
     bool parsingBanzuke12(QString content);
+    bool parsingBanzuke12_EN(QString content);
     bool parsingBanzuke3456(QString content);
     bool insertBanzuke(int year, int month, QString rank, int position, int side,
                        int rikishi_id, QString shikona, QString hiragana);
