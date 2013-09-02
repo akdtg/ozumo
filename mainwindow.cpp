@@ -1197,10 +1197,10 @@ bool MainWindow::parsingBanzuke12(QString content)
         "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;"
         ));
 
-    QString kanji1 = "K1";
+    QString kanji1;
     int id1 = 0;
-    QString rank = "R";
-    QString kanji2 = "K2";
+    QString rank;
+    QString kanji2;
     int id2 = 0;
 
     int pos = 0;
@@ -1302,10 +1302,10 @@ bool MainWindow::parsingBanzuke12_EN(QString content)
         "/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>"
         ));
 
-    QString kanji1 = "K1";
+    QString kanji1;
     int id1 = 0;
-    QString rank = "R";
-    QString kanji2 = "K2";
+    QString rank;
+    QString kanji2;
     int id2 = 0;
 
     int pos = 0;
@@ -1401,22 +1401,24 @@ bool MainWindow::parsingBanzuke3456(QString content)
     int position = 1;
 
     rx.setPattern(QString::fromUtf8(
-        "<dl class=\"player\">"
+        "<tr>.*<td.*"
+        "(?:<dl class=\"player\">"
         ".*"
         "<dt>(.*)[(](.*)[)]</dt>"
-        ".*"
+        ".*)?"
         "<td class=\"num\">(.*)</td>"
         ".*"
-        "<dl class=\"player\">"
+        "(?:<dl class=\"player\">"
         ".*"
-        "<dt>(.*)[(](.*)[)]</dt>"
+        "<dt>(.*)[(](.*)[)]</dt>)?"
+        ".*</td>.*</tr>"
         ));
 
-    QString kanji1 = "K1";
-    QString hiragana1 = "H1";
-    QString positions = "P";
-    QString kanji2 = "K2";
-    QString hiragana2 = "H2";
+    QString kanji1;
+    QString hiragana1;
+    QString positions;
+    QString kanji2;
+    QString hiragana2;
 
     int pos = 0;
     while ((pos = rx.indexIn(content, pos)) != -1)
