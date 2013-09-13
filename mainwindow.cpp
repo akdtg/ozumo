@@ -976,48 +976,70 @@ bool MainWindow::importTorikumi(QString fName)
 
     file0.close();
 
-    int year = 0, month = 0;
-    int basho, division, day;
+    int year = 0, month = 0, day = 0;
+    int basho = 0;
+    int division = 0, dayN = 0;
+    QString dayNum;
+    QString rank;
 
-    fName.replace('.', '_');
-    QStringList tempList= fName.split('_');
-    basho    = tempList.at(1).toInt();
-    division = tempList.at(2).toInt();
-    day      = tempList.at(3).toInt();
+    QRegExp rx;
+    rx.setMinimal(true);
 
-    QRegExp rx(QString::fromUtf8("(\\d{4})年(\\d{1,2})月(\\d{1,2})日"));
-
-    if (rx.indexIn(content) != -1)
+    // folder/tori_r2_d14.html
+    rx.setPattern(QString::fromUtf8(".*_r(\\d)_d(\\d{1,2}).*"));
+    if (rx.indexIn(fName) != -1)
     {
-        year  = rx.cap(1).toInt();
-        month = rx.cap(2).toInt();
+        division = rx.cap(1).toInt();
+        dayN = rx.cap(2).toInt();
     }
     else
     {
-        QSqlQuery query(db);
-
-        query.prepare("SELECT year, month FROM basho WHERE id = :basho");
-        query.bindValue(":basho", basho);
-        query.exec();
-        if (query.next())
-        {
-            year  = query.value(0).toInt();
-            month = query.value(1).toInt();
-        }
-        else
-        {
-            return false;
-        }
+        qDebug() << "the file name is invalid";
+        return false;
     }
+
+    // <span class="dayWrap">
+    //     <span class="dayNum">初日</span>
+    //     <span class="date">2013年9月15日(日)</span>
+    //     <span class="rank">幕内</span>
+    // </span>
+    rx.setPattern(QString::fromUtf8(
+        "<span class=\"dayWrap\">"
+        ".*"
+        "<span class=\"dayNum\">(\\w+)日</span>"
+        ".*"
+        "<span class=\"date\">(\\d{4})年(\\d{1,2})月(\\d{1,2})日.*</span>"
+        ".*"
+        "<span class=\"rank\">(\\w+)</span>"
+        ".*"
+        "</span>"
+        ));
+
+    if (rx.indexIn(content) != -1)
+    {
+        dayNum = rx.cap(1);
+        year = rx.cap(2).toInt();
+        month = rx.cap(3).toInt();
+        day = rx.cap(4).toInt();
+        rank = rx.cap(5);
+    }
+    else
+    {
+        qDebug() << "cannot find the date in the torikumi file" << fName;
+        return false;
+    }
+
+    // qDebug () << "div" << division << "dayN" << dayN;
+    // qDebug () << "dayNum" << dayNum << "year" << year << "month" << month << "day" << day << "rank" << rank;
 
     bool parsingResult;
     if (division <= 2)
     {
-        parsingResult = parsingTorikumi12(content, basho, year, month, day, division);
+        parsingResult = parsingTorikumi12(content, basho, year, month, dayN, division);
     }
     else
     {
-        parsingResult = parsingTorikumi3456(content, basho, year, month, day, division);
+        parsingResult = parsingTorikumi3456(content, basho, year, month, dayN, division);
     }
 
     return parsingResult;
