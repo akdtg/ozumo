@@ -920,7 +920,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
         ".*"
         "<span class=\"rank\">(.+)</span>" // rank1
         ".*"
-        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)</a>" // id1 + shikona1
+        "<span class=\"name\">(.+)</span>" // id1 + shikona1
         ".*"
         "<td class=\"result (?:win)?\">(.{,10})</td>" // res1
         ".*"
@@ -930,7 +930,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
         ".*"
         "<span class=\"rank\">(.+)</span>" // rank2
         ".*"
-        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)</a>" // id2 + shikona2
+        "<span class=\"name\">(.+)</span>" // id2 + shikona2
         ));
 
     QString rank1 = "R1";
@@ -941,21 +941,46 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
     int id2 = 0;
     QString shikona2 = "S2";
     QString res1, res2;
+    QString name1, name2;
 
     int pos = 0;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
         rank1 = rx.cap(1);
-        id1 = rx.cap(2).toInt();
-        shikona1 = rx.cap(3);
-        res1 = rx.cap(4).simplified();
-        kimarite = rx.cap(5);
-        res2 = rx.cap(6).simplified();
-        rank2 = rx.cap(7);
-        id2 = rx.cap(8).toInt();
-        shikona2 = rx.cap(9);
+        name1 = rx.cap(2);
+        res1 = rx.cap(3).simplified();
+        kimarite = rx.cap(4);
+        res2 = rx.cap(5).simplified();
+        rank2 = rx.cap(6);
+        name2 = rx.cap(7);
 
         pos += rx.matchedLength();
+
+        QRegExp rxn;
+        rxn.setMinimal(true);
+
+        rxn.setPattern(QString::fromUtf8(".*(\\d+)?.*(\\w+)<"));
+        if (rxn.indexIn(name1) != -1)
+        {
+            id1 = rxn.cap(1).toInt();
+            shikona1 = rxn.cap(2).simplified();
+        }
+        else
+        {
+            qDebug() << "the east name is invalid";
+            return false;
+        }
+
+        if (rxn.indexIn(name2) != -1)
+        {
+            id2 = rxn.cap(1).toInt();
+            shikona2 = rxn.cap(2).simplified();
+        }
+        else
+        {
+            qDebug() << "the west name is invalid";
+            return false;
+        }
 
         int result1 = WinOrLoss(res1), result2 = WinOrLoss(res2);
 
