@@ -1012,7 +1012,7 @@ bool MainWindow::importTorikumi(QString fName)
     rx.setPattern(QString::fromUtf8(
         "<span class=\"dayWrap\">"
         ".*"
-        "<span class=\"dayNum\">(\\w+)日</span>"
+        "<span class=\"dayNum\">(\\w+)</span>"
         ".*"
         "<span class=\"date\">(\\d{4})年(\\d{1,2})月(\\d{1,2})日.*</span>"
         ".*"
