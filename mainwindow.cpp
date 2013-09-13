@@ -868,91 +868,97 @@ bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int m
 
 bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
 {
+    if (basho <= 0)
+    {
+        QSqlQuery query(db);
+        query.prepare("SELECT id FROM basho WHERE year = :year AND month = :month");
+        query.bindValue(":year",  year);
+        query.bindValue(":month", month);
+        query.exec();
+        if (query.next())
+        {
+            basho = query.value(0).toInt();
+            qDebug() << "basho:" << basho;
+        }
+        else
+        {
+            qDebug() << "cannot find basho id";
+            return false;
+        }
+    }
+
     int dayx = day, id_local = 0;
 
-    content = content.mid(content.indexOf(QString::fromUtf8("<div class=\"torikumi_boxbg\">")));
-    content.truncate(content.indexOf(QString::fromUtf8("<!-- /BASYO CONTENTS -->")));
+//        if (contentRow.indexOf(QString::fromUtf8("優勝決定戦")) != -1)
+//        {
+//            dayx = 16;
+//            id_local = 0;
+//            //qDebug() << "ketteisen";
+//        }
 
-    while (content.indexOf(QString::fromUtf8("<tr>")) != -1)
+    QRegExp rx;
+    rx.setMinimal(true);
+
+    rx.setPattern(QString::fromUtf8(
+        "<div class=\"data\">"
+        ".*"
+        "<span class=\"rank\">(.+)</span>" // rank1
+        ".*"
+        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)</a>" // id1 + shikona1
+        ".*"
+        "<td class=\"result \">(.{,10})</td>" // res1
+        ".*"
+        "<td class=\"decide\">(.{,10})</td>" // kimarite
+        ".*"
+        "<td class=\"result \">(.{,10})</td>" // res2
+        ".*"
+        "<span class=\"rank\">(.+)</span>" // rank2
+        ".*"
+        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)</a>" // id2 + shikona2
+        ));
+
+    QString rank1 = "R1";
+    int id1 = 0;
+    QString shikona1 = "S1";
+    QString kimarite = "K";
+    QString rank2 = "R2";
+    int id2 = 0;
+    QString shikona2 = "S2";
+    QString res1, res2;
+
+    int pos = 0;
+    while ((pos = rx.indexIn(content, pos)) != -1)
     {
-        content = content.mid(content.indexOf(QString::fromUtf8("<tr>")));
+        rank1 = rx.cap(1);
+        id1 = rx.cap(2).toInt();
+        shikona1 = rx.cap(3);
+        res1 = rx.cap(4).simplified();
+        kimarite = rx.cap(5);
+        res2 = rx.cap(6).simplified();
+        rank2 = rx.cap(7);
+        id2 = rx.cap(8).toInt();
+        shikona2 = rx.cap(9);
 
-        QString contentRow = content.simplified();
-        contentRow.truncate(contentRow.indexOf(QString::fromUtf8("</tr>")));
+        pos += rx.matchedLength();
 
-        if (contentRow.indexOf(QString::fromUtf8("優勝決定戦")) != -1)
+        int result1 = mark2res(res1), result2 = mark2res(res2);
+
+        qDebug() << rank1 << id1 << shikona1 << "r1:" << res1 << "k:" << kimarite << "r2:" << res2 << id2 << shikona2 << rank2;
+
+        ++id_local;
+
+        int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
+
+        if (!insertTorikumi(index, basho, year, month, dayx,
+                            division,
+                            id1, shikona1, rank1, result1,
+                            id2, shikona2, rank2, result2,
+                            kimarite,
+                            id_local))
         {
-            dayx = 16;
-            id_local = 0;
-            //qDebug() << "ketteisen";
+            qDebug() << "-";
+            return false;
         }
-
-        QRegExp rx("class=\"torikumi_riki2\">"
-                   "(.{1,6})"     // rank1
-                   "</td>"
-
-                   ".*<span class=\"torikumi_btxt\">"
-                   ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id1 + '..>' + shikona1 + '</a>'
-                   "</span>"
-
-                   "(.+)"     // res1 + kimarite + res2
-
-                   ".*<span class=\"torikumi_btxt\">"
-                   ".*(<a\\D+)?(\\d+)?(.+>)?([^\\s][^<]*)(</a>)?.*"     // '<a..' + id2 + '..>' + shikona2 + '</a>'
-                   "</span>"
-
-                   ".*class=\"torikumi_riki2\">"
-                   "(.{1,6})"     // rank2
-                   "</td>");
-
-        if (rx.indexIn(contentRow) != -1)
-        {
-            QString rank1, id1, shikona1, res1;
-            QString rank2, id2, shikona2, res2;
-            QString kimarite;
-
-            QRegExp rxResults(".*class=\"torikumi_riki3\">(.{1})</td>"
-                              ".*class=\"torikumi_riki3\">.*(<a.+>)?([^\\s][^<]+)(</a>)?.*</td>"
-                              ".*class=\"torikumi_riki3\">(.{1})</td>");
-
-            rank1    = rx.cap(1);
-            id1      = rx.cap(3);
-            shikona1 = rx.cap(5);
-
-            QString results = rx.cap(7);
-            if (rxResults.indexIn(results) != -1)
-            {
-                res1     = rxResults.cap(1);
-                kimarite = rxResults.cap(3);
-                res2     = rxResults.cap(5);
-            }
-
-            int result1 = mark2res(res1), result2 = mark2res(res2);
-
-            id2      = rx.cap(9);
-            shikona2 = rx.cap(11);
-            rank2    = rx.cap(13);
-
-            //qDebug() << rx.cap(1) << rx.cap(4) << rx.cap(5) << rx.cap(6) << rx.cap(7) << rx.cap(8);
-            //qDebug() << rank1 << id1 << shikona1 << res1 << kimarite << res2 << id2 << shikona2 << rank2;
-
-            ++id_local;
-
-            int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
-
-            if (!insertTorikumi(index, basho, year, month, dayx,
-                                division,
-                                id1.toInt(), shikona1, rank1, result1,
-                                id2.toInt(), shikona2, rank2, result2,
-                                kimarite,
-                                id_local))
-            {
-                qDebug() << "-";
-                return false;
-            }
-        }
-
-        content = content.mid(content.indexOf(QString::fromUtf8("</tr>")));
     }
 
     return true;
