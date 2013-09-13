@@ -158,9 +158,9 @@ int mark2res(QString mark)
 
 int WinOrLoss(QString boshi)
 {
-    if (boshi.indexOf(ShiroboshiMark) != 0)
+    if (boshi.indexOf(ShiroboshiMark) != -1)
         return(1);
-    else if (boshi.indexOf(KuroboshiMark) != 0)
+    else if (boshi.indexOf(KuroboshiMark) != -1)
         return(0);
     else
         return(-1);
