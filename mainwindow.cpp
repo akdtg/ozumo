@@ -513,10 +513,15 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
     return Html;
 }
 
+#define TORIKUMI_DIR  "torikumi-new"
+
 int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
 {
-    // "http://sumo.goo.ne.jp/hon_basho/torikumi/tori_545_1_1.html"
-    QString url = BASE_URL "torikumi/";
+    // http://www.sumo.or.jp/honbasho/main/torikumi?day=17&rank=7
+    QString url = BASE_URL "main/torikumi";
+
+    QDir dir(WORK_DIR);
+    dir.mkdir(TORIKUMI_DIR);
 
     int basho;
 
@@ -535,15 +540,16 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
     if (day > 15)
         day = 15;
 
-    QString fName = "tori_" + QString::number(basho) + "_" + QString::number(division) + "_" + QString::number(day) + ".html";
-    url += fName;
+    url += "?day=" + QString::number(day) + "&rank=" + QString::number(division);
+    QString fName = "tori_r" + QString::number(division) + "_d" + QString::number(day) + ".html";
+    QString path = QString(TORIKUMI_DIR) + "/" + fName;
 
-    int exitCode = wgetDownload(url);
+    int exitCode = wgetDownload(url + " -O " + path);
 
     if (exitCode == 0)
     {
         exitCode = -1;
-        if (importTorikumi(fName))
+        if (importTorikumi(path))
         {
             exitCode = 0;
         }
