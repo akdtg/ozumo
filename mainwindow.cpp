@@ -26,6 +26,12 @@ QString Fuzen     = QString::fromUtf8(FUZEN);
 QString FuzenWin  = QString::fromUtf8(FUZEN_WIN);
 QString FuzenLoss = QString::fromUtf8(FUZEN_LOSS);
 
+#define SHIROBOSHI  "白"
+#define KUROBOSHI   "黒"
+
+QString ShiroboshiMark  = QString::fromUtf8(SHIROBOSHI);
+QString KuroboshiMark   = QString::fromUtf8(KUROBOSHI);
+
 QString color[] = { "#404040",
                     "#A00000",
                     "#A06000",
@@ -145,6 +151,16 @@ int mark2res(QString mark)
     if (mark == WinMark)
         return(1);
     else if (mark == LossMark)
+        return(0);
+    else
+        return(-1);
+}
+
+int WinOrLoss(QString boshi)
+{
+    if (boshi.indexOf(ShiroboshiMark) != 0)
+        return(1);
+    else if (boshi.indexOf(KuroboshiMark) != 0)
         return(0);
     else
         return(-1);
@@ -906,11 +922,11 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
         ".*"
         "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)</a>" // id1 + shikona1
         ".*"
-        "<td class=\"result \">(.{,10})</td>" // res1
+        "<td class=\"result (?:win)?\">(.{,10})</td>" // res1
         ".*"
         "<td class=\"decide\">(.{,10})</td>" // kimarite
         ".*"
-        "<td class=\"result \">(.{,10})</td>" // res2
+        "<td class=\"result (?:win)?\">(.{,10})</td>" // res2
         ".*"
         "<span class=\"rank\">(.+)</span>" // rank2
         ".*"
@@ -941,7 +957,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
 
         pos += rx.matchedLength();
 
-        int result1 = mark2res(res1), result2 = mark2res(res2);
+        int result1 = WinOrLoss(res1), result2 = WinOrLoss(res2);
 
         qDebug() << rank1 << id1 << shikona1 << "r1:" << res1 << "k:" << kimarite << "r2:" << res2 << id2 << shikona2 << rank2;
 
