@@ -20,8 +20,7 @@ public:
 public slots:
     bool importTorikumi(QString fName);
     void importAllTorikumi();
-    bool parsingTorikumi12(QString content, int basho, int year, int month, int day, int division);
-    bool parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division);
+    bool parsingTorikumi(QString content, int basho, int year, int month, int day, int division);
     bool insertTorikumi(int id, int basho, int year, int month, int day,
                         int division,
                         int rikishi1, QString shikona1, QString rank1, int result1,

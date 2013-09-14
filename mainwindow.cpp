@@ -814,75 +814,7 @@ void MainWindow::generateBBCodeResults()
                                            "[/pre][/spoiler]");
 }
 
-
-bool MainWindow::parsingTorikumi3456(QString content, int basho, int year, int month, int day, int division)
-{
-    int dayx = day, id_local = 0;
-    int rikishi1 = 0, rikishi2 = 0;
-
-    content.truncate(content.indexOf(QString("<!-- /BASYO CONTENTS -->")));
-    content = content.mid(content.indexOf(QString("<!-- /BASYO TITLE -->"))).simplified();
-
-    while (content.indexOf("torikumi_riki2") != -1)
-    {
-        content = content.mid(content.indexOf("torikumi_riki2"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString rank1 = content.left(content.indexOf("<")).simplified();
-
-        content = content.mid(content.indexOf("torikumi_riki4"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString shikona1 = content.left(content.indexOf("<")).simplified();
-
-        content = content.mid(content.indexOf("torikumi_riki3"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString result1 = content.left(content.indexOf("<")).simplified();
-
-        content = content.mid(content.indexOf("torikumi_riki3"));
-        content = content.mid(content.indexOf(">") + 1);
-        if (content.startsWith("<a"))
-            content = content.mid(content.indexOf(">") + 1);
-        QString kimarite = content.left(content.indexOf("<")).simplified();
-
-        content = content.mid(content.indexOf("torikumi_riki3"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString result2 = content.left(content.indexOf("<")).simplified();
-
-        content = content.mid(content.indexOf("torikumi_riki4"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString shikona2 = content.left(content.indexOf("<")).simplified();
-        if (shikona2.contains(QRegExp("\\d+")))
-        {
-            content = content.mid(content.indexOf("torikumi_riki4"));
-            content = content.mid(content.indexOf(">") + 1);
-            shikona2 = content.left(content.indexOf("<")).simplified();
-        }
-        else
-            dayx = 16;
-
-        content = content.mid(content.indexOf("torikumi_riki2"));
-        content = content.mid(content.indexOf(">") + 1);
-        QString rank2 = content.left(content.indexOf("<")).simplified();
-
-        ++id_local;
-
-        int index = (((basho) * 100 + dayx) * 10 + division) * 100 + id_local;
-
-        if (!insertTorikumi(index, basho, year, month, dayx,
-                            division,
-                            rikishi1, shikona1, rank1, mark2res(result1),
-                            rikishi2, shikona2, rank2, mark2res(result2),
-                            kimarite,
-                            id_local))
-        {
-            qDebug() << "-";
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int month, int day, int division)
+bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month, int day, int division)
 {
     if (basho <= 0)
     {
@@ -920,7 +852,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
         ".*"
         "<span class=\"rank\">(.+)</span>" // rank1
         ".*"
-        "<span class=\"name\">(.+)</span>" // id1 + shikona1
+        "<span class=\"name\">(.+)/span>" // id1 + shikona1
         ".*"
         "<td class=\"result (?:win)?\">(.{,10})</td>" // res1
         ".*"
@@ -930,7 +862,7 @@ bool MainWindow::parsingTorikumi12(QString content, int basho, int year, int mon
         ".*"
         "<span class=\"rank\">(.+)</span>" // rank2
         ".*"
-        "<span class=\"name\">(.+)</span>" // id2 + shikona2
+        "<span class=\"name\">(.+)/span>" // id2 + shikona2
         ));
 
     QString rank1 = "R1";
@@ -1080,14 +1012,7 @@ bool MainWindow::importTorikumi(QString fName)
     // qDebug () << "dayNum" << dayNum << "year" << year << "month" << month << "day" << day << "rank" << rank;
 
     bool parsingResult;
-    if (division <= 2)
-    {
-        parsingResult = parsingTorikumi12(content, basho, year, month, dayN, division);
-    }
-    else
-    {
-        parsingResult = parsingTorikumi3456(content, basho, year, month, dayN, division);
-    }
+    parsingResult = parsingTorikumi(content, basho, year, month, dayN, division);
 
     return parsingResult;
 }
