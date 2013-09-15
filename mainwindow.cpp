@@ -854,11 +854,11 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
         ".*"
         "<span class=\"name\">(.+)/span>" // id1 + shikona1
         ".*"
-        "<td class=\"result (?:win)?\">(.{,10})</td>" // res1
+        "<td class=\"result (?:win)?\">(.*)</td>" // res1
         ".*"
         "<td class=\"decide\">(.{,10})</td>" // kimarite
         ".*"
-        "<td class=\"result (?:win)?\">(.{,10})</td>" // res2
+        "<td class=\"result (?:win)?\">(.*)</td>" // res2
         ".*"
         "<span class=\"rank\">(.+)</span>" // rank2
         ".*"
