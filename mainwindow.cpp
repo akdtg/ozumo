@@ -50,6 +50,9 @@ QString color[] = { "#404040",
 #define WORK_DIR    "/mnt/memory/"
 #endif
 
+#define BANZUKE_DIR     "banzuke"
+#define TORIKUMI_DIR    "torikumi"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -529,8 +532,6 @@ QString MainWindow::torikumiResults2Html(int year, int month, int day, int divis
     return Html;
 }
 
-#define TORIKUMI_DIR  "torikumi-new"
-
 int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
 {
     // http://www.sumo.or.jp/honbasho/main/torikumi?day=17&rank=7
@@ -668,8 +669,6 @@ struct strings_pair_s BanzukeEN[] =
     {"index?rank=5&page=2", "div5p2.en.html"},
     {"index?rank=6",        "div6.en.html"}
 };
-
-#define BANZUKE_DIR  "banzuke-new"
 
 void MainWindow::downloadBanzuke()
 {
@@ -1019,10 +1018,10 @@ bool MainWindow::importTorikumi(QString fName)
 
 void MainWindow::importAllTorikumi()
 {
-    QDir dir(WORK_DIR "torikumi/");
+    QDir dir(WORK_DIR "" TORIKUMI_DIR "/");
 
     QStringList filters;
-    filters << "tori_*_*_*.html";
+    filters << "tori_r*_d*.html";
     dir.setNameFilters(filters);
 
     QStringList list = dir.entryList();
