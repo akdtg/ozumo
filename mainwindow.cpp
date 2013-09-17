@@ -915,7 +915,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
 
         int result1 = WinOrLoss(res1), result2 = WinOrLoss(res2);
 
-        qDebug() << rank1 << id1 << shikona1 << "r1:" << res1 << "k:" << kimarite << "r2:" << res2 << id2 << shikona2 << rank2;
+        qDebug() << rank1 << id1 << shikona1 << "r1:" << result1 << "k:" << kimarite << "r2:" << result2 << id2 << shikona2 << rank2;
 
         ++id_local;
 
@@ -978,7 +978,8 @@ bool MainWindow::importTorikumi(QString fName)
 
     // <span class="dayWrap">
     //     <span class="dayNum">初日</span>
-    //     <span class="date">2013年9月15日(日)</span>
+    //     //<span class="date">2013年9月15日(日)</span>
+    //     <span class="date">平成25年9月17日(火)</span>
     //     <span class="rank">幕内</span>
     // </span>
     rx.setPattern(QString::fromUtf8(
@@ -986,7 +987,7 @@ bool MainWindow::importTorikumi(QString fName)
         ".*"
         "<span class=\"dayNum\">(\\w+)</span>"
         ".*"
-        "<span class=\"date\">(\\d{4})年(\\d{1,2})月(\\d{1,2})日.*</span>"
+        "<span class=\"date\">.*(\\d{2,4})年(\\d{1,2})月(\\d{1,2})日.*</span>"
         ".*"
         "<span class=\"rank\">(\\w+)</span>"
         ".*"
@@ -1006,6 +1007,9 @@ bool MainWindow::importTorikumi(QString fName)
         qDebug() << "cannot find the date in the torikumi file" << fName;
         return false;
     }
+
+    if (year < 2000)
+        year += 1988;
 
     // qDebug () << "div" << division << "dayN" << dayN;
     // qDebug () << "dayNum" << dayNum << "year" << year << "month" << month << "day" << day << "rank" << rank;
