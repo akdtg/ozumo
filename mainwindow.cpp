@@ -98,44 +98,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void readNames()
-{
-    QDir dir(WORK_DIR "rikishi/");
-
-    QStringList filters;
-    filters << "rikishi_*.html";
-    dir.setNameFilters(filters);
-
-    QStringList list = dir.entryList();
-
-    for (int i = 0; i < list.count(); i++)
-    {
-        QFile file0(dir.absoluteFilePath(list.at(i)));
-
-        if (!file0.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            qDebug() << "error: file.open(" << WORK_DIR << "rikishi/rikishi_...)";
-            return;
-        }
-
-        QTextStream in(&file0);
-
-        in.setCodec("UTF-8");
-
-        QString content = in.readAll();
-
-        file0.close();
-
-        QString shikonaEn = content.mid(content.indexOf("<title>") + QString("<title>").size());
-        shikonaEn.truncate(shikonaEn.indexOf(" "));
-        QString id = list.at(i);
-        id.replace(QRegExp("rikishi_"), "");
-        id.replace(QRegExp(".html"), "");
-
-        qDebug() << id << shikonaEn;
-    }
-}
-
 QString res2mark(int result)
 {
     switch (result)
