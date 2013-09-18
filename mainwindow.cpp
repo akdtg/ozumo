@@ -864,19 +864,20 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
         "<span class=\"name\">(.+)/span>" // id2 + shikona2
         ));
 
-    QString rank1 = "R1";
-    int id1 = 0;
-    QString shikona1 = "S1";
-    QString kimarite = "K";
-    QString rank2 = "R2";
-    int id2 = 0;
-    QString shikona2 = "S2";
-    QString res1, res2;
-    QString name1, name2;
 
     int pos = 0;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
+        QString rank1 = "R1";
+        int id1 = 0;
+        QString shikona1 = "S1";
+        QString kimarite = "K";
+        QString rank2 = "R2";
+        int id2 = 0;
+        QString shikona2 = "S2";
+        QString res1, res2;
+        QString name1, name2;
+
         rank1 = rx.cap(1);
         name1 = rx.cap(2);
         res1 = rx.cap(3).simplified();
@@ -914,6 +915,9 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
         }
 
         int result1 = WinOrLoss(res1), result2 = WinOrLoss(res2);
+
+        kimarire.replace(QRegExp("&nbsp;"), " ");
+        kimarite = kimarite.simplified();
 
         qDebug() << rank1 << id1 << shikona1 << "r1:" << result1 << "k:" << kimarite << "r2:" << result2 << id2 << shikona2 << rank2;
 
