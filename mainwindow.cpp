@@ -916,7 +916,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
 
         int result1 = WinOrLoss(res1), result2 = WinOrLoss(res2);
 
-        kimarire.replace(QRegExp("&nbsp;"), " ");
+        kimarite.replace(QRegExp("&nbsp;"), " ");
         kimarite = kimarite.simplified();
 
         qDebug() << rank1 << id1 << shikona1 << "r1:" << result1 << "k:" << kimarite << "r2:" << result2 << id2 << shikona2 << rank2;
