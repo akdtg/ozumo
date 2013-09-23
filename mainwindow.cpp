@@ -924,7 +924,7 @@ bool MainWindow::importTorikumi(QString fName)
     rx.setMinimal(true);
 
     // folder/tori_r2_d14.html
-    rx.setPattern(QString::fromUtf8(".*_r(\\d)_d(\\d{1,2}).*"));
+    rx.setPattern(QString::fromUtf8(".*_r(\\d)_d(\\d{1,2})[.]html"));
     if (rx.indexIn(fName) != -1)
     {
         division = rx.cap(1).toInt();
@@ -971,7 +971,7 @@ bool MainWindow::importTorikumi(QString fName)
     if (year < 2000)
         year += 1988;
 
-    // qDebug () << "div" << division << "dayN" << dayN;
+    qDebug () << "div" << division << "dayN" << dayN;
     // qDebug () << "dayNum" << dayNum << "year" << year << "month" << month << "day" << day << "rank" << rank;
 
     bool parsingResult;
