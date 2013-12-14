@@ -149,6 +149,11 @@
              <string>2013</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>2014</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item>
