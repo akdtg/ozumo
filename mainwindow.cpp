@@ -1145,15 +1145,19 @@ bool MainWindow::parsingBanzuke12(QString content)
     int position = 1;
 
     rx.setPattern(QString::fromUtf8(
+        "<tr"
+        ".*"
         "<td class=\"east\">"
         ".*"
-        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;"
+        "(?:/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;)?"
         ".*"
         "<td class=\"rank\">(.*)</td>"
         ".*"
         "<td class=\"west\">"
         ".*"
-        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;"
+        "(?:/sumo_data/rikishi/profile[?]id=(\\d+)\">(.*)&#12288;)?"
+        ".*"
+        "</tr>"
         ));
 
     QString kanji1;
@@ -1250,15 +1254,19 @@ bool MainWindow::parsingBanzuke12_EN(QString content)
     int position = 1;
 
     rx.setPattern(QString::fromUtf8(
+        "<tr"
+        ".*"
         "<td class=\"east\">"
         ".*"
-        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>"
+        "(?:/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>)?"
         ".*"
         "<td class=\"rank\">(.*)</td>"
         ".*"
         "<td class=\"west\">"
         ".*"
-        "/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>"
+        "(?:/sumo_data/rikishi/profile[?]id=(\\d+)\">(\\w+)</a>)?"
+        ".*"
+        "</tr>"
         ));
 
     QString kanji1;
