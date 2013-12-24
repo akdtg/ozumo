@@ -496,18 +496,12 @@ int MainWindow::getAndImportTorikumi(int year, int month, int day, int division)
     QDir dir(WORK_DIR);
     dir.mkdir(TORIKUMI_DIR);
 
-    int basho;
-
     QSqlQuery query(db);
     query.prepare("SELECT id FROM basho WHERE year = :year AND month = :month");
     query.bindValue(":year",  year);
     query.bindValue(":month", month);
     query.exec();
-    if (query.next())
-    {
-        basho = query.value(0).toInt();
-    }
-    else
+    if (!(query.next()))
         return -1;
 
     if (day > 15)
@@ -914,7 +908,7 @@ bool MainWindow::importTorikumi(QString fName)
 
     file0.close();
 
-    int year = 0, month = 0, day = 0;
+    int year = 0, month = 0/*, day = 0*/;
     int basho = 0;
     int division = 0, dayN = 0;
     QString dayNum;
@@ -959,7 +953,7 @@ bool MainWindow::importTorikumi(QString fName)
         dayNum = rx.cap(1);
         year = rx.cap(2).toInt();
         month = rx.cap(3).toInt();
-        day = rx.cap(4).toInt();
+        // day = rx.cap(4).toInt();
         rank = rx.cap(5);
     }
     else
