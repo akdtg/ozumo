@@ -300,7 +300,13 @@ bool MainWindow::insertTorikumi(int id, int basho, int year, int month, int day,
 {
     QSqlQuery query(db);
 
-    query.prepare("INSERT OR REPLACE INTO torikumi ("
+    query.prepare("DELETE FROM torikumi WHERE id = :id");
+
+    query.bindValue(":id",       id);
+
+    query.exec();
+
+    query.prepare("INSERT INTO torikumi ("
                   "id, basho, year, month, day, division, "
                   "rikishi1, shikona1, rank1, result1, "
                   "rikishi2, shikona2, rank2, result2, "
@@ -1049,7 +1055,11 @@ bool MainWindow::insertBanzuke(int year, int month, QString rank, int position, 
 
     int id = ((basho * 100 + rank_id) * 1000 + position) * 10 + side;
 
-    query.prepare("INSERT OR REPLACE INTO banzuke ("
+    query.prepare("DELETE FROM banzuke WHERE id = :id");
+    query.bindValue(":id",       id);
+    query.exec();
+
+    query.prepare("INSERT INTO banzuke ("
                   "id, year, month, rank, position, side, rikishi, shikona, hiragana) "
                   "VALUES ("
                   ":id, :year, :month, :rank, :position, :side, :rikishi, :shikona, :hiragana)");
