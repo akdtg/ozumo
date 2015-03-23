@@ -1392,6 +1392,8 @@ bool MainWindow::parsingBanzuke3456(QString content)
     QString hiragana2;
 
     int pos = 0;
+    int prev_position = 0;
+    int tsukedashi_side = 2;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
         kanji1 = rx.cap(1);
@@ -1410,19 +1412,30 @@ bool MainWindow::parsingBanzuke3456(QString content)
 //        qDebug() << kanji1 << hiragana1 << position;
 //        qDebug() << kanji2 << hiragana2 << position;
 
+        if (position == prev_position)
+            tsukedashi_side += 2;
+        else
+            tsukedashi_side = 0;
+
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(year, month, division, position, 0, 0, kanji1, hiragana1))
+        {
+            if (!insertBanzuke(year, month, division, position, 0 + tsukedashi_side, 0, kanji1, hiragana1))
             {
                 qDebug() << "-";
                 return false;
             }
+        }
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(year, month, division, position, 1, 0, kanji2, hiragana2))
+        {
+            if (!insertBanzuke(year, month, division, position, 1 + tsukedashi_side, 0, kanji2, hiragana2))
             {
                 qDebug() << "-";
                 return false;
             }
+        }
+
+        prev_position = position;
     }
 
     return true;
