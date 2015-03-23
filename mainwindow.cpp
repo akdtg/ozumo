@@ -610,6 +610,7 @@ struct strings_pair_s BanzukeJP[] =
     {"index?rank=4&page=2", "div4p2.jp.html"},
     {"index?rank=5",        "div5.jp.html"},
     {"index?rank=5&page=2", "div5p2.jp.html"},
+    {"index?rank=5&page=3", "div5p3.jp.html"},
     {"index?rank=6",        "div6.jp.html"}
 };
 
@@ -623,6 +624,7 @@ struct strings_pair_s BanzukeEN[] =
     {"index?rank=4&page=2", "div4p2.en.html"},
     {"index?rank=5",        "div5.en.html"},
     {"index?rank=5&page=2", "div5p2.en.html"},
+    {"index?rank=5&page=3", "div5p3.en.html"},
     {"index?rank=6",        "div6.en.html"}
 };
 
