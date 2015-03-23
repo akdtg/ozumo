@@ -53,6 +53,9 @@ QString color[] = { "#404040",
 #define BANZUKE_DIR     "banzuke"
 #define TORIKUMI_DIR    "torikumi"
 
+#define SIDE_EAST   0
+#define SIDE_WEST   1
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -1195,14 +1198,14 @@ bool MainWindow::parsingBanzuke12(QString content)
         }
 
         if (!kanji1.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 0, id1, kanji1, ""))
+            if (!insertBanzuke(year, month, rank, position, SIDE_EAST, id1, kanji1, ""))
             {
                 qDebug() << "-";
                 return false;
             }
 
         if (!kanji2.isEmpty())
-            if (!insertBanzuke(year, month, rank, position, 1, id2, kanji2, ""))
+            if (!insertBanzuke(year, month, rank, position, SIDE_WEST, id2, kanji2, ""))
             {
                 qDebug() << "-";
                 return false;
@@ -1421,7 +1424,7 @@ bool MainWindow::parsingBanzuke3456(QString content)
 
         if (!kanji1.isEmpty())
         {
-            if (!insertBanzuke(year, month, division, position, 0 + tsukedashi_side, 0, kanji1, hiragana1))
+            if (!insertBanzuke(year, month, division, position, SIDE_EAST + tsukedashi_side, 0, kanji1, hiragana1))
             {
                 qDebug() << "-";
                 return false;
@@ -1430,7 +1433,7 @@ bool MainWindow::parsingBanzuke3456(QString content)
 
         if (!kanji2.isEmpty())
         {
-            if (!insertBanzuke(year, month, division, position, 1 + tsukedashi_side, 0, kanji2, hiragana2))
+            if (!insertBanzuke(year, month, division, position, SIDE_WEST + tsukedashi_side, 0, kanji2, hiragana2))
             {
                 qDebug() << "-";
                 return false;
