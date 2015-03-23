@@ -839,12 +839,12 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
         QString res1, res2;
         QString name1, name2;
 
-        rank1 = rx.cap(1);
+        rank1 = rx.cap(1).simplified();
         name1 = rx.cap(2);
         res1 = rx.cap(3).simplified();
         kimarite = rx.cap(4);
         res2 = rx.cap(5).simplified();
-        rank2 = rx.cap(6);
+        rank2 = rx.cap(6).simplified();
         name2 = rx.cap(7);
 
         pos += rx.matchedLength();
@@ -855,7 +855,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
         rxn.setPattern(QString::fromUtf8(".*(\\d+)?.*(\\w+)<"));
         if (rxn.indexIn(name1) != -1)
         {
-            id1 = rxn.cap(1).toInt();
+            id1 = rxn.cap(1).simplified().toInt();
             shikona1 = rxn.cap(2).simplified();
         }
         else
@@ -866,7 +866,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
 
         if (rxn.indexIn(name2) != -1)
         {
-            id2 = rxn.cap(1).toInt();
+            id2 = rxn.cap(1).simplified().toInt();
             shikona2 = rxn.cap(2).simplified();
         }
         else
@@ -932,8 +932,8 @@ bool MainWindow::importTorikumi(QString fName)
     rx.setPattern(QString::fromUtf8(".*_r(\\d)_d(\\d{1,2})[.]html"));
     if (rx.indexIn(fName) != -1)
     {
-        division = rx.cap(1).toInt();
-        dayN = rx.cap(2).toInt();
+        division = rx.cap(1).simplified().toInt();
+        dayN = rx.cap(2).simplified().toInt();
     }
     else
     {
@@ -961,11 +961,11 @@ bool MainWindow::importTorikumi(QString fName)
 
     if (rx.indexIn(content) != -1)
     {
-        dayNum = rx.cap(1);
-        year = rx.cap(2).toInt();
-        month = rx.cap(3).toInt();
-        // day = rx.cap(4).toInt();
-        rank = rx.cap(5);
+        dayNum = rx.cap(1).simplified();
+        year = rx.cap(2).simplified().toInt();
+        month = rx.cap(3).simplified().toInt();
+        // day = rx.cap(4).simplified().toInt();
+        rank = rx.cap(5).simplified();
     }
     else
     {
@@ -1141,8 +1141,8 @@ bool MainWindow::parsingBanzuke12(QString content)
     rx.setPattern(QString::fromUtf8("平成(.{1,3})年(.{1,3})月場所"));
     if (rx.indexIn(content) != -1)
     {
-        year = 1988 + Chinese2Arabic(rx.cap(1));
-        month = Chinese2Arabic(rx.cap(2));
+        year = 1988 + Chinese2Arabic(rx.cap(1).simplified());
+        month = Chinese2Arabic(rx.cap(2).simplified());
     }
     else
     {
@@ -1178,11 +1178,11 @@ bool MainWindow::parsingBanzuke12(QString content)
     int pos = 0;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
-        id1 = rx.cap(1).toInt();
-        kanji1 = rx.cap(2);
-        rank = rx.cap(3);
-        id2 = rx.cap(4).toInt();
-        kanji2 = rx.cap(5);
+        id1 = rx.cap(1).simplified().toInt();
+        kanji1 = rx.cap(2).simplified();
+        rank = rx.cap(3).simplified();
+        id2 = rx.cap(4).simplified().toInt();
+        kanji2 = rx.cap(5).simplified();
         pos += rx.matchedLength();
 
         rank.truncate(2);
@@ -1250,8 +1250,8 @@ bool MainWindow::parsingBanzuke12_EN(QString content)
     rx.setPattern(QString::fromUtf8("<p class=\"mdDate\">.*(\\d{4})\\s(\\w+).*</p>"));
     if (rx.indexIn(content) != -1)
     {
-        year = rx.cap(1).toInt();
-        month = Month2Number(rx.cap(2));
+        year = rx.cap(1).simplified().toInt();
+        month = Month2Number(rx.cap(2).simplified());
     }
     else
     {
@@ -1287,11 +1287,11 @@ bool MainWindow::parsingBanzuke12_EN(QString content)
     int pos = 0;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
-        id1 = rx.cap(1).toInt();
-        kanji1 = rx.cap(2);
-        rank = rx.cap(3);
-        id2 = rx.cap(4).toInt();
-        kanji2 = rx.cap(5);
+        id1 = rx.cap(1).simplified().toInt();
+        kanji1 = rx.cap(2).simplified();
+        rank = rx.cap(3).simplified();
+        id2 = rx.cap(4).simplified().toInt();
+        kanji2 = rx.cap(5).simplified();
         pos += rx.matchedLength();
 
         rank.truncate(2);
@@ -1353,8 +1353,8 @@ bool MainWindow::parsingBanzuke3456(QString content)
     rx.setPattern(QString::fromUtf8("平成(.{1,3})年(.{1,3})月場所"));
     if (rx.indexIn(content) != -1)
     {
-        year = 1988 + Chinese2Arabic(rx.cap(1));
-        month = Chinese2Arabic(rx.cap(2));
+        year = 1988 + Chinese2Arabic(rx.cap(1).simplified());
+        month = Chinese2Arabic(rx.cap(2).simplified());
     }
     else
     {
@@ -1368,7 +1368,7 @@ bool MainWindow::parsingBanzuke3456(QString content)
     rx.setPattern(QString::fromUtf8("<span class=\"dayNum\">(.{3}).*</span>"));
     if (rx.indexIn(content) != -1)
     {
-        division = rx.cap(1);
+        division = rx.cap(1).simplified();
         division = division.simplified();
     }
 //    qDebug() << "division:" << division;
@@ -1401,11 +1401,11 @@ bool MainWindow::parsingBanzuke3456(QString content)
     int tsukedashi_side = 2;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
-        kanji1 = rx.cap(1);
-        hiragana1 = rx.cap(2);
-        positions = rx.cap(3);
-        kanji2 = rx.cap(4);
-        hiragana2 = rx.cap(5);
+        kanji1 = rx.cap(1).simplified();
+        hiragana1 = rx.cap(2).simplified();
+        positions = rx.cap(3).simplified();
+        kanji2 = rx.cap(4).simplified();
+        hiragana2 = rx.cap(5).simplified();
 
         pos += rx.matchedLength();
 
@@ -1474,9 +1474,9 @@ bool MainWindow::importBanzuke(QString fName)
     rx.setPattern(QString::fromUtf8("<meta property=\"og:locale\" content=\"(\\w*)\" />"));
     if (rx.indexIn(content) != -1)
     {
-        if (rx.cap(1) == "ja_JP")
+        if (rx.cap(1).simplified() == "ja_JP")
             locale = 1;
-        else if (rx.cap(1) == "en_US")
+        else if (rx.cap(1).simplified() == "en_US")
             locale = 2;
         else
             locale = 0;
@@ -1494,7 +1494,7 @@ bool MainWindow::importBanzuke(QString fName)
     rx.setPattern(QString::fromUtf8("<li class=\"rank(\\d) current\">"));
     if (rx.indexIn(content) != -1)
     {
-        division = rx.cap(1).toInt();
+        division = rx.cap(1).simplified().toInt();
     }
     else
     {
