@@ -796,13 +796,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
     }
 
     int dayx = day, id_local = 0;
-
-//        if (contentRow.indexOf(QString::fromUtf8("優勝決定戦")) != -1)
-//        {
-//            dayx = 16;
-//            id_local = 0;
-//            //qDebug() << "ketteisen";
-//        }
+    int ketteisen_pos = content.indexOf(QString::fromUtf8("優勝決定戦"));
 
     QRegExp rx;
     rx.setMinimal(true);
@@ -810,7 +804,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
     rx.setPattern(QString::fromUtf8(
         "<div class=\"data\">"
         ".*"
-        "<span class=\"rank\">(.+)</span>" // rank1
+        "<span class=\"rank\".*>(.+)</span>" // rank1
         ".*"
         "<span class=\"name\">(.+)/span>" // id1 + shikona1
         ".*"
@@ -820,7 +814,7 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
         ".*"
         "<td class=\"result (?:win)?\">(.*)</td>" // res2
         ".*"
-        "<span class=\"rank\">(.+)</span>" // rank2
+        "<span class=\"rank\".*>(.+)</span>" // rank2
         ".*"
         "<span class=\"name\">(.+)/span>" // id2 + shikona2
         ));
@@ -829,6 +823,12 @@ bool MainWindow::parsingTorikumi(QString content, int basho, int year, int month
     int pos = 0;
     while ((pos = rx.indexIn(content, pos)) != -1)
     {
+        if (ketteisen_pos > 0 && pos > ketteisen_pos)
+        {
+            dayx = 16;
+            qDebug() << "ketteisen";
+        }
+
         QString rank1 = "R1";
         int id1 = 0;
         QString shikona1 = "S1";
